@@ -8,7 +8,6 @@
 u32 Integrity_MACOwner_IsBad(void);
 u32 Integrity_MACOwner_IsGood(void);
 u32 Integrity_ROMTest_IsBad(void);
-u32 Integrity_ROMTest_IsBad(void);
 u32 Integrity_ROMTest_IsGood(void);
 
 #define INTEGRITY_OBFS_OFFSET  (0x1000)
