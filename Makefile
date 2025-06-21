@@ -28,8 +28,8 @@ MW_DIR        :=  $(TOOL_DIR)/mw
 MWCCARM   :=  $(MW_DIR)/mwccarm.exe
 MWASMARM  :=  $(MW_DIR)/mwasmarm.exe
 MWLDARM   :=  $(MW_DIR)/mwldarm.exe
-ELFCODER  :=  $(ELFCODER_DIR)/elfcoder$(EXE)
-FIXDEP    :=  $(FIXDEP_DIR)/fixdep$(EXE)
+ELFCODER  :=  $(ELFCODER_DIR)/build/elfcoder$(EXE)
+FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 
 # C / ASM compilation parameters
 CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -interworking -i $(INC_DIR)

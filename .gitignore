@@ -1,4 +1,4 @@
-/build/**
+**/build/**
 license.dat
 *.exe
 *.dll
