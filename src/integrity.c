@@ -62,7 +62,7 @@ u32 Integrity_MACOwner_IsGood(void) { /* ov123_0225F824 */
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// Bytes of the first four instructions of the function
-	// (Has to be like this to match, `(u8*)base` as a varible causes regswaps)
+	// (Has to be like this to match, `(u8*)base` as a variable causes regswaps)
 	if (((u8*)base)[offset+0]  != 0xF0) return 0;
 	if (((u8*)base)[offset+1]  != 0x00) return 0;
 	if (((u8*)base)[offset+2]  != 0x2D) return 0;
@@ -136,7 +136,7 @@ u32 Integrity_ROMTest_IsGood(void) { /* ov123_0225FA10 */
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// Bytes of the first four instructions of the function
-	// (Has to be like this to match, `(u8*)base` as a varible causes regswaps)
+	// (Has to be like this to match, `(u8*)base` as a variable causes regswaps)
 	if (((u8*)base)[offset+0]  != 0xF0) return 0;
 	if (((u8*)base)[offset+1]  != 0x00) return 0;
 	if (((u8*)base)[offset+2]  != 0x2D) return 0;
