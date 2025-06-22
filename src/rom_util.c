@@ -70,7 +70,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	addr_offset = 0 - (addr & 0x1FF);
 	
 	// Wait for card to not be busy
-	while (((REGType32v*)register_base_1)[0x1A4/4] & 0x80000000) { }
+	while (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x80000000) { }
 	
 	// Writing to card ROM and SPI control register
 	((REGType8v*)register_base_1)[0x1A1] = 0x80;
@@ -98,20 +98,20 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 		register_base_2[0x1AF] = 0x00;
 		
 		// Submit command
-		((REGType32v*)register_base_1)[0x1A4/4] = card_ctrl_cmd;
+		((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] = card_ctrl_cmd;
 		
 		// Copy the output into the destination buffer, within the bounds of num_bytes
 		// (Must read the output out of the I/O register regardless)
 		do {
-			if (((REGType32v*)register_base_1)[0x1A4/4] & 0x800000) {
+			if (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x800000) {
 				output = ((REGType32v*)(register_base_1 + 0x100000))[4];
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
 					*(u32*)(dest + addr_offset) = output;
 				}
 				
-				addr_offset += 4;
+				addr_offset += sizeof(u32);
 			}
-		} while (((REGType32v*)register_base_1)[0x1A4/4] & 0x80000000);
+		} while (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x80000000);
 		
 		// Advance address to next block
 		addr += 0x200;
