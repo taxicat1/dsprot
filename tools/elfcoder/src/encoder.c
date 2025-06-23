@@ -44,7 +44,12 @@ static int categorizeOpCode(unsigned int opcode) {
 }
 
 
-void Encode_Instruction(Instruction* ins, RC4_Ctx* rc4) {
+void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
+	// Futureproofing
+}
+
+
+void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	switch (categorizeOpCode(ins->opcode)) {
 		case 0:
 			if (rc4 != NULL) {
@@ -94,7 +99,7 @@ void Encode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc
 }
 
 
-void Decode_Instruction(Instruction* ins, RC4_Ctx* rc4) {
+void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	switch (categorizeOpCode(ins->opcode)) {
 		case 0:
 			if (rc4 != NULL) {

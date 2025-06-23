@@ -136,6 +136,9 @@ static void createRC4Key(uint32_t inkey, unsigned int func_size, uint8_t* outkey
 
 
 static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
+	Encoding_Ctx ctx;
+	Encode_Init(&ctx, task);
+	
 	int num_ins = size / 4;
 	fseek(elf->fhandle, start_addr, SEEK_SET);
 	Instruction* ins_buffer = malloc(size);
@@ -180,9 +183,9 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTa
 	
 	for (int i = 0; i < encoded_instructions; i++) {
 		if (task->encoding_type == ENC_DECODE) {
-			Decode_Instruction(&ins_buffer[i], rc4);
+			Decode_Instruction(&ctx, &ins_buffer[i], rc4);
 		} else {
-			Encode_Instruction(&ins_buffer[i], rc4);
+			Encode_Instruction(&ctx, &ins_buffer[i], rc4);
 		}
 	}
 	
