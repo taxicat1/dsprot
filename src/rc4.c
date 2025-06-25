@@ -140,7 +140,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* o
 			case 2:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
 				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
-				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) - ENC_VAL_1) & 0xFFFFFF);
+				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) - ENC_VAL_1) & 0x00FFFFFF);
 				break;
 			
 			case 3:
