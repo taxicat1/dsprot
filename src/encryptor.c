@@ -164,7 +164,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	u32 bss_addr = (u32)&BSS; // ldr r3, [pc, #124]
 	asm {
 		mov r7, r0
-		add r4, bss_addr, #4864
+		add r4, bss_addr, #ENC_VAL_1
 		mov r6, r1
 		sub r0, r7, r4
 		add r7, r0, r6, lsr #20
@@ -178,7 +178,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 		eor lr, r5, r3
 		eor ip, r7, r5
 		eor r3, r5, r2
-		sub r1, r6, #4864
+		sub r1, r6, #ENC_VAL_1
 		str r3, [sp, #8]
 		orr r0, r0, r7, lsl #24
 		str ip, [sp]
@@ -190,7 +190,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 		str ip, [sp, #12]
 		bl RC4_InitAndEncryptInstructions
 		mov r1, r5
-		sub r0, r6, #4864
+		sub r0, r6, #ENC_VAL_1
 		bl clearDataAndInstructionCache
 		add r0, r7, r4
 		add sp, sp, #16
