@@ -26,25 +26,25 @@ u32 Integrity_MACOwner_IsBad(void) { /* ov123_0225F74C */
 	ret = base + 1;
 	
 	// Bytes of the first four instructions of the function
-	if (bytes[offset+0]  != 0xF0) return ret;
-	if (bytes[offset+1]  != 0x00) return ret;
-	if (bytes[offset+2]  != 0x2D) return ret;
-	if (bytes[offset+3]  != 0xE9) return ret;
+	if (bytes[offset+0x0] != 0xF0) return ret;
+	if (bytes[offset+0x1] != 0x00) return ret;
+	if (bytes[offset+0x2] != 0x2D) return ret;
+	if (bytes[offset+0x3] != 0xE9) return ret;
 	
-	if (bytes[offset+4]  != 0x0F) return ret;
-	if (bytes[offset+5]  != 0x00) return ret;
-	if (bytes[offset+6]  != 0x2D) return ret;
-	if (bytes[offset+7]  != 0xE9) return ret;
+	if (bytes[offset+0x4] != 0x0F) return ret;
+	if (bytes[offset+0x5] != 0x00) return ret;
+	if (bytes[offset+0x6] != 0x2D) return ret;
+	if (bytes[offset+0x7] != 0xE9) return ret;
 	
-	if (bytes[offset+8]  != 0xF0) return ret;
-	if (bytes[offset+9]  != 0x00) return ret;
-	if (bytes[offset+10] != 0xBD) return ret;
-	if (bytes[offset+11] != 0xE8) return ret;
+	if (bytes[offset+0x8] != 0xF0) return ret;
+	if (bytes[offset+0x9] != 0x00) return ret;
+	if (bytes[offset+0xA] != 0xBD) return ret;
+	if (bytes[offset+0xB] != 0xE8) return ret;
 	
-	if (bytes[offset+12] != 0x60) return ret;
-	if (bytes[offset+13] != 0x10) return ret;
-	if (bytes[offset+14] != 0x9F) return ret;
-	if (bytes[offset+15] != 0xE5) return ret;
+	if (bytes[offset+0xC] != 0x60) return ret;
+	if (bytes[offset+0xD] != 0x10) return ret;
+	if (bytes[offset+0xE] != 0x9F) return ret;
+	if (bytes[offset+0xF] != 0xE5) return ret;
 	
 	return 0;
 }
@@ -63,25 +63,25 @@ u32 Integrity_MACOwner_IsGood(void) { /* ov123_0225F824 */
 	
 	// Bytes of the first four instructions of the function
 	// (Has to be like this to match, `(u8*)base` as a variable causes regswaps)
-	if (((u8*)base)[offset+0]  != 0xF0) return 0;
-	if (((u8*)base)[offset+1]  != 0x00) return 0;
-	if (((u8*)base)[offset+2]  != 0x2D) return 0;
-	if (((u8*)base)[offset+3]  != 0xE9) return 0;
+	if (((u8*)base)[offset+0x0] != 0xF0) return 0;
+	if (((u8*)base)[offset+0x1] != 0x00) return 0;
+	if (((u8*)base)[offset+0x2] != 0x2D) return 0;
+	if (((u8*)base)[offset+0x3] != 0xE9) return 0;
 	
-	if (((u8*)base)[offset+4]  != 0x0F) return 0;
-	if (((u8*)base)[offset+5]  != 0x00) return 0;
-	if (((u8*)base)[offset+6]  != 0x2D) return 0;
-	if (((u8*)base)[offset+7]  != 0xE9) return 0;
+	if (((u8*)base)[offset+0x4] != 0x0F) return 0;
+	if (((u8*)base)[offset+0x5] != 0x00) return 0;
+	if (((u8*)base)[offset+0x6] != 0x2D) return 0;
+	if (((u8*)base)[offset+0x7] != 0xE9) return 0;
 	
-	if (((u8*)base)[offset+8]  != 0xF0) return 0;
-	if (((u8*)base)[offset+9]  != 0x00) return 0;
-	if (((u8*)base)[offset+10] != 0xBD) return 0;
-	if (((u8*)base)[offset+11] != 0xE8) return 0;
+	if (((u8*)base)[offset+0x8] != 0xF0) return 0;
+	if (((u8*)base)[offset+0x9] != 0x00) return 0;
+	if (((u8*)base)[offset+0xA] != 0xBD) return 0;
+	if (((u8*)base)[offset+0xB] != 0xE8) return 0;
 	
-	if (((u8*)base)[offset+12] != 0x60) return 0;
-	if (((u8*)base)[offset+13] != 0x10) return 0;
-	if (((u8*)base)[offset+14] != 0x9F) return 0;
-	if (((u8*)base)[offset+15] != 0xE5) return 0;
+	if (((u8*)base)[offset+0xC] != 0x60) return 0;
+	if (((u8*)base)[offset+0xD] != 0x10) return 0;
+	if (((u8*)base)[offset+0xE] != 0x9F) return 0;
+	if (((u8*)base)[offset+0xF] != 0xE5) return 0;
 	
 	return ret + 1;
 }
@@ -100,25 +100,25 @@ u32 Integrity_ROMTest_IsBad(void) { /* ov123_0225F938 */
 	ret = base + 1;
 	
 	// Bytes of the first four instructions of the function
-	if (bytes[offset+0]  != 0xF0) return ret;
-	if (bytes[offset+1]  != 0x00) return ret;
-	if (bytes[offset+2]  != 0x2D) return ret;
-	if (bytes[offset+3]  != 0xE9) return ret;
+	if (bytes[offset+0x0] != 0xF0) return ret;
+	if (bytes[offset+0x1] != 0x00) return ret;
+	if (bytes[offset+0x2] != 0x2D) return ret;
+	if (bytes[offset+0x3] != 0xE9) return ret;
 	
-	if (bytes[offset+4]  != 0x0F) return ret;
-	if (bytes[offset+5]  != 0x00) return ret;
-	if (bytes[offset+6]  != 0x2D) return ret;
-	if (bytes[offset+7]  != 0xE9) return ret;
+	if (bytes[offset+0x4] != 0x0F) return ret;
+	if (bytes[offset+0x5] != 0x00) return ret;
+	if (bytes[offset+0x6] != 0x2D) return ret;
+	if (bytes[offset+0x7] != 0xE9) return ret;
 	
-	if (bytes[offset+8]  != 0xF0) return ret;
-	if (bytes[offset+9]  != 0x00) return ret;
-	if (bytes[offset+10] != 0xBD) return ret;
-	if (bytes[offset+11] != 0xE8) return ret;
+	if (bytes[offset+0x8] != 0xF0) return ret;
+	if (bytes[offset+0x9] != 0x00) return ret;
+	if (bytes[offset+0xA] != 0xBD) return ret;
+	if (bytes[offset+0xB] != 0xE8) return ret;
 	
-	if (bytes[offset+12] != 0x60) return ret;
-	if (bytes[offset+13] != 0x10) return ret;
-	if (bytes[offset+14] != 0x9F) return ret;
-	if (bytes[offset+15] != 0xE5) return ret;
+	if (bytes[offset+0xC] != 0x60) return ret;
+	if (bytes[offset+0xD] != 0x10) return ret;
+	if (bytes[offset+0xE] != 0x9F) return ret;
+	if (bytes[offset+0xF] != 0xE5) return ret;
 	
 	return 0;
 }
@@ -137,25 +137,25 @@ u32 Integrity_ROMTest_IsGood(void) { /* ov123_0225FA10 */
 	
 	// Bytes of the first four instructions of the function
 	// (Has to be like this to match, `(u8*)base` as a variable causes regswaps)
-	if (((u8*)base)[offset+0]  != 0xF0) return 0;
-	if (((u8*)base)[offset+1]  != 0x00) return 0;
-	if (((u8*)base)[offset+2]  != 0x2D) return 0;
-	if (((u8*)base)[offset+3]  != 0xE9) return 0;
+	if (((u8*)base)[offset+0x0] != 0xF0) return 0;
+	if (((u8*)base)[offset+0x1] != 0x00) return 0;
+	if (((u8*)base)[offset+0x2] != 0x2D) return 0;
+	if (((u8*)base)[offset+0x3] != 0xE9) return 0;
 	
-	if (((u8*)base)[offset+4]  != 0x0F) return 0;
-	if (((u8*)base)[offset+5]  != 0x00) return 0;
-	if (((u8*)base)[offset+6]  != 0x2D) return 0;
-	if (((u8*)base)[offset+7]  != 0xE9) return 0;
+	if (((u8*)base)[offset+0x4] != 0x0F) return 0;
+	if (((u8*)base)[offset+0x5] != 0x00) return 0;
+	if (((u8*)base)[offset+0x6] != 0x2D) return 0;
+	if (((u8*)base)[offset+0x7] != 0xE9) return 0;
 	
-	if (((u8*)base)[offset+8]  != 0xF0) return 0;
-	if (((u8*)base)[offset+9]  != 0x00) return 0;
-	if (((u8*)base)[offset+10] != 0xBD) return 0;
-	if (((u8*)base)[offset+11] != 0xE8) return 0;
+	if (((u8*)base)[offset+0x8] != 0xF0) return 0;
+	if (((u8*)base)[offset+0x9] != 0x00) return 0;
+	if (((u8*)base)[offset+0xA] != 0xBD) return 0;
+	if (((u8*)base)[offset+0xB] != 0xE8) return 0;
 	
-	if (((u8*)base)[offset+12] != 0x60) return 0;
-	if (((u8*)base)[offset+13] != 0x10) return 0;
-	if (((u8*)base)[offset+14] != 0x9F) return 0;
-	if (((u8*)base)[offset+15] != 0xE5) return 0;
+	if (((u8*)base)[offset+0xC] != 0x60) return 0;
+	if (((u8*)base)[offset+0xD] != 0x10) return 0;
+	if (((u8*)base)[offset+0xE] != 0x9F) return 0;
+	if (((u8*)base)[offset+0xF] != 0xE5) return 0;
 	
 	return ret + 1;
 }
