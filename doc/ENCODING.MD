@@ -76,6 +76,8 @@ For both a **type-1** and **type-2** instruction:
 
 - The three least significant bytes are incremented by the value `0x4C2`.
 
+- A relocation for this instruction has its addend incremented by `0x1300` (and subtraction by 8 removed).
+
 For a **type-3** instruction:
 
 - The most significant byte is exclusive-ored with the value `0x01`.
@@ -126,6 +128,48 @@ The keyed encoding and decoding process for type-1, -2, and -3 instructions is i
 	- The third-least-significant byte is substituted via an [S-box](https://en.wikipedia.org/wiki/S-box). However, this S-box is very weak: `S[i] = i ⊕ 1`. It is unknown why this was implemented using an S-box instead of simply exclusive-oring the value `0x01` directly.
 
 This process, as its own inverse, is identical for decoding.
+
+### Encoding to instructions vs relocations
+
+Note the association between the two values `0x1300` and `0x4C2`. When encoding, the addition of `0x1300` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x1300` bytes is converted into a offset of *instructions* rather than bytes, effectively dividing it by 4. ARM branches are also always offset by 8: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions. So, when `0x1300` is applied from the relocation into the instruction, is divided by 4 and then incremented by 2, resulting in an addition of `0x4C2` to the instruction.
+
+Therefore, if the encoding procedure added `0x1300` to the *relocation*, the decoding procedure needs to subtract `0x4C2` from the instruction.
+
+Meanwhile, if the encoding procedure added `0x1300` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x1300` from the instruction.
+
+*(In my opinion the smarter way to do this would have been to encode the relocation by incrementing it by `(0x1300 - 0x8) * 4 = 0x4BF8`, such that the resulting instruction would be incremented by `0x1300` and could then be decoded normally)*
+
+### Encoding and linking
+
+The encoding process has been specifically designed such that most instructions are encoded via exclusive-or, but branches are encoded using addition of a constant. The purpose of this is so the encoding can persist through linking.
+
+For example, a function like this:
+
+```c
+void foo(void) {
+    bar();
+}
+```
+
+Might generate:
+
+```
+EB000000    bl  8     R_ARM_PC24:  bar-0x8
+E12FFF1E    bx  lr
+```
+
+The resulting encoded instructions would then be:
+
+```
+EA0004C2    b   4880    R_ARM_PC24:  bar+0x1300
+11799A48    cmnne sb, r8, asr #20
+```
+
+Where, as discussed in the previous section, incrementing the relocation by `0x1300` will increment the instruction by `0x4C2`.
+
+Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x4C2`.
+
+In hindsight this is obvious: in order to be able to encode, then link, then decode, the encoding/decoding procedure must be associative with linking. Linking uses addition modulo 2^24, and therefore encoding must also use addition modulo 2^24.
 
 ## RC4
 
