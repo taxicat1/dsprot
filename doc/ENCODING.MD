@@ -119,7 +119,7 @@ A modified version of the RC4 stream cipher algorithm is used to generate pseudo
 
 The keyed encoding and decoding process for type-1, -2, and -3 instructions is identical to the unkeyed process. Only the process for **type-0** instructions differs:
 
-- The most significant byte is left unmodified
+- The most significant byte is left unmodified.
 
 - The three least significant bytes are split apart:
 	
