@@ -1,13 +1,10 @@
 #include "rom_util.h"
 
+#include "encryptor.h"
 #include "io_reg.h"
 
-// Functions to be encrypted (cannot be called directly)
-void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes);
-u32 ROMUtil_CRC32(void* buf, u32 size);
 
-
-void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
+void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 	//
@@ -16,36 +13,36 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
-	REGType8v*  vnull;
 	u32         register_base_1;
+	REGType8v*  card_cmd;
 	s32         addr_offset;
 	u32         card_ctrl_13;
-	REGType8v*  register_base_2;
 	u8          buffer[8];
-	u8*         bufptr;
 	u16         lock_id;
 	u16         ext_mem_register_val_original;
 	u32         output;
+	u32         reg_mi_exmemcnt;
 	s32         card_ctrl_cmd;
 	int         i;
 	
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	// Alias for volatile null pointer
-	vnull = (REGType8v*)NULL;
+	ENCRYPTION_START(0x2F0C);
 	
 	// Alias for register base (0x04000000)
 	register_base_1 = 1;
 	register_base_1 <<= 26;
-	
-	// Another alias for register base (0x04000000)
-	register_base_2 = (REGType8v*)HW_REG_BASE;
+	card_cmd = (REGType8v*)(register_base_1 + 0x1A8);
 	
 	// External memory control register (0x04000204)
+	reg_mi_exmemcnt = 1;
+	reg_mi_exmemcnt <<= 26;
+	reg_mi_exmemcnt += REG_EXMEMCNT_OFFSET;
+	
 	// Save value to rewrite later
-	ext_mem_register_val_original = reg_MI_EXMEMCNT;
-	reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
+	ext_mem_register_val_original = *(REGType16v*)reg_mi_exmemcnt;
+	*(REGType16v*)reg_mi_exmemcnt &= ~REG_MI_EXMEMCNT_MP_MASK;
 	
 	// Obfuscated, create address 0x027FFE60
 	// This is an address in the .nds header: port 0x040001A4 / setting for normal commands
@@ -76,9 +73,8 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	((REGType8v*)register_base_1)[0x1A1] = 0x80;
 	
 	// Obfuscated read 8-byte command out from gamecard bus, write this back later
-	bufptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		*bufptr++ = (vnull + HW_REG_BASE)[0x1A8+i];
+		buffer[i] = card_cmd[i];
 	}
 	
 	addr += addr_offset;
@@ -88,14 +84,14 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 		
 		// Write 8-byte command to registers
 		// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
-		register_base_2[0x1A8] = 0xB7;
-		register_base_2[0x1A9] = addr >> 24;
-		register_base_2[0x1AA] = addr >> 16;
-		register_base_2[0x1AB] = addr >> 8;
-		register_base_2[0x1AC] = addr;
-		register_base_2[0x1AD] = 0x00;
-		register_base_2[0x1AE] = 0x00;
-		register_base_2[0x1AF] = 0x00;
+		card_cmd[0] = 0xB7;
+		card_cmd[1] = addr >> 24;
+		card_cmd[2] = addr >> 16;
+		card_cmd[3] = addr >> 8;
+		card_cmd[4] = addr;
+		card_cmd[5] = 0x00;
+		card_cmd[6] = 0x00;
+		card_cmd[7] = 0x00;
 		
 		// Submit command
 		((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] = card_ctrl_cmd;
@@ -118,38 +114,48 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	}
 	
 	// Write 8-byte command back to gamecard bus
-	bufptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		(vnull + HW_REG_BASE)[0x1A8+i] = *bufptr++;
+		card_cmd[i] = buffer[i];
 	}
 	
 	// Write original value back to to external memory control register
 	((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/sizeof(u16)] = ext_mem_register_val_original;
-		
+	
+	ENCRYPTION_END(0x2F0C);
+	
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
 }
 
 
-u32 ROMUtil_CRC32(void* buf, u32 size) { /* ov123_022603BC */
+u32 ROMUtil_CRC32(void* buf, u32 size) {
 	int  i;
 	u32  crc;
-	u32  poly;
 	u8*  byteptr;
+	
+	ENCRYPTION_START(0x480C);
 	
 	byteptr = (u8*)buf;
 	crc = 0xFFFFFFFF;
-	poly = 0xEDB88320;
 	while (size-- != 0) {
 		crc ^= *byteptr++;
 		for (i = 0; i < 8; i++) {
 			if (crc & 1) {
 				crc = (crc >> 1);
 			} else {
-				crc = poly ^ (crc >> 1);
+				crc = (crc >> 1);
+				// poly = 0xEDB88320
+				// Has to be like this, somewhy
+				crc ^= 0xED << 24;
+				crc ^= 0xB8 << 16;
+				crc ^= 0x83 << 8;
+				crc ^= 0x20;
 			}
 		}
 	}
+	crc = ~crc;
 	
-	return ~crc;
+	ENCRYPTION_END(0x480C);
+	
+	return crc;
 }

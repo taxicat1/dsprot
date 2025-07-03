@@ -1,16 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
 
 #include "encoder.h"
-
-
-static int parseKey(const char* key_text, uint32_t* out_key) {
-	char* outptr;
-	*out_key = strtoul(key_text, &outptr, 16);
-	return (*outptr == '\0') && (errno != ERANGE);
-}
 
 
 static int isValidIdentifier(const char* str) {
@@ -44,8 +36,7 @@ static int isValidIdentifier(const char* str) {
 
 static void printDescription(void) {
 	printf(
-		"Encode or decode ARM ELF files, with or without a key.                          \n"
-		"If encoding, output an assembly file that will decode them.                     \n"
+		"Encode or decode ARM ELF files using built-in keys.                             \n"
 	);
 }
 
@@ -53,13 +44,10 @@ static void printUsage(const char* self_name) {
 	printf(
 		"Usage: %s <arguments>                                                           \n"
 		"  -i, --input [file1, [file2, [ ... ]]]      List of input files to process.    \n"
-		"  -o, --output [outfile]                     Output file to create, if encoding.\n"
 		"  -e, --encode                               Encode the input files.            \n"
 		"  -d, --decode                               Decode the input files.            \n"
-		"  -f, --functions [func1, [func2, [ ... ]]]  List of functions to encode/decode.\n"
-		"  -k, --key [key]                            Optional encryption key.           \n"
-		"  -p, --prefix [prefix = RunEncrypted_]      Prefix for decryption wrappers.    \n"
-		"  -g  --garbage [symbol]                     Optional added garbage reference.  \n"
+		"  -s, --start [symbol]                       Symbol for the start of encryption.\n"
+		"  -n, --end [symbol]                         Symbol for the end of encryption.  \n"
 		"  -v, --verbose                              Print encoding progress.           \n",
 		self_name
 	);
@@ -74,21 +62,16 @@ static int argCompare(char* arg, char short_letter, char* long_str) {
 
 enum {
 	AWAIT_INPUT_FILE,
-	AWAIT_SYMBOL,
 	AWAIT_NONE
 };
 
 int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 	// Defaults
-	task->inputs          = NULL;
-	task->output_fname    = NULL;
-	task->encoding_type   = ENC_INVALID;
-	task->key_mode        = MODE_UNKEYED;
-	task->symbols         = NULL;
-	task->wrapper_prefix  = NULL;
-	task->garbage         = NULL;
-	task->key             = 0;
-	task->verbose         = 0;
+	task->inputs            = NULL;
+	task->encryption_symbol = NULL;
+	task->decryption_symbol = NULL;
+	task->encoding_type     = ENC_INVALID;
+	task->verbose           = 0;
 	
 	int arg_idx = 0;
 	
@@ -109,10 +92,6 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 	
 	
 	int max_files = 16;
-	int max_symbols = 64;
-	
-	task->symbols = calloc(max_symbols, sizeof(char*));
-	int symbol_idx = 0;
 	
 	task->inputs = calloc(max_files, sizeof(FILE*));
 	int file_idx = 0;
@@ -134,20 +113,6 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 				
 				await_state = AWAIT_INPUT_FILE;
 			
-			} else if (argCompare(curr_arg, 'o', "--output")) {
-				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no output filename provided\n", curr_arg);
-					return 1;
-				}
-				
-				if (task->output_fname != NULL) {
-					printf("Error: multiple output files provided\n");
-					return 1;
-				}
-				
-				task->output_fname = next_arg;
-				arg_idx++;
-			
 			} else if (argCompare(curr_arg, 'e', "--encode")) {
 				if (task->encoding_type != ENC_INVALID) {
 					printf("Error: multiple operations provided\n");
@@ -164,44 +129,14 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 				
 				task->encoding_type = ENC_DECODE;
 			
-			} else if (argCompare(curr_arg, 'f', "--functions")) {
+			} else if (argCompare(curr_arg, 'n', "--end")) {
 				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no functions provided\n", curr_arg);
+					printf("Error: %s but no identifier provided\n", curr_arg);
 					return 1;
 				}
 				
-				await_state = AWAIT_SYMBOL;
-			
-			} else if (argCompare(curr_arg, 'k', "--key")) {
-				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no key provided\n", curr_arg);
-					return 1;
-				}
-				
-				uint32_t key;
-				int valid = parseKey(next_arg, &key);
-				if (!valid) {
-					printf("Error: could not parse key: %s\n", next_arg);
-					return 1;
-				}
-				
-				if (task->key_mode != MODE_UNKEYED) {
-					printf("Error: multiple keys provided\n");
-					return 1;
-				}
-				
-				task->key_mode = MODE_KEYED;
-				task->key = key;
-				arg_idx++;
-			
-			} else if (argCompare(curr_arg, 'p', "--prefix")) {
-				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no prefix string provided\n", curr_arg);
-					return 1;
-				}
-				
-				if (task->wrapper_prefix != NULL) {
-					printf("Error: multiple prefix strings provided\n");
+				if (task->encryption_symbol != NULL) {
+					printf("Error: multiple encryption functions provided\n");
 					return 1;
 				}
 				
@@ -210,17 +145,17 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 					return 1;
 				}
 				
-				task->wrapper_prefix = next_arg;
+				task->encryption_symbol = next_arg;
 				arg_idx++;
 			
-			} else if (argCompare(curr_arg, 'g', "--garbage")) {
+			} else if (argCompare(curr_arg, 's', "--start")) {
 				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no reference provided\n", curr_arg);
+					printf("Error: %s but no identifier provided\n", curr_arg);
 					return 1;
 				}
 				
-				if (task->garbage != NULL) {
-					printf("Error: multiple garbage references provided\n");
+				if (task->decryption_symbol != NULL) {
+					printf("Error: multiple decryption functions provided\n");
 					return 1;
 				}
 				
@@ -229,7 +164,7 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 					return 1;
 				}
 				
-				task->garbage = next_arg;
+				task->decryption_symbol = next_arg;
 				arg_idx++;
 			
 			} else if (argCompare(curr_arg, 'v', "--verbose")) {
@@ -242,30 +177,6 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 			}
 		} else {
 			switch (await_state) {
-				case AWAIT_SYMBOL:
-					// Maintain null terminator
-					if ((symbol_idx + 1) == max_symbols) {
-						max_symbols += 32;
-						task->symbols = realloc(task->symbols, max_symbols * sizeof(char*));
-					}
-					
-					if (!isValidIdentifier(curr_arg)) {
-						printf("Error: invalid identifier: %s\n", curr_arg);
-						return 1;
-					}
-					
-					for (int i = 0; i < symbol_idx; i++) {
-						if (strcmp(curr_arg, task->symbols[i]) == 0) {
-							printf("Error: duplicate function: %s\n", curr_arg);
-							return 1;
-						}
-					}
-					
-					task->symbols[symbol_idx] = curr_arg;
-					symbol_idx++;
-					task->symbols[symbol_idx] = NULL;
-					break;
-				
 				case AWAIT_INPUT_FILE:
 					// Maintain null terminator
 					if ((file_idx + 1) == max_files) {
@@ -301,25 +212,14 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 		return 1;
 	}
 	
-	if (symbol_idx == 0) {
-		printf("Error: no functions provided (-f)\n");
+	if (task->decryption_symbol == NULL) {
+		printf("Error: no encryption start function provided (-s)\n");
 		return 1;
 	}
 	
-	
-	if (task->output_fname != NULL && task->encoding_type == ENC_DECODE) {
-		printf("Warning: output file name provided, but no output will be generated for decoding\n");
-		task->output_fname = NULL;
-	}
-	
-	if (task->wrapper_prefix != NULL && !(task->encoding_type == ENC_ENCODE && task->key_mode == MODE_KEYED)) {
-		printf("Warning: decryption wrapper prefix provided, but will not be used unless encoding with key\n");
-		task->wrapper_prefix = NULL;
-	}
-	
-	if (task->garbage != NULL && task->encoding_type == ENC_DECODE) {
-		printf("Warning: garbage reference provided, but will not be used for decoding\n");
-		task->garbage = NULL;
+	if (task->encryption_symbol == NULL) {
+		printf("Error: no encryption end function provided (-n)\n");
+		return 1;
 	}
 	
 	return 0;
@@ -328,7 +228,6 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 
 void ArgParse_DestroyTask(EncodingTask* task) {
 	if (task != NULL) {
-		free(task->symbols);
 		free(task->inputs);
 	}
 }

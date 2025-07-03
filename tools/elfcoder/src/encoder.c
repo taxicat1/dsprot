@@ -2,9 +2,6 @@
 
 #include "encoder.h"
 
-#include "encoding_constants.h"
-
-
 // S[i] = i ^ 1
 // Incredibly secure S-Box.
 static const uint8_t SBox[256] = {
@@ -27,123 +24,29 @@ static const uint8_t SBox[256] = {
 };
 
 
-static int categorizeOpCode(unsigned int opcode) {
-	if ((opcode & 0x0E) == 0x0A) {
-		if ((opcode & 0xF0) == 0xF0) {
-			return 1;
-		}
+void Encode_Instruction(Instruction* ins, RC4_Ctx* rc4) {
+	if (rc4 == NULL) {
+		// Not possible
+	} else {
+		uint8_t a, b, c, d;
+		a = ins->operands;
+		b = ins->operands >> 8;
+		c = ins->operands >> 16;
+		d = ins->opcode;
 		
-		if (opcode & 0x01) {
-			return 2;
-		} else {
-			return 3;
-		}
-	}
-	
-	return 0;
-}
-
-
-void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
-	// Futureproofing
-}
-
-
-void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
-	switch (categorizeOpCode(ins->opcode)) {
-		case 0:
-			if (rc4 != NULL) {
-				uint8_t a = RC4_Byte(rc4);
-				uint8_t b = RC4_Byte(rc4);
-				uint32_t xor = (b << 8) | a;
-				ins->operands ^= xor;
-				
-				uint8_t subbyte = ins->operands >> 16;
-				subbyte = SBox[subbyte];
-				ins->operands = (ins->operands & 0x00FFFF) | (subbyte << 16);
-			} else {
-				ins->opcode ^= ENC_OPCODE_2;
-				ins->operands ^= (ENC_BYTE_A << 16) | (ENC_BYTE_B << 8) | ENC_BYTE_A;
-			}
-			break;
+		a ^= RC4_Byte(rc4);
+		b ^= RC4_Byte(rc4);
+		c = SBox[c];
+		d = d;
 		
-		case 1:
-		case 2:
-			ins->opcode ^= ENC_OPCODE_1;
-			ins->operands += ENC_VAL_2;
-			break;
-		
-		case 3:
-			ins->opcode ^= ENC_OPCODE_1;
-			ins->operands += ENC_VAL_1;
-			break;
+		ins->opcode = d;
+		ins->operands = (c << 16) | (b << 8) | a;
 	}
 }
 
 
-void Encode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
-	switch (categorizeOpCode(encoded_instruction->opcode)) {
-		case 0:
-			// Not possible
-			break;
-		
-		case 1:
-		case 2:
-			reloc->r_addend += ENC_VAL_2 + 8;
-			break;
-		
-		case 3:
-			reloc->r_addend += ENC_VAL_1 + 8;
-			break;
-	}
+
+void Decode_Instruction(Instruction* ins, RC4_Ctx* rc4) {
+	Encode_Instruction(ins, rc4);
 }
 
-
-void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
-	switch (categorizeOpCode(ins->opcode)) {
-		case 0:
-			if (rc4 != NULL) {
-				uint8_t a = RC4_Byte(rc4);
-				uint8_t b = RC4_Byte(rc4);
-				uint32_t xor = (b << 8) | a;
-				ins->operands ^= xor;
-				
-				uint8_t subbyte = ins->operands >> 16;
-				subbyte = SBox[subbyte];
-				ins->operands = (ins->operands & 0x00FFFF) | (subbyte << 16);
-			} else {
-				ins->opcode ^= ENC_OPCODE_2;
-				ins->operands ^= (ENC_BYTE_A << 16) | (ENC_BYTE_B << 8) | ENC_BYTE_A;
-			}
-			break;
-		
-		case 1:
-		case 2:
-			ins->opcode ^= ENC_OPCODE_1;
-			ins->operands -= ENC_VAL_1;
-			break;
-		
-		case 3:
-			ins->opcode ^= ENC_OPCODE_1;
-			ins->operands -= ENC_VAL_2;
-			break;
-	}
-}
-
-
-void Decode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
-	switch (categorizeOpCode(encoded_instruction->opcode)) {
-		case 0:
-			// Not possible
-			break;
-		
-		case 1:
-		case 2:
-			reloc->r_addend -= ENC_VAL_1 + 8;
-			break;
-		
-		case 3:
-			reloc->r_addend -= ENC_VAL_2 + 8;
-			break;
-	}
-}

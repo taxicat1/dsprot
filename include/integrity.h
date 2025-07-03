@@ -3,10 +3,9 @@
 
 #include "types.h"
 
-// Assembly decryption wrappers
-extern u32 RunEncrypted_Integrity_MACOwner_IsBad(void);
-extern u32 RunEncrypted_Integrity_MACOwner_IsGood(void);
-extern u32 RunEncrypted_Integrity_ROMTest_IsBad(void);
-extern u32 RunEncrypted_Integrity_ROMTest_IsGood(void);
+u32 Integrity_MACOwner_IsBad(void);
+u32 Integrity_MACOwner_IsGood(void);
+u32 Integrity_ROMTest_IsBad(void);
+u32 Integrity_ROMTest_IsGood(void);
 
 #endif

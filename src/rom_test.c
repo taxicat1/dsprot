@@ -1,27 +1,23 @@
 #include "rom_test.h"
 
+#include "encryptor.h"
 #include "rom_util.h"
-
-// Functions to be encrypted (cannot be called directly)
-u32 ROMTest_IsBad(void);
-u32 ROMTest_IsGood(void);
 
 #define ROM_BLOCK_SIZE  (0x200)
 
 
-u32 ROMTest_IsBad(void) { /* ov123_02260504 */
+u32 ROMTest_IsBad(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
 	u32  rom_addr;
 	int  i;
 	u32  ret;
-	u8*  rom_buf_ptr;
 	
 	rom_addr = 0x1000;
 	for (i = 0; i < 6; i++) {
-		RunEncrypted_ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
-		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
+		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		if (i == 2) {
 			// Has to be like this to match
@@ -31,6 +27,8 @@ u32 ROMTest_IsBad(void) { /* ov123_02260504 */
 			rom_addr += ROM_BLOCK_SIZE;
 		}
 	}
+	
+	ENCRYPTION_START(0x03F9);
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
@@ -47,28 +45,28 @@ u32 ROMTest_IsBad(void) { /* ov123_02260504 */
 	}
 	
 EXIT:
-	rom_buf_ptr = &rom_buf[0];
 	for (i = 0; i < ROM_BLOCK_SIZE; i++) {
-		*rom_buf_ptr++ = 0;
+		rom_buf[i] = 0;
 	}
+	
+	ENCRYPTION_END(0x03F9);
 	
 	return ret;
 }
 
 
-u32 ROMTest_IsGood(void) { /* ov123_022605C8 */
+u32 ROMTest_IsGood(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
 	u32  rom_addr;
 	int  i;
 	u32  ret;
-	u8*  rom_buf_ptr;
 	
 	rom_addr = 0x1000;
 	for (i = 0; i < 6; i++) {
-		RunEncrypted_ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
-		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
+		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		if (i == 2) {
 			// Has to be like this to match
@@ -78,6 +76,8 @@ u32 ROMTest_IsGood(void) { /* ov123_022605C8 */
 			rom_addr += ROM_BLOCK_SIZE;
 		}
 	}
+	
+	ENCRYPTION_START(0x735A);
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
@@ -94,10 +94,11 @@ u32 ROMTest_IsGood(void) { /* ov123_022605C8 */
 	}
 	
 EXIT:
-	rom_buf_ptr = &rom_buf[0];
 	for (i = 0; i < ROM_BLOCK_SIZE; i++) {
-		*rom_buf_ptr++ = 0;
+		rom_buf[i] = 0;
 	}
+	
+	ENCRYPTION_END(0x735A);
 	
 	return ret;
 }

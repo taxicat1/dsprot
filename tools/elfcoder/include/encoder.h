@@ -13,32 +13,15 @@ enum {
 	ENC_INVALID
 };
 
-enum {
-	MODE_KEYED,
-	MODE_UNKEYED,
-	MODE_INVALID
-};
-
 typedef struct {
 	char**    inputs;
-	char*     output_fname;
 	int       encoding_type;
-	int       key_mode;
-	char**    symbols;
-	char*     wrapper_prefix;
-	char*     garbage;
-	uint32_t  key;
+	char*     decryption_symbol;
+	char*     encryption_symbol;
 	int       verbose;
 } EncodingTask;
 
-typedef struct {
-	int  unused;
-} Encoding_Ctx;
-
-void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task);
-void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4);
-void Encode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc);
-void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4);
-void Decode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc);
+void Encode_Instruction(Instruction* ins, RC4_Ctx* rc4);
+void Decode_Instruction(Instruction* ins, RC4_Ctx* rc4);
 
 #endif

@@ -23,8 +23,7 @@ typedef struct {
 extern void OS_GetMacAddress(u8* mac_addr);
 extern void OS_GetOwnerInfo(OSOwnerInfo* info);
 
-// Assembly decryption wrappers
-extern u32 RunEncrypted_MACOwner_IsBad(void);
-extern u32 RunEncrypted_MACOwner_IsGood(void);
+u32 MACOwner_IsBad(void);
+u32 MACOwner_IsGood(void);
 
 #endif

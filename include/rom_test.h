@@ -3,8 +3,7 @@
 
 #include "types.h"
 
-// Assembly decryption wrappers
-extern u32 RunEncrypted_ROMTest_IsBad(void);
-extern u32 RunEncrypted_ROMTest_IsGood(void);
+u32 ROMTest_IsBad(void);
+u32 ROMTest_IsGood(void);
 
 #endif

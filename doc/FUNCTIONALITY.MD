@@ -35,24 +35,14 @@ Each of these functions takes as argument an optional callback function, which w
 
 ## Obfuscation
 
-The code has multiple layers of obfuscation present. Many of the core functions are written in convoluted ways intended to deter reverse engineering, and/or encrypted and accessible only through special decryption wrappers. Decryption wrappers will decrypt the function, run it with the specified arguments, re-encrypt the function (with a new key), and return. This is designed such that the raw code of the function spends as little time in RAM as possible.
+The code has multiple layers of obfuscation present. Many of the core functions are written in convoluted ways intended to deter reverse engineering, and/or have ranges of their instructions encrypted. At the start of the range, it will call a decryption routine to decrypt the instructions ahead. At the end of the range, it will call an encryption routine to re-encrypt them.
 
-Other functions are encoded using an unkeyed encoding scheme. These functions are decoded immediately upon being loaded, and remain decoded for as long as they remain in RAM. This is seemingly designed to deter reading dumps of the ROM.
-
-Typically, a file will have some selected functions encrypted, then decryption wrappers are created for those functions, then those decryption wrappers are encoded, and included in the table to decode upon being loaded. Some functions are encoded directly without encryption, and other functions remain in plain code.
-
-Values and references used throughout the file, such as sizes, keys, and function pointers, are often obfuscated by having other values added to them while they are at rest.
-
-For technical details on the encoding and obfuscation, see [ENCODING.MD](./ENCODING.MD).
+For technical details on the encryption, see [ENCODING.MD](./ENCODING.MD).
 
 ## Integrity
 
-Before running any of the core check functions, it also conducts an integrity check of their decryption wrappers. It checks the first 16 bytes (4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected. There is no integrity check on the dummy detection functions.
-
-## Dummy data
-
-As a final trick, the library also includes 24 bytes of data designed to appear as instructions, but which are actually dummy garbage data. A reference to this data is held elsewhere to prevent it from being stripped out during linking, but it is not read from, written to, nor executed at any point.
+Before running any of the core check functions, it also conducts an integrity check. It checks the first 16 bytes (4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected. There is no integrity check on the dummy detection functions.
 
 ## Note on language
 
-The majority of the library is written in C, but the decryption wrappers and decoder initializers are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
+The majority of the library is written in C, but the decryption range boundaries are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).

@@ -7,7 +7,6 @@
 #include "elf.h" // Copy included if not available already
 
 #include "encoder.h"
-#include "asmwriter.h"
 
 typedef struct {
 	FILE*       fhandle;
@@ -57,6 +56,16 @@ static int symbolStringCompare(ElfFile* elf, int str_idx, const char* target_sym
 	} while(*target_symbol++ != '\0');
 	
 	return 0;
+}
+
+
+static void quickStringTblPut(ElfFile* elf, int str_idx) {
+	fseek(elf->fhandle, elf->strtbl_header.sh_offset + str_idx, SEEK_SET);
+	
+	int c;
+	while ((c = fgetc(elf->fhandle)) != '\0') {
+		putchar(c);
+	}
 }
 
 
@@ -121,225 +130,289 @@ static int ElfFile_Init(ElfFile* elf, char* fname) {
 }
 
 
-#define ROTL(x,a)  (((uint32_t)x << a) | (x >> (32-a)))
-static void createRC4Key(uint32_t inkey, unsigned int func_size, uint8_t* outkey) {
-	uint32_t k[4];
+static void createRC4Key(uint32_t key_ins, uint8_t* outkey) {
+	outkey[0] = outkey[4] = outkey[8]  = outkey[12] = key_ins & 0xff;
+	outkey[1] = outkey[5] = outkey[9]  = outkey[13] = (key_ins >> 8) & 0xff;
+	outkey[2] = outkey[6] = outkey[10] = outkey[14] = (key_ins >> 16) & 0xff;
+	outkey[3] = outkey[7] = outkey[11] = outkey[15] = (key_ins >> 24) & 0xff;
 	
-	k[0] = func_size ^ inkey;
-	k[1] = func_size ^ ROTL(inkey,  8);
-	k[2] = func_size ^ ROTL(inkey, 16);
-	k[3] = func_size ^ ROTL(inkey, 24);
-	
-	// LE assumed
-	memcpy(outkey, &k[0], RC4_KEY_SIZE);
+	outkey[0]  ^= 0xff;
+	outkey[15] ^= 0xff;
 }
 
 
-static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
-	Encoding_Ctx ctx;
-	Encode_Init(&ctx, task);
-	
+static int encodeInstructions(ElfFile* elf, int start_addr, int size, uint32_t key_ins, EncodingTask* task) {
 	int num_ins = size / 4;
 	fseek(elf->fhandle, start_addr, SEEK_SET);
 	Instruction* ins_buffer = malloc(size);
 	fread(ins_buffer, sizeof(Instruction), num_ins, elf->fhandle);
 	
-	// Finding last executed instruction (ignoring data at the end of the routine)
-	// Looking for bx / pop opcodes, or what they get encoded into
-	int target_opcode_1;
-	int target_opcode_2;
+	RC4_Ctx rc4;
+	uint8_t rc4key[RC4_KEY_SIZE];
+	createRC4Key(key_ins, rc4key);
+	RC4_Init(&rc4, rc4key);
 	
-	if (task->encoding_type == ENC_DECODE && task->key_mode == MODE_UNKEYED) {
-		// Unkeyed decoding needs these encoded opcodes
-		target_opcode_1 = 0x18;
-		target_opcode_2 = 0x11;
-	} else {
-		// Encoding needs these, also keyed decoding, since keyed encoding does not change these
-		target_opcode_1 = 0xE8;
-		target_opcode_2 = 0xE1;
-	}
-	
-	int last_idx = num_ins - 1;
-	while (ins_buffer[last_idx].opcode != target_opcode_1 && ins_buffer[last_idx].opcode != target_opcode_2) {
-		last_idx--;
-		
-		if (last_idx < 0) {
-			// Could not find target, probably wrong encoding direction specified
-			return 0;
-		}
-	}
-	
-	int encoded_instructions = last_idx + 1;
-	int encoded_size = encoded_instructions * 4;
-	
-	// RC4 setup if neccessary, else use NULL
-	RC4_Ctx* rc4 = NULL;
-	if (task->key_mode == MODE_KEYED) {
-		rc4 = malloc(sizeof(RC4_Ctx));
-		uint8_t rc4key[RC4_KEY_SIZE];
-		createRC4Key(task->key, encoded_size, rc4key);
-		RC4_Init(rc4, rc4key);
-	}
-	
-	for (int i = 0; i < encoded_instructions; i++) {
+	for (int i = 0; i < num_ins; i++) {
 		if (task->encoding_type == ENC_DECODE) {
-			Decode_Instruction(&ctx, &ins_buffer[i], rc4);
+			Decode_Instruction(&ins_buffer[i], &rc4);
 		} else {
-			Encode_Instruction(&ctx, &ins_buffer[i], rc4);
+			Encode_Instruction(&ins_buffer[i], &rc4);
 		}
 	}
 	
 	fseek(elf->fhandle, start_addr, SEEK_SET);
-	fwrite(ins_buffer, sizeof(Instruction), encoded_instructions, elf->fhandle);
+	fwrite(ins_buffer, sizeof(Instruction), num_ins, elf->fhandle);
 	
 	free(ins_buffer);
-	free(rc4);
 	
-	return encoded_size;
+	return key_ins;
 }
 
 
-static void encodeRelocations(
-	ElfFile*           elf,
-	int                section_offset,
-	const Elf32_Sym*   symbol,
-	int                encoded_size,
-	const Elf32_Shdr*  relocation_header,
-	EncodingTask*      task
+static int tryEncryptRanges(
+	ElfFile* elf,
+	Elf32_Rela* relocs,
+	int len,
+	int decryption_symbol_idx,
+	int encryption_symbol_idx,
+	int file_offset,
+	EncodingTask* task
 ) {
-	// Iterate all relocations looking for any with offsets in the bounds of the encoding
-	int num_relocs = relocation_header->sh_size / relocation_header->sh_entsize;
+	/*
+		- Must start with decrypt
+		- Must end with encrypt
+		- Must alternate decrypt-encrypt-decrypt-encrypt...
+		- Must be at least 32 bytes between decrypt and the following encrypt
+		- Key must be the same between decrypt/encrypt (dec+12 == enc-16)
+	*/
+	
+	if ((len % 2) != 0) {
+		return 1;
+	}
+	
+	int expected_next = decryption_symbol_idx;
+	for (int i = 0; i < len; i++) {
+		if (ELF32_R_SYM(relocs[i].r_info) != expected_next) {
+			return 1;
+		}
+		
+		if (expected_next == encryption_symbol_idx) {
+			expected_next = decryption_symbol_idx;
+		} else {
+			expected_next = encryption_symbol_idx;
+		}
+	}
+	
+	for (int i = 0; i < len; i += 2) {
+		Elf32_Rela dec_reloc = relocs[i];
+		Elf32_Rela enc_reloc = relocs[i+1];
+		
+		if ((enc_reloc.r_offset - dec_reloc.r_offset) <= 32) {
+			return 1;
+		}
+		
+		int dec_key_offset = file_offset + dec_reloc.r_offset + 12;
+		int enc_key_offset = file_offset + enc_reloc.r_offset - 16;
+		
+		uint32_t dec_key, enc_key;
+		fseek(elf->fhandle, dec_key_offset, SEEK_SET);
+		fread(&dec_key, sizeof(uint32_t), 1, elf->fhandle);
+		
+		fseek(elf->fhandle, enc_key_offset, SEEK_SET);
+		fread(&enc_key, sizeof(uint32_t), 1, elf->fhandle);
+		
+		if (dec_key != enc_key) {
+			return 1;
+		}
+		
+		int start_addr = dec_key_offset + 4;
+		int end_addr = enc_key_offset;
+		int size = end_addr - start_addr;
+		
+		encodeInstructions(elf, start_addr, size, dec_key, task);
+		
+		if (task->verbose) {
+			if (task->encoding_type == ENC_DECODE) {
+				printf(INDENT INDENT "Decrypted +%x from %x with key %08x\n", size, start_addr, enc_key);
+			} else {
+				printf(INDENT INDENT "Encrypted +%x from %x with key %08x\n", size, start_addr, enc_key);
+			}
+		}
+	}
+	
+	if (task->verbose) {
+		printf("\n");
+	}
+	
+	return 0;
+}
+
+static void sortRelocsByOffset(Elf32_Rela* relocs, int len) {
+	// Nope, shut up, don't care, I'm doing this
+	for (int i = 0; i < len-1; i++) {
+		int minidx = i;
+		for (int j = i+1; j < len; j++) {
+			if (relocs[j].r_offset < relocs[minidx].r_offset) {
+				minidx = j;
+			}
+		}
+		
+		if (i != minidx) {
+			Elf32_Rela tmp;
+			tmp = relocs[i];
+			relocs[i] = relocs[minidx];
+			relocs[minidx] = tmp;
+		}
+	}
+}
+
+static int tryEncryptSymbol(ElfFile* elf, const Elf32_Sym* symbol, int decryption_symbol_idx, int encryption_symbol_idx, EncodingTask* task) {
+	Elf32_Shdr text_header;
+	getSectionHeaderByIdx(elf, symbol->st_shndx, &text_header);
+	int start_addr = text_header.sh_offset + symbol->st_value;
+	
+	Elf32_Shdr relocation_header;
+	int rela_found = getRelocationHeaderByTarget(elf, symbol->st_shndx, &relocation_header);
+	if (!rela_found) {
+		return 0;
+	}
+	
+	int crypt_reloc_max = 10;
+	Elf32_Rela* crypt_relocs = calloc(crypt_reloc_max, sizeof(Elf32_Rela));
+	int crypt_reloc_idx = 0;
+	
+	int num_relocs = relocation_header.sh_size / relocation_header.sh_entsize;
 	for (int i = 0; i < num_relocs; i++) {
 		Elf32_Rela reloc;
-		int reloc_addr = relocation_header->sh_offset + (i * relocation_header->sh_entsize);
+		int reloc_addr = relocation_header.sh_offset + (i * relocation_header.sh_entsize);
 		fseek(elf->fhandle, reloc_addr, SEEK_SET);
 		fread(&reloc, sizeof(Elf32_Rela), 1, elf->fhandle);
 		
 		if (
 			(reloc.r_offset >= symbol->st_value) &&
-			(reloc.r_offset < (symbol->st_value + encoded_size))
+			(reloc.r_offset < (symbol->st_value + symbol->st_size))
 		) {
-			// The instruction it's relocating is needed to determine how to encode this relocation
-			int instruction_addr = section_offset + reloc.r_offset;
-			fseek(elf->fhandle, instruction_addr, SEEK_SET);
-			Instruction coded_instruction;
-			fread(&coded_instruction, sizeof(Instruction), 1, elf->fhandle);
-			
-			if (task->encoding_type == ENC_DECODE) {
-				Decode_Relocation(&coded_instruction, &reloc);
-				if (task->verbose) {
-					printf(INDENT "Decoded relocation for %04x\n", reloc.r_offset);
-				}
-			} else {
-				Encode_Relocation(&coded_instruction, &reloc);
-				if (task->verbose) {
-					printf(INDENT "Encoded relocation for %04x\n", reloc.r_offset);
+			if (
+				ELF32_R_SYM(reloc.r_info) == decryption_symbol_idx || 
+				ELF32_R_SYM(reloc.r_info) == encryption_symbol_idx
+			) {
+				crypt_relocs[crypt_reloc_idx] = reloc;
+				crypt_reloc_idx++;
+				if (crypt_reloc_idx == crypt_reloc_max) {
+					crypt_reloc_max += 10;
+					crypt_relocs = realloc(crypt_relocs, crypt_reloc_max * sizeof(Elf32_Rela));
 				}
 			}
-			
-			fseek(elf->fhandle, reloc_addr, SEEK_SET);
-			fwrite(&reloc, sizeof(Elf32_Rela), 1, elf->fhandle);
 		}
 	}
+	
+	if (crypt_reloc_idx == 0) {
+		free(crypt_relocs);
+		return 0;
+	}
+	
+	sortRelocsByOffset(crypt_relocs, crypt_reloc_idx);
+	
+	if (task->verbose) {
+		printf(INDENT);
+		quickStringTblPut(elf, symbol->st_name);
+		printf(":\n");
+	}
+	
+	if (tryEncryptRanges(
+		elf,
+		crypt_relocs,
+		crypt_reloc_idx,
+		decryption_symbol_idx,
+		encryption_symbol_idx,
+		start_addr,
+		task) != 0
+	) {
+		if (!task->verbose) {
+			printf("%s:\n", elf->fname);
+			printf(INDENT);
+			quickStringTblPut(elf, symbol->st_name);
+			printf(":\n");
+		}
+		
+		printf(INDENT INDENT "Error: invalid decryption/encryption ranges\n\n");
+		free(crypt_relocs);
+		return 1;
+	}
+	
+	free(crypt_relocs);
+	return 0;
+}
+
+int getDecryptionAndEncryptionSymbolIdxs(ElfFile* elf, int* out_decryption_symbol_idx, int* out_encryption_symbol_idx, EncodingTask* task) {
+	int symbol_tbl_len = elf->symtbl_header.sh_size / elf->symtbl_header.sh_entsize;
+	
+	int decryption_symbol_idx = -1;
+	int encryption_symbol_idx = -1;
+	
+	for (int symbol_tbl_idx = 0; symbol_tbl_idx < symbol_tbl_len; symbol_tbl_idx++) {
+		Elf32_Sym symbol;
+		getSymbolByIdx(elf, symbol_tbl_idx, &symbol);
+		
+		if (symbolStringCompare(elf, symbol.st_name, task->decryption_symbol) == 0) {
+			decryption_symbol_idx = symbol_tbl_idx;
+		} else if (symbolStringCompare(elf, symbol.st_name, task->encryption_symbol) == 0) {
+			encryption_symbol_idx = symbol_tbl_idx;
+		}
+	}
+	
+	if (decryption_symbol_idx != -1 && encryption_symbol_idx != -1) {
+		*out_decryption_symbol_idx = decryption_symbol_idx;
+		*out_encryption_symbol_idx = encryption_symbol_idx;
+		return 0;
+	}
+	
+	return 1;
+}
+
+static int processElf(ElfFile* elf, EncodingTask* task) {
+	int symbol_tbl_len = elf->symtbl_header.sh_size / elf->symtbl_header.sh_entsize;
+	
+	int decryption_symbol_idx;
+	int encryption_symbol_idx;
+	if (getDecryptionAndEncryptionSymbolIdxs(elf, &decryption_symbol_idx, &encryption_symbol_idx, task) != 0) {
+		printf("Error: %s: could not find encryption/decryption functions in symbol table\n", elf->fname);
+		return 1;
+	}
+	
+	if (task->verbose) {
+		printf("%s:\n", elf->fname);
+		printf(INDENT "decryption/encryption symbols found @ %i/%i\n", decryption_symbol_idx, encryption_symbol_idx);
+	}
+	
+	int ret_code = 0;
+	
+	for (int symbol_tbl_idx = 0; symbol_tbl_idx < symbol_tbl_len; symbol_tbl_idx++) {
+		if (symbol_tbl_idx == decryption_symbol_idx || symbol_tbl_idx == encryption_symbol_idx) {
+			continue;
+		}
+		
+		Elf32_Sym symbol;
+		getSymbolByIdx(elf, symbol_tbl_idx, &symbol);
+		
+		// Ignore external symbols and non-functions
+		if (symbol.st_shndx == SHN_UNDEF || ELF32_ST_TYPE(symbol.st_info) != STT_FUNC) {
+			continue;
+		}
+		
+		ret_code += tryEncryptSymbol(elf, &symbol, decryption_symbol_idx, encryption_symbol_idx, task);
+	}
+	
+	return ret_code;
 }
 
 
-static int encodeSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name, ASMWriter_Ctx* asmw, EncodingTask* task) {
+static int processElfs(ElfFile* elfs, EncodingTask* task) {
 	int ret = 0;
 	
-	Elf32_Shdr text_header;
-	getSectionHeaderByIdx(elf, symbol->st_shndx, &text_header);
-	int start_addr = text_header.sh_offset + symbol->st_value;
-	
-	// Encode instructions of this function
-	int encoded_bytes = encodeInstructions(elf, start_addr, symbol->st_size, task);
-	
-	if (encoded_bytes != 0) {
-		ASMWriter_SetSymbolSize(asmw, symbol_name, encoded_bytes);
-		
-		if (task->verbose) {
-			printf("%s: found @ %04x in %s\n",
-				symbol_name, symbol->st_value, elf->fname);
-			
-			if (task->encoding_type == ENC_DECODE) {
-				if (task->key_mode == MODE_KEYED) {
-					printf(INDENT "Decoded +%x (key = %04x)\n", encoded_bytes, task->key);
-				} else {
-					printf(INDENT "Decoded +%x\n", encoded_bytes);
-				}
-			} else {
-				if (task->key_mode == MODE_KEYED) {
-					printf(INDENT "Encoded +%x (key = %04x)\n", encoded_bytes, task->key);
-				} else {
-					printf(INDENT "Encoded +%x\n", encoded_bytes);
-				}
-			}
-		}
-		
-		// Search for corresponding relocation table for this symbol's section
-		Elf32_Shdr relocation_header;
-		int rela_found = getRelocationHeaderByTarget(elf, symbol->st_shndx, &relocation_header);
-		
-		// Encode relocations if applicable
-		if (rela_found) {
-			// (Prints relocation data)
-			encodeRelocations(elf, text_header.sh_offset, symbol, encoded_bytes, &relocation_header, task);
-		}
-		
-		if (task->verbose) {
-			printf("\n");
-		}
-		
-	} else {
-		ASMWriter_SetInvalid(asmw);
-		ret++;
-		
-		printf("%s (@ %04x in %s): failed: could not find instruction range\n",
-			symbol_name, symbol->st_value, elf->fname);
-	}
-	
-	return ret;
-}
-
-
-static int processElfs(ElfFile* elfs, ASMWriter_Ctx* asmw, EncodingTask* task) {
-	int ret = 0;
-	
-	// Iterate all target symbols in the outermost loop so they are processed in order
-	// (this is inefficient, but needed for output structure)
-	for (int target_symbol_idx = 0; task->symbols[target_symbol_idx] != NULL; target_symbol_idx++) {
-		int symbol_found = 0;
-		
-		// Next loop: iterate all elf files we have
-		for (int elf_idx = 0; elfs[elf_idx].fhandle != NULL; elf_idx++) {
-			int symbol_tbl_len = elfs[elf_idx].symtbl_header.sh_size / elfs[elf_idx].symtbl_header.sh_entsize;
-			
-			// Final loop: iterate symbol table of this elf file
-			for (int symbol_tbl_idx = 0; symbol_tbl_idx < symbol_tbl_len; symbol_tbl_idx++) {
-				Elf32_Sym symbol;
-				getSymbolByIdx(&elfs[elf_idx], symbol_tbl_idx, &symbol);
-				
-				// Ignore external symbols and non-functions
-				if (symbol.st_shndx == SHN_UNDEF || ELF32_ST_TYPE(symbol.st_info) != STT_FUNC) {
-					continue;
-				}
-				
-				if (symbolStringCompare(&elfs[elf_idx], symbol.st_name, task->symbols[target_symbol_idx]) != 0) {
-					continue;
-				}
-				
-				symbol_found = 1;
-				ret += encodeSymbol(&elfs[elf_idx], &symbol, task->symbols[target_symbol_idx], asmw, task);
-				break;
-			}
-		}
-		
-		if (!symbol_found) {
-			ASMWriter_SetInvalid(asmw);
-			ret++;
-			
-			printf("%s: not found in any input file\n", task->symbols[target_symbol_idx]);
-		}
+	// Iterate all elf files we have
+	for (int elf_idx = 0; elfs[elf_idx].fhandle != NULL; elf_idx++) {
+		ret += processElf(&elfs[elf_idx], task);
 	}
 	
 	return ret;
@@ -355,9 +428,6 @@ int Elf_EncodeSymbols(EncodingTask* task) {
 	if (num_inputs == 0) {
 		return 0;
 	}
-	
-	ASMWriter_Ctx asmw;
-	ASMWriter_Init(&asmw, task);
 	
 	ElfFile* elfs = calloc(num_inputs + 1, sizeof(ElfFile));
 	for (int elf_idx = 0; elf_idx < num_inputs; elf_idx++) {
@@ -378,8 +448,6 @@ int Elf_EncodeSymbols(EncodingTask* task) {
 #endif
 		
 		if (error) {
-			ASMWriter_SetInvalid(&asmw);
-			ASMWriter_Finalize(&asmw);
 			free(elfs);
 			return 1;
 		}
@@ -389,8 +457,7 @@ int Elf_EncodeSymbols(EncodingTask* task) {
 	elfs[num_inputs].fhandle = NULL;
 	
 	// Process all
-	int ret_code = processElfs(elfs, &asmw, task);
-	ret_code += ASMWriter_Finalize(&asmw);
+	int ret_code = processElfs(elfs, task);
 	
 	free(elfs);
 	
