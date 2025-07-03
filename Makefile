@@ -88,6 +88,7 @@ LIBRARY_FILES_PKHG := \
 
 
 .PHONY: all pokeheartgold-compatible clean tools dsprot dsprot-pokeheartgold
+.DELETE_ON_ERROR : 
 
 all:
 	$(MAKE) tools
