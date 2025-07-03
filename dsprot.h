@@ -9,12 +9,12 @@
 extern "C" {
 #endif
 
-extern u32 DSProt_DetectFlashcart(void* callback);
-extern u32 DSProt_DetectNotFlashcart(void* callback);
-extern u32 DSProt_DetectEmulator(void* callback);
-extern u32 DSProt_DetectNotEmulator(void* callback);
-extern u32 DSProt_DetectDummy(void* callback);
-extern u32 DSProt_DetectNotDummy(void* callback);
+extern u32 DSProt_DetectFlashcart(void* callback, void* param);
+extern u32 DSProt_DetectNotFlashcart(void* callback, void* param);
+extern u32 DSProt_DetectEmulator(void* callback, void* param);
+extern u32 DSProt_DetectNotEmulator(void* callback, void* param);
+extern u32 DSProt_DetectDummy(void* callback, void* param);
+extern u32 DSProt_DetectNotDummy(void* callback, void* param);
 
 #ifdef __cplusplus
 }

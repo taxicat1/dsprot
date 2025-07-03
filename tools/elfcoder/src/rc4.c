@@ -9,6 +9,9 @@ void RC4_Init(RC4_Ctx* ctx, uint8_t* k) {
 		ctx->S[i] = i;
 	}
 	
+	// Modification to RC4
+	ctx->x = 0xAA;
+	
 	/*
 	uint8_t j = 0;
 	for (int i = 0; i < 256; i++) {
@@ -34,7 +37,11 @@ void RC4_Init(RC4_Ctx* ctx, uint8_t* k) {
 
 
 uint8_t RC4_Byte(RC4_Ctx* ctx) {
-	ctx->i++;
+	// Modification to RC4
+	ctx->i += ctx->x;
+	ctx->j += ctx->x;
+	
+	ctx->i += 1;
 	ctx->j += ctx->S[ctx->i];
 	
 	int tmp = ctx->S[ctx->i];

@@ -32,7 +32,7 @@ typedef struct {
 } EncodingTask;
 
 typedef struct {
-	int  unused;
+	uint32_t  xor_val;
 } Encoding_Ctx;
 
 void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task);

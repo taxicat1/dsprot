@@ -89,8 +89,7 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 		fprintf(output,
 			"\tlocal_arm_func_start NitroStaticInit\n"
 			"NitroStaticInit:\n"
-			"\tdecode_func_table encoded_func_table\n"
-			"encoded_func_table:\n"
+			"\tdecode_following_func_table\n"
 		);
 		
 		for (int symbol_idx = 0; asmw->symbols[symbol_idx] != NULL; symbol_idx++) {

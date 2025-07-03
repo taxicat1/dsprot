@@ -31,7 +31,7 @@ Each of the three methods exists as two copies, which are identical except for r
 - Detect dummy (always fails)
 - Detect not dummy (always succeeds)
 
-Each of these functions takes as argument an optional callback function, which will be run if the target detection succeeds. Meaning, `DetectFlashcart(callback)` will run the callback function only if a flashcart is detected. `DetectNotFlashcart(callback)` will inversely run the callback function only if a flashcart is *not* detected. They will also return `1` if the target detection succeeded, and `0` if it did not, regardless of whether a callback function was supplied.
+Each of these functions takes as argument a callback function and a parameter for that callback of type `void*`. The callback function will be run if the target detection succeeds. Meaning, `DetectFlashcart(callback, param)` will run the callback function only if a flashcart is detected. `DetectNotFlashcart(callback, param)` will inversely run the callback function only if a flashcart is *not* detected. They will return the return value of the inner callback function if detection succeeded and the callback was run. Otherwise, some other integer value will be returned.
 
 ## Obfuscation
 
@@ -41,7 +41,7 @@ Other functions are encoded using an unkeyed encoding scheme. These functions ar
 
 Typically, a file will have some selected functions encrypted, then decryption wrappers are created for those functions, then those decryption wrappers are encoded, and included in the table to decode upon being loaded. Some functions are encoded directly without encryption, and other functions remain in plain code.
 
-Values and references used throughout the file, such as sizes, keys, and function pointers, are often obfuscated by having other values added to them while they are at rest.
+Values and references used throughout the file, such as sizes, keys, and function pointers, are often obfuscated by having other values added to them while they are at rest. Booleans are represented by multiples of different prime numbers to obscure their value.
 
 For technical details on the encoding and obfuscation, see [ENCODING.MD](./ENCODING.MD).
 
@@ -55,4 +55,4 @@ As a final trick, the library also includes 24 bytes of data designed to appear 
 
 ## Note on language
 
-The majority of the library is written in C, but the decryption wrappers and decoder initializers are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
+The majority of the library is written in C, but the decryption wrappers, decoder initializers, and another helper function are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).

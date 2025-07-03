@@ -9,6 +9,7 @@ typedef struct {
 	uint8_t  S[256];
 	uint8_t  i;
 	uint8_t  j;
+	uint32_t x;
 } RC4_Ctx;
 
 void RC4_Init(RC4_Ctx* ctx, uint8_t* k);

@@ -4,6 +4,7 @@
 #include "types.h"
 
 typedef struct {
+	int  x;
 	int  i;
 	int  j;
 	u8   S[256];

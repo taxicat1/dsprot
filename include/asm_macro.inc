@@ -18,65 +18,50 @@
 	.endm
 
 
-	.public Encryptor_DecryptFunction
-	.public Encryptor_EncryptFunction
 	.public BSS
+	.public Encryptor_DecryptionWrapperFragment
 
 	.macro run_encrypted_func func, length, key
-	stmfd sp!, {r4-r7}
-	stmfd sp!, {r0-r3}
-	ldmfd sp!, {r4-r7}
-	ldr r1, func_\@
-	adr r3, storage_\@
-	str lr, [r3]
-	ldr r2, length_\@
-	ldr r0, key_\@
-	bl Encryptor_DecryptFunction
-	mov ip, r0
-	stmfd sp!, {r4-r7}
-	ldmfd sp!, {r0-r3}
-	ldmfd sp!, {r4-r7}
-	blx ip
-	stmfd sp!, {r4}
-	mov r4, r0
-	ldr r1, func_\@
-	ldr r2, length_\@
-	ldr r0, key_\@
-	bl Encryptor_EncryptFunction
-	str r0, key_\@
-	mov r0, r4
-	ldmfd sp!, {r4}
-	ldr lr, storage_\@
-	str pc, storage_\@
-	bx lr
-storage_\@:
-	.word BSS + 1
-length_\@:
-	.word BSS + \length + ENC_VAL_1
-key_\@:
-	.word BSS + \key + ENC_VAL_1
-func_\@:
-	.word \func + ENC_VAL_1
+	; Obfuscated: copy `pc` into `ip`, then add +0x1C and +0x14 for total +0x30.
+	; `pc + 0x30` from the first line is the line with `Encryptor_DecryptionWrapperFragment + ENC_VAL_1`.
+	; Subtract `ENC_VAL_1` (0x1600) from that, store it on the stack.
+	; Then set `ip` back to `pc`, which now points at the start of the data structure.
+	; Finally pop the address to `Encryptor_DecryptionWrapperFragment` off the stack onto `pc` to jump.
+	orr    ip, pc, pc
+	ands   ip, ip, ip
+	moveq  ip, #0
+	addne  ip, ip, #0x1C
+	ldr    ip, [ip, #0x14]
+	sub    ip, ip, #ENC_VAL_1
+	stmfd  sp!, {ip}
+	orr    ip, pc, pc
+	ldmfd  sp!, {pc}
+	.word  BSS + 0x1                  ; Storage space
+	.word  BSS + \key + ENC_VAL_1     ; Encryption key
+	.word  \func + ENC_VAL_1          ; Function address
+	.word  BSS + \length + ENC_VAL_1  ; Length
+	.word  0                          ; Storage space
+	.word  Encryptor_DecryptionWrapperFragment + ENC_VAL_1
 	.endm
 
 
 	.public Encryptor_DecodeFunctionTable
 
-	.macro decode_func_table table
-	stmdb sp!, {lr}
-	adr r0, \table
-	bl Encryptor_DecodeFunctionTable
-	ldmia sp!, {pc}
+	.macro decode_following_func_table
+	; This does not take a reference, instead always uses a manual `[pc #4]`
+	orr   r0, pc, #0x0
+	adds  r0, r0, #0x4
+	bne   Encryptor_DecodeFunctionTable
 	.endm
 
 	.macro func_table_entry func, size
-	.word \func + ENC_VAL_1, BSS + \size + ENC_VAL_1
+	.word  \func + ENC_VAL_1,  BSS + \size + ENC_VAL_1
 	.endm
 
 	.macro func_table_end
-	.word 0, 0
+	.word  0, 0
 	.endm
 
 	.macro garbage_ref ref
-	.word \ref + ENC_VAL_1
+	.word  \ref + ENC_VAL_1
 	.endm

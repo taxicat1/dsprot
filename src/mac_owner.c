@@ -1,10 +1,13 @@
 #include "mac_owner.h"
 
+#include "primes.h"
+#include "encoding_constants.h"
+
 // Functions to be encrypted (cannot be called directly)
 u32 MACOwner_IsBad(void);
 u32 MACOwner_IsGood(void);
 
-static const u8 bad_mac_addr[6] = { /* _02260BD4 */
+static const u8 bad_mac_addr[6] = {
 	// 00:09:BF:00:00:31 after bit flipping
 	0xFF, 0xF6, 0x40, 0xFF, 0xFF, 0xCE
 };
@@ -12,42 +15,11 @@ static const u8 bad_mac_addr[6] = { /* _02260BD4 */
 #define MAC_ADDR_SIZE  (6)
 
 
-u32 MACOwner_IsBad(void) { /* ov123_0225FFE8 */
-	int          i;
+u32 MACOwner_IsBad(void) {
+    int          i;
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
-	
-	OS_GetMacAddress(&mac_addr[0]);
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
-			break;
-		}
-	}
-	
-	OS_GetOwnerInfo(&owner_info);
-	if (
-		i == MAC_ADDR_SIZE && 
-		owner_info.birthday.month == 1 && 
-		owner_info.birthday.day   == 1 && 
-		owner_info.nickNameLength == 0
-	) {
-		return 1;
-	}
-	
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (mac_addr[i] != 0x00) {
-			return 0;
-		}
-	}
-	
-	return 1;
-}
-
-
-u32 MACOwner_IsGood(void) { /* ov123_02260098 */
-	int          i;
-	u8           mac_addr[MAC_ADDR_SIZE];
-	OSOwnerInfo  owner_info;
+    u32          ret;
 	
 	OS_GetMacAddress(&mac_addr[0]);
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
@@ -63,14 +35,57 @@ u32 MACOwner_IsGood(void) { /* ov123_02260098 */
 		owner_info.birthday.day   == 1 &&
 		owner_info.nickNameLength == 0
 	) {
-		return 0;
+		ret = PRIME_TRUE;
+        goto EXIT;
 	}
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (mac_addr[i] != 0x00) {
-			return 1;
+			ret = PRIME_FALSE;
+            goto EXIT;
+		}
+	}
+    
+    ret = PRIME_TRUE;
+    
+EXIT:
+	return ret * PRIME_MAC_OWNER_1;
+}
+
+
+u32 MACOwner_IsGood(void) {
+    int          i;
+	u8           mac_addr[MAC_ADDR_SIZE];
+	OSOwnerInfo  owner_info;
+    u32          ret;
+	
+	OS_GetMacAddress(&mac_addr[0]);
+	for (i = 0; i < MAC_ADDR_SIZE; i++) {
+		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
+			break;
 		}
 	}
 	
-	return 0;
+	OS_GetOwnerInfo(&owner_info);
+	if (
+		i == MAC_ADDR_SIZE &&
+		owner_info.birthday.month == 1 &&
+		owner_info.birthday.day   == 1 &&
+		owner_info.nickNameLength == 0
+	) {
+		ret = PRIME_FALSE;
+        goto EXIT;
+	}
+	
+	for (i = 0; i < MAC_ADDR_SIZE; i++) {
+		if (mac_addr[i] != 0x00) {
+			ret = PRIME_TRUE;
+            goto EXIT;
+		}
+	}
+    
+    ret = PRIME_FALSE;
+    
+EXIT:
+	return ret * PRIME_MAC_OWNER_2;
 }

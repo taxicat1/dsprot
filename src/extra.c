@@ -1,13 +1,14 @@
+
 #include "bss.h"
 #include "garbage.h"
 
-u8 BSS[32]; /* _02260C00 */
+u8 BSS[4];
 
-const u32 Garbage[6] = { /* ov123_02260BBC */
-	0xEBAA0113,
-	0xE4064EC7,
-	0xEF013596,
-	0xE5212F83,
-	0xE7EE335B,
-	0xE83B197C
+const u32 Garbage[6] = {
+	0xE8DFFE17,
+	0xE43DF0DE,
+	0x2AE8335C,
+	0x0AC09826,
+	0xE7A838DC,
+	0xE891A6FC
 };

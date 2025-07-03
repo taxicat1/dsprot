@@ -7,7 +7,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes);
 u32 ROMUtil_CRC32(void* buf, u32 size);
 
 
-void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
+void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 	//
@@ -16,21 +16,18 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
-	REGType8v*  vnull;
-	u32         register_base_1;
-	s32         addr_offset;
-	u32         card_ctrl_13;
-	REGType8v*  register_base_2;
 	u8          buffer[8];
 	u8*         bufptr;
-	u16         lock_id;
+	u32         register_base_1;
+	REGType8v*  register_base_2;
+	REGType8v*  vnull;
+	u32         card_ctrl_13;
+	s32         card_ctrl_cmd;
+	s32         addr_offset;
+	u32         addr_mask;
 	u16         ext_mem_register_val_original;
 	u32         output;
-	s32         card_ctrl_cmd;
 	int         i;
-	
-	lock_id = OS_GetLockID();
-	CARD_LockRom(lock_id);
 	
 	// Alias for volatile null pointer
 	vnull = (REGType8v*)NULL;
@@ -50,24 +47,26 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	// Obfuscated, create address 0x027FFE60
 	// This is an address in the .nds header: port 0x040001A4 / setting for normal commands
 	card_ctrl_13 = 5;
+	
+	// Obfuscated 0x1FF to mask address later
+	addr_mask = 0x204 - card_ctrl_13;
+	
+	// Creating address 0x027FFE60 cont.
+	// This read is not a used location, should always read 0
+	card_ctrl_13 += ((REGType8v*)register_base_1)[0x4000] & 1;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
-	
-	// This is not a used location, should always read 0
-	if (((REGType8v*)register_base_1)[0x4000] & 1) {
-		card_ctrl_13 |= 0x40000;
-	}
-	
 	card_ctrl_13 <<= 5;
 	
 	// Read port setting
-	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~0x7000000) | 0xA1000000;
+	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~0x07000000) | 0xA1000000;
 	
 	// Calculate offset to round back to nearest 0x200-byte block.
 	// E.G. if we want to read starting from 0x1208, we actually need to
 	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 	// This would set `addr_offset` to -8.
-	addr_offset = 0 - (addr & 0x1FF);
+	addr_offset = addr & addr_mask;
+	addr_offset = 0 - addr_offset;
 	
 	// Wait for card to not be busy
 	while (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x80000000) { }
@@ -82,7 +81,6 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	}
 	
 	addr += addr_offset;
-	
 	while (addr_offset < num_bytes) {
 		// Read a 0x200-byte data block from ROM
 		
@@ -125,14 +123,10 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 	
 	// Write original value back to to external memory control register
 	((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/sizeof(u16)] = ext_mem_register_val_original;
-		
-	CARD_UnlockRom(lock_id);
-	OS_ReleaseLockID(lock_id);
 }
 
 
-u32 ROMUtil_CRC32(void* buf, u32 size) { /* ov123_022603BC */
-	int  i;
+u32 ROMUtil_CRC32(void* buf, u32 size) {
 	u32  crc;
 	u32  poly;
 	u8*  byteptr;
@@ -142,13 +136,16 @@ u32 ROMUtil_CRC32(void* buf, u32 size) { /* ov123_022603BC */
 	poly = 0xEDB88320;
 	while (size-- != 0) {
 		crc ^= *byteptr++;
-		for (i = 0; i < 8; i++) {
-			if (crc & 1) {
-				crc = (crc >> 1);
-			} else {
-				crc = poly ^ (crc >> 1);
-			}
-		}
+		
+		// Must be unrolled to match
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
+		if (crc & 1) {  crc = (crc >> 1);  } else {  crc = poly ^ (crc >> 1);  }
 	}
 	
 	return ~crc;

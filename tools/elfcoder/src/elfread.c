@@ -149,15 +149,8 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTa
 	int target_opcode_1;
 	int target_opcode_2;
 	
-	if (task->encoding_type == ENC_DECODE && task->key_mode == MODE_UNKEYED) {
-		// Unkeyed decoding needs these encoded opcodes
-		target_opcode_1 = 0x18;
-		target_opcode_2 = 0x11;
-	} else {
-		// Encoding needs these, also keyed decoding, since keyed encoding does not change these
-		target_opcode_1 = 0xE8;
-		target_opcode_2 = 0xE1;
-	}
+	target_opcode_1 = 0xE8;
+	target_opcode_2 = 0xE1;
 	
 	int last_idx = num_ins - 1;
 	while (ins_buffer[last_idx].opcode != target_opcode_1 && ins_buffer[last_idx].opcode != target_opcode_2) {

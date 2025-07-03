@@ -1,31 +1,43 @@
 #include "rc4.h"
 
-#include "encryptor.h"
 #include "encoding_constants.h"
+#include "encryptor.h"
 
 
-void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) { /* ov123_022607C4 */
-	u8   tmp1;
-	u8   tmp2;
-	int  Ki;
-	int  Si;
-	int  i;
-	int  j;
+void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
+	u8    tmp1;
+	u8    tmp2;
+	int   i;
+	int   Si;
+	int   Ki;
+	u32*  s_start;
+	u32*  s_end;
+	u32   x;
+	u32   y;
 	
-	Ki = 0;
-	Si = 0;
+	// Must be like this to match
+	Si = Ki = 0;
+	
+	ctx->x = 0xAA;
 	ctx->i = 0;
 	ctx->j = 0;
 	
-	for (j = 0; j < 256; j++) {
-		ctx->S[j] = j;
-	}
+	// Optimized way to init the RC4 state 4 bytes at a time
+	s_start = (u32*)&ctx->S[0];
+	s_end = (u32*)&ctx->S[256];
+	x = 0x03020100;
+	y = 0x04040404;
+	do {
+		*s_start++ = x;
+		x += y;
+	} while(s_start < s_end);
 	
 	// Modification to RC4: i = 255 -> 0, instead of 0 -> 255
 	for (i = 255; i >= 0; i--) {
 		tmp1 = ctx->S[i];
 		Si = (Si + ((u8*)key)[Ki] + tmp1) & 0xFF;
 		tmp2 = ctx->S[Si];
+		
 		ctx->S[Si] = tmp1;
 		ctx->S[i] = tmp2;
 		
@@ -37,26 +49,28 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) { /* ov123_022607C4 */
 }
 
 
-u8 RC4_Byte(RC4_Ctx* ctx) { /* ov123_02260838 */
+u8 RC4_Byte(RC4_Ctx* ctx) {
 	u8   i;
 	u8*  S;
 	u8   jval;
 	u8   ival;
-	u8   j;
+	u32  j;
 	u8   out_idx;
 	
-	i = ctx->i + 1;
+	// Modification to RC4: i and j both increased by new variable x
+	i = ctx->i + 1 + ctx->x;
+	j = ctx->x;
 	
 	S = ctx->S;
 	
 	ival = S[i];
-	j = ival + ctx->j;
-	jval = S[j];
+	j += ival + ctx->j;
+	jval = S[j & 0xFF];
 	
 	ctx->i = i;
-	ctx->j = j;
+	ctx->j = j & 0xFF;
 	
-	S[j] = ival;
+	S[j & 0xFF] = ival;
 	S[i] = jval;
 	
 	out_idx = ival + jval;
@@ -64,23 +78,36 @@ u8 RC4_Byte(RC4_Ctx* ctx) { /* ov123_02260838 */
 }
 
 
-u32 RC4_InitSBox(u8* sbox) { /* ov123_02260884 */
-	int  i;
-	int  x;
-	for (i = 0; i < 256; i++) {
-		x = i & 0xFF;
-		sbox[i] = x ^ 1;
-	}
+u32 RC4_InitSBox(u8* sbox) {
+	// S[i] = i ^ 0xFF (optimized to write 4 bytes at a time)
+	u32   x;
+	u32   y;
+	u32*  sbox_start;
+	u32*  sbox_end;
+	
+	x = 0x03020100;
+	y = 0x04040404;
+	sbox_start = (u32*)&sbox[0];
+	sbox_end = (u32*)&sbox[256];
+	do {
+		*sbox_start++ = x ^ 0xFFFFFFFF;
+		x += y;
+	} while(sbox_start < sbox_end);
 	
 	return 0;
 }
 
 
-u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* ov123_022608A8 */
+u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
 	u8*  src_bytes;
 	u8*  dst_bytes;
 	u32  idx;
+	u32  ins_word;
+	u32  upper;
+	u32  lower;
+	u8   ins_byte;
+	u8   rand_byte;
 	
 	if (size & 3) {
 		return -1;
@@ -92,25 +119,47 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* o
 	RC4_InitSBox(&sbox[0]);
 	
 	for (idx = 0; idx < size; idx += 4) {
-		switch (Encryptor_CategorizeInstruction(*(u32*)(src_bytes + idx))) {
+		ins_word = *(u32*)(src_bytes + idx);
+		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case 1:
 			case 2:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
-				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
-				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
+				
+				lower = ((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF;
+				upper = (*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24);
+				
+				ctx->x += (upper >> 24);
+				
+				*(u32*)(dst + idx) = upper | lower;
 				break;
 			
 			case 3:
-				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
-				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
-				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_1) & 0x00FFFFFF);
-				break;
-			
+				// Likely a typo: Modified source data
+				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
+				// Fall through
 			default:
-				dst_bytes[idx]   = src_bytes[idx]   ^ RC4_Byte(ctx);
-				dst_bytes[idx+1] = src_bytes[idx+1] ^ RC4_Byte(ctx);
+				// First byte
+				rand_byte = RC4_Byte(ctx);
+				ins_byte = src_bytes[idx];
+				ins_byte ^= rand_byte;
+				ctx->x = ins_byte;
+				dst_bytes[idx] = ins_byte;
+				
+				// Second byte
+				rand_byte = RC4_Byte(ctx);
+				ins_byte = src_bytes[idx+1];
+				ins_byte ^= rand_byte;
+				ctx->x = ins_byte;
+				dst_bytes[idx+1] = ins_byte;
+				
+				// Third byte
 				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				
+				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
+				
+				// Update x
+				ctx->x = (ctx->x * dst_bytes[idx+2]) - dst_bytes[idx+3];
 				break;
 		}
 	}
@@ -119,11 +168,21 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* o
 }
 
 
-u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* ov123_022609B0 */
+// For some reason this inline is required to match
+static inline u8 getInsByte(u8 *ins_byte_ptr, u32 offset, u32 byte);
+static inline u8 getInsByte(u8 *ins_byte_ptr, u32 offset, u32 byte) {
+	return ins_byte_ptr[offset + byte];
+}
+
+
+u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
 	u8*  src_bytes;
 	u8*  dst_bytes;
 	u32  idx;
+	u32  ins_word;
+	u8   ins_byte;
+	u8   rand_byte;
 	
 	if (size & 3) {
 		return -1;
@@ -135,24 +194,62 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* o
 	RC4_InitSBox(&sbox[0]);
 	
 	for (idx = 0; idx < size; idx += 4) {
-		switch (Encryptor_CategorizeInstruction(*(u32*)(src_bytes + idx))) {
+		ins_word = *(u32*)(src_bytes + idx);
+		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case 1:
-			case 2:
-				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
-				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
-				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) - ENC_VAL_1) & 0x00FFFFFF);
+			case 3:
+				ctx->x += (ins_word >> 24);
+				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
+				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+				
 				break;
 			
-			case 3:
-				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
-				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
-				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+			case 2:
+				// First byte
+				ins_byte = src_bytes[idx];
+				rand_byte = RC4_Byte(ctx);
+				ctx->x = ins_byte;
+				dst_bytes[idx] = ins_byte ^ rand_byte;
+				
+				// Second byte
+				ins_byte = getInsByte(src_bytes, idx, 1);
+				rand_byte = RC4_Byte(ctx);
+				ctx->x = ins_byte;
+				dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				
+				// Update x
+				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
+				
+				// Third byte
+				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				
+				// Fourth byte
+				dst_bytes[idx+3] = src_bytes[idx+3];
+				
+				// Likely a typo: Modified source data
+				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				break;
 			
 			default:
-				dst_bytes[idx]   = src_bytes[idx]   ^ RC4_Byte(ctx);
-				dst_bytes[idx+1] = src_bytes[idx+1] ^ RC4_Byte(ctx);
+				// First byte
+				ins_byte = src_bytes[idx];
+				rand_byte = RC4_Byte(ctx);
+				ctx->x = ins_byte;
+				dst_bytes[idx] = ins_byte ^ rand_byte;
+				
+				// Second byte
+				ins_byte = getInsByte(src_bytes, idx, 1);
+				rand_byte = RC4_Byte(ctx);
+				ctx->x = ins_byte;
+				dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				
+				// Update x
+				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
+				
+				// Third byte
 				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				
+				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
 				break;
 		}
@@ -162,7 +259,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) { /* o
 }
 
 
-u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) { /* ov123_02260ABC */
+u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
 	RC4_Ctx ctx;
 	RC4_Init(&ctx, key, 16);
 	// Must coerce output to -1 or 0 like this to match
@@ -170,7 +267,7 @@ u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) { 
 }
 
 
-u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size) { /* ov123_02260B14 */
+u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size) {
 	RC4_Ctx ctx;
 	RC4_Init(&ctx, key, 16);
 	// Must coerce output to -1 or 0 like this to match
