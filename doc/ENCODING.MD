@@ -229,11 +229,11 @@ This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is
 For example, if the library is conducting a ROM read test, it will perform 6 calls to the decryption wrapper function `RunEncrypted_ROMUtil_Read()`, which will change the key 6 times in total. If the original seed key is `0x0982`, and the address and size of the inner `ROMUtil_Read()` is `0x02260238` + `0x17C`, then the subsequent seed keys and expanded keys will be:
 
 ```
-09A4    D8 08 00 00 7C A5 09 00 7C 01 A4 90 75 01 00 4A 
-09C6    BA 08 00 00 7C C7 09 00 7C 01 C6 90 75 01 00 6C
-09E8    94 08 00 00 7C E9 09 00 7C 01 E8 90 75 01 00 8E
-0A0A    76 0B 00 00 7C 0B 0A 00 7C 01 0A A0 76 01 00 A0
-0A4E    32 0B 00 00 7C 4F 0A 00 7C 01 4E A0 76 01 00 E4
-0A70    0C 0B 00 00 7C 71 0A 00 7C 01 70 A0 76 01 00 07
+09A4    D8 08 00 00 7C A5 09 00 7C 01 A4 09 75 01 00 A4
+09C6    BA 08 00 00 7C C7 09 00 7C 01 C6 09 75 01 00 C6
+09E8    94 08 00 00 7C E9 09 00 7C 01 E8 09 75 01 00 E8
+0A0A    76 0B 00 00 7C 0B 0A 00 7C 01 0A 0A 76 01 00 0A
+0A2C    50 0B 00 00 7C 2D 0A 00 7C 01 2C 0A 76 01 00 2C
+0A4E    32 0B 00 00 7C 4F 0A 00 7C 01 4E 0A 76 01 00 4E
 ...                           ...
 ```
