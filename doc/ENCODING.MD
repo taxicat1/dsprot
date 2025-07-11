@@ -267,13 +267,13 @@ The expanded key buffer is then treated as a little-endian array of 16 bytes, wh
 For example, a seed key of `0x946F` and a size of `0x8C` would create the key:
 
 ```
-E3 94 00 00 8C 6F 94 00 8C 00 6F 49 18 00 00 F6
+E3 94 00 00 8C 6F 94 00 8C 00 6F 94 18 00 00 6F
 ```
 
 This key would then produce the RC4 keystream (ignoring outside updates to `x`):
 
 ```
-D0 33 25 1C B1 B8 72 F1 DC B0 71 9C D5 9E F3 96 D8 79 CC 79 F4 53 C3 2B 66 31 1E A0 24 47 49 5B ...
+B6 03 59 09 01 73 29 BD 19 4A 69 BF FC 00 E4 FC 89 1B 61 88 70 E1 66 5E 0E 15 FB ED 36 77 22 AB ...
 ```
 
 ### Key changing
@@ -293,11 +293,11 @@ This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is
 For example, if the library is conducting a ROM read test, it will perform 6 calls to the decryption wrapper function `RunEncrypted_ROMUtil_Read()`, which will change the key 6 times in total. If the original seed key is `0xC20D`, and the address and size of the inner `ROMUtil_Read()` is `0x02300000` + `0x14C`, then the subsequent seed keys and expanded keys will be:
 
 ```
-C230    7C C3 00 00 4C 31 C2 00 4C 01 30 2C 8E 01 00 03
-C253    1F C3 00 00 4C 52 C2 00 4C 01 53 2C 8E 01 00 35
-C276    3A C3 00 00 4C 77 C2 00 4C 01 76 2C 8E 01 00 67
-C299    D5 C3 00 00 4C 98 C2 00 4C 01 99 2C 8E 01 00 99
-C2BC    F0 C3 00 00 4C BD C2 00 4C 01 BC 2C 8E 01 00 CB
-C2DF    93 C3 00 00 4C DE C2 00 4C 01 DF 2C 8E 01 00 FD
+C230    7C C3 00 00 4C 31 C2 00 4C 01 30 C2 8E 01 00 30
+C253    1F C3 00 00 4C 52 C2 00 4C 01 53 C2 8E 01 00 53
+C276    3A C3 00 00 4C 77 C2 00 4C 01 76 C2 8E 01 00 76
+C299    D5 C3 00 00 4C 98 C2 00 4C 01 99 C2 8E 01 00 99
+C2BC    F0 C3 00 00 4C BD C2 00 4C 01 BC C2 8E 01 00 BC
+C2DF    93 C3 00 00 4C DE C2 00 4C 01 DF C2 8E 01 00 DF
 ...                           ...
 ```
