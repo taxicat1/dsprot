@@ -6,8 +6,6 @@
 
 void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes);
 
-#define ENCODING_START_XORVAL  (0xF0618C46)
-
 
 asm void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes) {
 	// This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange.
@@ -72,7 +70,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		
 		end_addr = addr + (size & ~3);
 		
-		xorval = ENCODING_START_XORVAL;
+		xorval = ENC_XOR_START;
 		
 		for (; addr < end_addr; addr += 4) {
 			switch (Encryptor_CategorizeInstruction(*(u32*)addr)) {

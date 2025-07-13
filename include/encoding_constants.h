@@ -6,4 +6,6 @@
 
 #define ENC_OPCODE_1  (0x01)
 
+#define ENC_XOR_START  (0xF0618C46)
+
 #endif
