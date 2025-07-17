@@ -7,9 +7,9 @@ DS Protect has two methods of antipiracy detection:
 	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of [Ensata](https://emulation.gametechwiki.com/index.php/Ensata))
 
 2. ROM read check. It will conduct six reads of the cartridge ROM at these locations:
-	- `0x1000 - 0x11FF`
-	- `0x1200 - 0x13FF`
-	- `0x1400 - 0x15FF`
+	- `0x0000 - 0x01FF`
+	- `0x0200 - 0x03FF`
+	- `0x0400 - 0x05FF`
 	- `0x8000 - 0x81FF`
 	- `0x8200 - 0x83FF`
 	- `0x8400 - 0x85FF`
@@ -38,10 +38,6 @@ Each of these functions takes as argument an optional callback function, which w
 The code has multiple layers of obfuscation present. Many of the core functions are written in convoluted ways intended to deter reverse engineering, and/or have ranges of their instructions encrypted. At the start of the range, it will call a decryption routine to decrypt the instructions ahead. At the end of the range, it will call an encryption routine to re-encrypt them.
 
 For technical details on the encryption, see [ENCODING.MD](./ENCODING.MD).
-
-## Integrity
-
-Before running any of the core check functions, it also conducts an integrity check. It checks the first 16 bytes (4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected. There is no integrity check on the dummy detection functions.
 
 ## Note on language
 

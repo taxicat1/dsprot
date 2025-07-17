@@ -16,19 +16,18 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	u32         register_base_1;
 	REGType8v*  card_cmd;
 	s32         addr_offset;
-	u32         card_ctrl_13;
 	u8          buffer[8];
 	u16         lock_id;
 	u16         ext_mem_register_val_original;
 	u32         output;
 	u32         reg_mi_exmemcnt;
-	s32         card_ctrl_cmd;
 	int         i;
+	s32         card_ctrl_cmd;
 	
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	ENCRYPTION_START(0x2F0C);
+	ENCRYPTION_START(0x4979);
 	
 	// Alias for register base (0x04000000)
 	register_base_1 = 1;
@@ -44,21 +43,8 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	ext_mem_register_val_original = *(REGType16v*)reg_mi_exmemcnt;
 	*(REGType16v*)reg_mi_exmemcnt &= ~REG_MI_EXMEMCNT_MP_MASK;
 	
-	// Obfuscated, create address 0x027FFE60
 	// This is an address in the .nds header: port 0x040001A4 / setting for normal commands
-	card_ctrl_13 = 5;
-	card_ctrl_13 <<= 18;
-	card_ctrl_13 -= 13;
-	
-	// This is not a used location, should always read 0
-	if (((REGType8v*)register_base_1)[0x4000] & 1) {
-		card_ctrl_13 |= 0x40000;
-	}
-	
-	card_ctrl_13 <<= 5;
-	
-	// Read port setting
-	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~0x7000000) | 0xA1000000;
+	card_ctrl_cmd = (*(vs32*)0x027FFE60 & ~0x7000000) | 0xA1000000;
 	
 	// Calculate offset to round back to nearest 0x200-byte block.
 	// E.G. if we want to read starting from 0x1208, we actually need to
@@ -121,7 +107,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Write original value back to to external memory control register
 	((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/sizeof(u16)] = ext_mem_register_val_original;
 	
-	ENCRYPTION_END(0x2F0C);
+	ENCRYPTION_END(0x4979);
 	
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
@@ -133,7 +119,7 @@ u32 ROMUtil_CRC32(void* buf, u32 size) {
 	u32  crc;
 	u8*  byteptr;
 	
-	ENCRYPTION_START(0x480C);
+	ENCRYPTION_START(0x1476);
 	
 	byteptr = (u8*)buf;
 	crc = 0xFFFFFFFF;
@@ -155,7 +141,7 @@ u32 ROMUtil_CRC32(void* buf, u32 size) {
 	}
 	crc = ~crc;
 	
-	ENCRYPTION_END(0x480C);
+	ENCRYPTION_END(0x1476);
 	
 	return crc;
 }

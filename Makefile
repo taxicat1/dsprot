@@ -46,12 +46,11 @@ LIBRARY_NAME := dsprot.a
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
 	$(BUILD_DIR)/encryptor.o              \
+	$(BUILD_DIR)/rc4.o                    \
 	$(BUILD_DIR)/mac_owner_encrypted.o    \
 	$(BUILD_DIR)/rom_util_encrypted.o     \
 	$(BUILD_DIR)/rom_test_encrypted.o     \
-	$(BUILD_DIR)/dsprot_main_encrypted.o  \
-	$(BUILD_DIR)/integrity_encrypted.o    \
-	$(BUILD_DIR)/rc4.o
+	$(BUILD_DIR)/dsprot_main_encrypted.o
 
 
 .PHONY: all clean tools dsprot
@@ -77,6 +76,12 @@ dsprot:
 # Library output
 $(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
 	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
+
+
+# RC4 module
+$(BUILD_DIR)/rc4.o: $(SRC_DIR)/rc4.c
+	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rc4.c -o $(BUILD_DIR)/rc4.o
+	$(FIXDEP) $(BUILD_DIR)/rc4.d
 
 
 # Encryptor module
@@ -119,22 +124,6 @@ $(BUILD_DIR)/dsprot_main_encrypted.o: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 $(BUILD_DIR)/dsprot_main.o: $(SRC_DIR)/dsprot_main.c
 	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/dsprot_main.c -o $(BUILD_DIR)/dsprot_main.o
 	$(FIXDEP) $(BUILD_DIR)/dsprot_main.d
-
-
-# Integrity module
-$(BUILD_DIR)/integrity_encrypted.o: $(BUILD_DIR)/integrity.o $(ELFCODER)
-	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) $(ELFCODER_PARAM) -i $(BUILD_DIR)/integrity_encrypted.o
-
-$(BUILD_DIR)/integrity.o: $(SRC_DIR)/integrity.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/integrity.c -o $(BUILD_DIR)/integrity.o
-	$(FIXDEP) $(BUILD_DIR)/integrity.d
-
-
-# RC4 module
-$(BUILD_DIR)/rc4.o: $(SRC_DIR)/rc4.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rc4.c -o $(BUILD_DIR)/rc4.o
-	$(FIXDEP) $(BUILD_DIR)/rc4.d
 
 
 -include $(DEPS)

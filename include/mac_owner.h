@@ -24,6 +24,5 @@ extern void OS_GetMacAddress(u8* mac_addr);
 extern void OS_GetOwnerInfo(OSOwnerInfo* info);
 
 u32 MACOwner_IsBad(void);
-u32 MACOwner_IsGood(void);
 
 #endif

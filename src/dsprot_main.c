@@ -3,7 +3,6 @@
 #include "types.h"
 
 #include "encryptor.h"
-#include "integrity.h"
 #include "rom_test.h"
 #include "mac_owner.h"
 
@@ -28,36 +27,38 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	s32   compare_sum;
+	u32   result;
 	
-	ENCRYPTION_START(0x53EF);
+	result = 0;
 	
 	func_queue[0] = (u32)&ROMTest_IsBad + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&Integrity_ROMTest_IsBad + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[1] = 0;
 	
-	compare_sum = 0;
 	func_result_sum = 0;
-	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_queue[i] -= DSP_OBFS_OFFSET;
 		
+		func_result = ((U32Func)(func_queue[i]))() != 0;
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
-		
-		compare_sum += 1;
-		compare_sum <<= 1;
 	}
 	
-	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
+	ENCRYPTION_START(0x4EF9);
 	
-	if (callback != NULL && compare_sum != 0) {
+	func_result_sum >>= 1;
+	if (func_result_sum) {
+		result = 1;
+	} else if (func_result_sum == 0) {
+		result = 0;
+	}
+	
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x53EF);
+	ENCRYPTION_END(0x4EF9);
 	
-	return compare_sum;
+	return result;
 }
 
 
@@ -66,36 +67,38 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	s32   compare_sum;
+	u32   result;
 	
-	ENCRYPTION_START(0x1D7A);
+	result = 0;
 	
-	func_queue[0] = (u32)&ROMTest_IsGood + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&Integrity_ROMTest_IsGood + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[0] = (u32)&ROMTest_IsBad + DSP_OBFS_OFFSET;
+	func_queue[1] = 0;
 	
-	compare_sum = 0;
 	func_result_sum = 0;
-	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_queue[i] -= DSP_OBFS_OFFSET;
 		
+		func_result = ((U32Func)(func_queue[i]))() != 0;
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
-		
-		compare_sum += 1;
-		compare_sum <<= 1;
 	}
 	
-	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
+	ENCRYPTION_START(0x292E);
 	
-	if (callback != NULL && compare_sum != 0) {
+	func_result_sum >>= 1;
+	if (func_result_sum) {
+		result = 0;
+	} else if (func_result_sum == 0) {
+		result = 1;
+	}
+	
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x1D7A);
+	ENCRYPTION_END(0x292E);
 	
-	return compare_sum;
+	return result;
 }
 
 
@@ -104,36 +107,38 @@ u32 DSProt_DetectEmulator(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	s32   compare_sum;
+	u32   result;
 	
-	ENCRYPTION_START(0x58A8);
+	result = 0;
 	
 	func_queue[0] = (u32)&MACOwner_IsBad + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&Integrity_MACOwner_IsBad + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[1] = 0;
 	
-	compare_sum = 0;
 	func_result_sum = 0;
-	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_queue[i] -= DSP_OBFS_OFFSET;
 		
+		func_result = ((U32Func)(func_queue[i]))() != 0;
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
-		
-		compare_sum += 1;
-		compare_sum <<= 1;
 	}
 	
-	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
+	ENCRYPTION_START(0x1186);
 	
-	if (callback != NULL && compare_sum != 0) {
+	func_result_sum >>= 1;
+	if (func_result_sum) {
+		result = 1;
+	} else if (func_result_sum == 0) {
+		result = 0;
+	}
+	
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x58A8);
+	ENCRYPTION_END(0x1186);
 	
-	return compare_sum;
+	return result;
 }
 
 
@@ -142,36 +147,38 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	s32   compare_sum;
+	u32   result;
 	
-	ENCRYPTION_START(0x129E);
+	result = 0;
 	
-	func_queue[0] = (u32)&MACOwner_IsGood + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&Integrity_MACOwner_IsGood + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[0] = (u32)&MACOwner_IsBad + DSP_OBFS_OFFSET;
+	func_queue[1] = 0;
 	
-	compare_sum = 0;
 	func_result_sum = 0;
-	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_queue[i] -= DSP_OBFS_OFFSET;
 		
+		func_result = ((U32Func)(func_queue[i]))() != 0;
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
-		
-		compare_sum += 1;
-		compare_sum <<= 1;
 	}
 	
-	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
+	ENCRYPTION_START(0x1CC4);
 	
-	if (callback != NULL && compare_sum != 0) {
+	func_result_sum >>= 1;
+	if (func_result_sum) {
+		result = 0;
+	} else if (func_result_sum == 0) {
+		result = 1;
+	}
+	
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x129E);
+	ENCRYPTION_END(0x1CC4);
 	
-	return compare_sum;
+	return result;
 }
 
 
@@ -180,35 +187,38 @@ u32 DSProt_DetectDummy(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	s32   compare_sum;
+	u32   result;
 	
-	ENCRYPTION_START(0x496B);
+	result = 0;
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
 	func_queue[0] = 0;
 	
-	compare_sum = 0;
 	func_result_sum = 0;
-	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_queue[i] -= DSP_OBFS_OFFSET;
 		
+		func_result = ((U32Func)(func_queue[i]))() != 0;
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
-		
-		compare_sum += 1;
-		compare_sum <<= 1;
 	}
 	
-	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
+	ENCRYPTION_START(0x72A8);
 	
-	if (callback != NULL && compare_sum != 0) {
+	func_result_sum >>= 1;
+	if (func_result_sum) {
+		result = 1;
+	} else if (func_result_sum == 0) {
+		result = 0;
+	}
+	
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x496B);
+	ENCRYPTION_END(0x72A8);
 	
-	return compare_sum;
+	return result;
 }
 
 
@@ -217,33 +227,36 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	s32   compare_sum;
+	u32   result;
 	
-	ENCRYPTION_START(0x4165);
+	result = 0;
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
 	func_queue[0] = 0;
 	
-	compare_sum = 0;
 	func_result_sum = 0;
-	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_queue[i] -= DSP_OBFS_OFFSET;
 		
+		func_result = ((U32Func)(func_queue[i]))() != 0;
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
-		
-		compare_sum += 1;
-		compare_sum <<= 1;
 	}
 	
-	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
+	ENCRYPTION_START(0x7CD4);
 	
-	if (callback != NULL && compare_sum != 0) {
+	func_result_sum >>= 1;
+	if (func_result_sum) {
+		result = 0;
+	} else if (func_result_sum == 0) {
+		result = 1;
+	}
+	
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x4165);
+	ENCRYPTION_END(0x7CD4);
 	
-	return compare_sum;
+	return result;
 }
