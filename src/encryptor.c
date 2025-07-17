@@ -3,7 +3,7 @@
 #include "rc4.h"
 
 
-void Encryptor_StartRange(u32 addr) {
+void Encryptor_StartRange(u32* addr) {
     u8   key[16];
     int  i;
     u32  key_ins;
@@ -11,7 +11,7 @@ void Encryptor_StartRange(u32 addr) {
     u32  end;
     u32  size;
     
-    key_ins = ((u32*)addr)[-1];
+    key_ins = addr[-1];
     
     keyptr = &key[0];
     for (i = 0; i < 16; i++) {
@@ -22,24 +22,24 @@ void Encryptor_StartRange(u32 addr) {
         keyptr++;
     }
     
-    end = *(u32*)addr;
+    end = addr[0];
     size = 0;
     while (key_ins != end) {
         size++;
-        end = ((u32*)addr)[size];
+        end = addr[size];
     }
     size *= 4;
     
     if (size) {
-        RC4_InitAndDecryptInstructions(&key[0], (void*)addr, (void*)addr, size);
+        RC4_InitAndDecryptInstructions(&key[0], addr, addr, size);
     }
     
-    DC_FlushRange((void*)addr, size);
-    IC_InvalidateRange((void*)addr, size);
+    DC_FlushRange(addr, size);
+    IC_InvalidateRange(addr, size);
 }
 
 
-void Encryptor_EndRange(u32 addr) {
+void Encryptor_EndRange(u32* addr) {
     u8   key[16];
     int  i;
     u32  key_ins;
@@ -47,7 +47,7 @@ void Encryptor_EndRange(u32 addr) {
     u32  end;
     u32  size;
     
-    key_ins = ((u32*)addr)[1];
+    key_ins = addr[1];
     
     keyptr = &key[0];
     for (i = 0; i < 16; i++) {
@@ -58,24 +58,24 @@ void Encryptor_EndRange(u32 addr) {
         keyptr++;
     }
     
-    end = *(u32*)addr;
+    end = addr[0];
     while (end != key_ins) {
-        end = *(u32*)(addr -= 4);
+        end = *--addr;
     }
-    end = ((u32*)addr)[1];
+    end = addr[1];
     
     size = 0;
     while (key_ins != end) {
         size++;
-        end = ((u32*)addr + size)[1];
+        end = addr[size + 1];
     }
     size *= 4;
-    addr += 4;
+    addr++;
     
     if (size) {
-        RC4_InitAndEncryptInstructions(&key[0], (void*)addr, (void*)addr, size);
+        RC4_InitAndEncryptInstructions(&key[0], addr, addr, size);
     }
     
-    DC_FlushRange((void*)addr, size);
-    IC_InvalidateRange((void*)addr, size);
+    DC_FlushRange(addr, size);
+    IC_InvalidateRange(addr, size);
 }

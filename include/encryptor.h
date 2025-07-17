@@ -8,8 +8,8 @@
 extern void DC_FlushRange(const void* start_addr, u32 num_bytes);
 extern void IC_InvalidateRange(void* start_addr, u32 num_bytes);
 
-void Encryptor_StartRange(u32 addr);
-void Encryptor_EndRange(u32 addr);
+void Encryptor_StartRange(u32* addr);
+void Encryptor_EndRange(u32* addr);
 
 // Encryption range macros
 #define ENCRYPTION_START(enc_key) \
