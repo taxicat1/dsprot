@@ -7,8 +7,8 @@
 
 
 u32 ROMTest_IsBad(void) {
-	// Extra CRC entry is required to match
-	u32  crcs[7];
+	// Extra CRC entries are required to match
+	u32  crcs[8];
 	u8   rom_buf[ROM_BLOCK_SIZE];
 	u32  rom_addr;
 	int  i;
@@ -28,7 +28,7 @@ u32 ROMTest_IsBad(void) {
 		}
 	}
 	
-	ENCRYPTION_START(0x03F9);
+	ENCRYPTION_START(0x31F6);
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
@@ -49,15 +49,15 @@ EXIT:
 		rom_buf[i] = 0;
 	}
 	
-	ENCRYPTION_END(0x03F9);
+	ENCRYPTION_END(0x31F6);
 	
 	return ret;
 }
 
 
 u32 ROMTest_IsGood(void) {
-	// Extra CRC entry is required to match
-	u32  crcs[7];
+	// Extra CRC entries are required to match
+	u32  crcs[8];
 	u8   rom_buf[ROM_BLOCK_SIZE];
 	u32  rom_addr;
 	int  i;
@@ -77,7 +77,7 @@ u32 ROMTest_IsGood(void) {
 		}
 	}
 	
-	ENCRYPTION_START(0x735A);
+	ENCRYPTION_START(0x38CA);
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
@@ -98,7 +98,7 @@ EXIT:
 		rom_buf[i] = 0;
 	}
 	
-	ENCRYPTION_END(0x735A);
+	ENCRYPTION_END(0x38CA);
 	
 	return ret;
 }

@@ -7,8 +7,8 @@ The ranges declarations take the form:
 ```asm
     ; ENCRYPTION_START(enc_key)
     push   {r0-r9}
-    mov    r0, #6
-    add    r0, pc, r0, lsl #1
+    mov    r0, #3
+    add    r0, pc, r0, lsl #2
     bl     Encryptor_StartRange
     pop    {r0-r9}
     b      +8

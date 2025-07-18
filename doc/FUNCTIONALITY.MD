@@ -41,7 +41,7 @@ For technical details on the encryption, see [ENCODING.MD](./ENCODING.MD).
 
 ## Integrity
 
-Before running any of the core check functions, it also conducts an integrity check. It checks the first 16 bytes (4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected. There is no integrity check on the dummy detection functions.
+Before running any of the core check functions, it also conducts an integrity check. It checks the first 12-16 bytes (3-4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected. There is no integrity check on the dummy detection functions.
 
 ## Note on language
 

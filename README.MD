@@ -1,8 +1,8 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.10 (unconfirmed), as it appears in Japanese versions of Pokémon HeartGold and SoulSilver as overlay 122. 
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version 1.08 (unconfirmed), as it appears in Rockman.EXE - Operate Shooting Star as overlay 583. 
 
-This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: HeartGold and SoulSilver will leak memory until the game eventually crashes.
+This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: Rockman.EXE - Operate Shooting Star will prevent the player from editing the Folder or playing minigames, and random battles will trigger on every step the player takes ([source](https://tcrf.net/Rockman.EXE:_Operate_Shooting_Star#Anti-Piracy)).
 
 The existence, mechanics, and effects of DS Protect have been documented as early as 2009 ([link](https://gbatemp.net/threads/seeking-help-for-anti-piracy-protection-removal.134683/post-1768816), [link](https://sourceforge.net/p/desmume/bugs/979/), [link](https://opentrackers.org/scenerules.org/html/2010_NDSr.html)).
 
