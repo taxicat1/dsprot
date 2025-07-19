@@ -4,7 +4,7 @@ DS Protect has two methods of antipiracy detection:
 
 1. System info check. It will check the DS's MAC address and the system owner information for either of these situations:
 	- A MAC address of `00:00:00:00:00:00` (indicating an emulator that is not emulating a MAC address at all)
-	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of [Ensata](https://emulation.gametechwiki.com/index.php/Ensata))
+	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of No$GBA)
 
 2. ROM read check. It will conduct six reads of the cartridge ROM at these locations:
 	- `0x0000 - 0x01FF`
