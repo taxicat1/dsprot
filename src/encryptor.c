@@ -7,24 +7,35 @@
 void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes);
 
 
-asm void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes) {
-	// This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange.
-	// Both of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
-	
-	add  r1, r1, r0
-	mov  ip, #0
-	bic  r0, r0, #31
-	
-@1:
-	mcr  p15, 0, r0, c7, c5, 1
-	mcr  p15, 0, ip, c7, c10, 4
-	mcr  p15, 0, r0, c7, c14, 1
-	
-	add  r0, r0, #32
-	cmp  r0, r1
-	blt  @1
-	
-	bx   lr
+static inline void clearDataAndInstructionCache(void) {
+	// This function is an inlining and combination of DC_FlushAll, IC_InvalidateAll, and DC_WaitWriteBufferEmpty.
+	// All of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
+	asm {
+        /* DC_FlushAll */
+    	mov  ip, #0
+    	mov  r1, #0
+    @1:
+        mov  r0, #0
+    @2:
+        orr r2, r1, r0
+    	mcr  p15, 0, ip, c7, c10, 4
+    	mcr  p15, 0, r2, c7, c14, 2
+    	
+    	add  r0, r0, #32
+    	cmp  r0, 0x400
+    	blt  @2
+        
+        add  r1, r1, 0x40000000
+        cmp  r1, #0
+        bne  @1
+        
+        /* IC_InvalidateAll */
+        mov  r0, #0
+        mcr  p15, 0, r0, c7, c5, 0
+        
+        /* DC_WaitWriteBufferEmpty */
+        mcr  p15, 0, ip, c7, c10, 4
+    }
 }
 
 
@@ -50,14 +61,13 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) {
 
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
-	u32   size;
+	u32   addr;
 	u32   end_addr;
 	u32   xorval;
-	u32   bss_addr;
-	u32   addr;
+	u32   size;
 	u32*  prevmem;
-	
-	bss_addr = (u32)&BSS;
+	u32   upper;
+	u32   lower;
 	
 	// This overwrites the instructions in the callee, erasing them
 	prevmem = (u32*)functions - 3;
@@ -66,9 +76,9 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	
 	do {
 		addr = (u32)(functions->start_addr - ENC_VAL_1);
-		size = functions->size - bss_addr - ENC_VAL_1;
+		size = functions->size - (u32)&BSS - ENC_VAL_1;
 		
-		end_addr = addr + (size & ~3);
+		end_addr = addr + ((size >> 2) << 2);
 		
 		xorval = ENC_XOR_START;
 		
@@ -76,8 +86,9 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 			switch (Encryptor_CategorizeInstruction(*(u32*)addr)) {
 				case 1:
 				case 3:
-					*(u32*)addr = ((*(u32*)addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
-					              (((*(u32*)addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+					upper = ((*(u32*)addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF;
+					lower = ((*(u32*)addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
+					*(u32*)addr = lower | upper;
 					
 					xorval ^= *(u32*)addr >> 24;
 					xorval &= 0x00FFFFFF;
@@ -94,9 +105,9 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 			}
 		}
 		
-		clearDataAndInstructionCache(functions->start_addr - ENC_VAL_1, size);
-		functions->size = 0;
-		functions->start_addr = NULL;
+		clearDataAndInstructionCache();
+		// Must be like this to match
+		functions->start_addr = (void*)(functions->size = 0);
 		functions++;
 		
 	} while (functions->start_addr != 0);
@@ -105,18 +116,15 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 
 void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
-	u32    literal_obfs_offset;
 	u32    key;
 	u32    size;
 	void*  func_addr;
 	
-	literal_obfs_offset = (u32)&BSS + ENC_VAL_1;
-	
 	key = obfs_key;
-	key -= literal_obfs_offset;
+	key -= (u32)&BSS + ENC_VAL_1;
 	
 	size = obfs_size;
-	size -= literal_obfs_offset;
+	size -= (u32)&BSS + ENC_VAL_1;
 	
 	expanded_key[0] = key ^ size;
 	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
@@ -127,40 +135,36 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 	func_addr -= ENC_VAL_1;
 	
 	RC4_InitAndDecryptInstructions(&expanded_key[0], func_addr, func_addr, size);
-	clearDataAndInstructionCache(func_addr, size);
+	clearDataAndInstructionCache();
 	
 	return func_addr;
 }
 
 
-// This function sucks. https://decomp.me/scratch/I41ac
+// This function sucks. https://decomp.me/scratch/D8nhP
 // 
 // This *should* be identical to `Encryptor_DecryptFunction` with the extra step
 // of modifying the key, and calling the encryption function instead of decryption.
 // But for some reason, all the instructions are in a totally different order.
-// You can match the instruction order with some weird dummy lines, but then
-// the registers just never line up. Something very stupid is happening.
+// Something very stupid is happening.
 // I suspect there is some sort of obfuscation that is being partially 
 // optimized out, leaving behind only strange register patterns.
 u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
 #ifdef NONMATCHING
 	
 	u32    expanded_key[4];
-	u32    literal_obfs_offset;
 	u32    key;
 	u32    size;
 	void*  func_addr;
 	
-	literal_obfs_offset = (u32)&BSS + ENC_VAL_1;
-	
 	func_addr = obfs_func_addr;
 	
 	key = obfs_key;
-	key -= literal_obfs_offset;
-	key += (u32)func_addr >> 20;
+	key -= (u32)&BSS + ENC_VAL_1;;
+	key += (u32)func_addr & 0x0000FFFF;
 	
 	size = obfs_size;
-	size -= literal_obfs_offset;
+	size -= (u32)&BSS + ENC_VAL_1;;
 	
 	expanded_key[0] = key ^ size;
 	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
@@ -172,50 +176,54 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	RC4_InitAndEncryptInstructions(&expanded_key[0], func_addr, func_addr, size);
 	clearDataAndInstructionCache(func_addr, size);
 	
-	return key + literal_obfs_offset;
+	return key + ((u32)&BSS + ENC_VAL_1);
 	
 #else /* NONMATCHING */
 	
-	// push {r3, r4, r5, r6, r7, lr}
+	// push {r3, r4, r5, lr}
 	asm {
-		sub sp, sp, #16
+		sub  sp, sp, #16
+		ldr  r3, =BSS
+		ldr  ip, =0x0000FFFF
+		mov  r4, r0
+		add  r0, r3, #ENC_VAL_1
+		ldr  r5, =BSS
+		sub  r4, r4, r0
+		and  r0, r1, ip
+		add  r4, r4, r0
+		mov  r3, r2
+		mov  r2, r1
+		add  r5, r5, #ENC_VAL_1
+		lsr  ip, r4, #24
+		lsr  r1, r4, #16
+		lsr  r0, r4, #8
+		sub  r3, r3, r5
+		orr  r1, r1, r4, lsl #16
+		eor  r5, r4, r3
+		eor  lr, r3, r1
+		sub  r2, r2, #ENC_VAL_1
+		orr  ip, ip, r4, lsl #8
+		str  r5, [sp]
+		eor  r5, r3, ip
+		orr  r0, r0, r4, lsl #24
+		eor  ip, r3, r0
+		add  r0, sp, #0
+		mov  r1, r2
+		str  r5, [sp, #4]
+		str  lr, [sp, #8]
+		str  ip, [sp, #12]
+		bl   RC4_InitAndEncryptInstructions
 	}
-	u32 bss_addr = (u32)&BSS; // ldr r3, [pc, #124]
+	clearDataAndInstructionCache();
 	asm {
-		mov r7, r0
-		add r4, bss_addr, #ENC_VAL_1
-		mov r6, r1
-		sub r0, r7, r4
-		add r7, r0, r6, lsr #20
-		mov r5, r2
-		mov r2, r7, lsr #24
-		sub r5, r5, r4
-		mov r0, r7, lsr #8
-		orr r3, r2, r7, lsl #8
-		mov r1, r7, lsr #16
-		orr r2, r1, r7, lsl #16
-		eor lr, r5, r3
-		eor ip, r7, r5
-		eor r3, r5, r2
-		sub r1, r6, #ENC_VAL_1
-		str r3, [sp, #8]
-		orr r0, r0, r7, lsl #24
-		str ip, [sp]
-		eor ip, r5, r0
-		add r0, sp, #0
-		mov r2, r1
-		mov r3, r5
-		str lr, [sp, #4]
-		str ip, [sp, #12]
-		bl RC4_InitAndEncryptInstructions
-		mov r1, r5
-		sub r0, r6, #ENC_VAL_1
-		bl clearDataAndInstructionCache
-		add r0, r7, r4
-		add sp, sp, #16
+		ldr  r0, =bss
+		add  r0, r0, #0x1000
+		add  r0, r4, r0
+		add  sp, sp, #0x10
 	}
-	// pop {r3, r4, r5, r6, r7, pc}
+	// pop {r3, r4, r5, pc}
 	// .word BSS
+	// .word 0x0000FFFF
 	
 #endif /* NONMATCHING */
 }
