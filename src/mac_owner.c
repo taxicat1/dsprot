@@ -18,7 +18,7 @@ u32 MACOwner_IsBad(void) {
 	i = 0;
 	OS_GetMacAddress(&mac_addr[0]);
 	
-	ENCRYPTION_START(0x0317);
+	ENCRYPTION_START(0x66F2);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
@@ -26,11 +26,11 @@ u32 MACOwner_IsBad(void) {
 		}
 	}
 	
-	ENCRYPTION_END(0x0317);
+	ENCRYPTION_END(0x66F2);
 	
 	OS_GetOwnerInfo(&owner_info);
 	
-	ENCRYPTION_START(0x1DFA);
+	ENCRYPTION_START(0x2F11);
 	
 	// `i` is recycled as the return value here
 	if (
@@ -53,7 +53,7 @@ u32 MACOwner_IsBad(void) {
 	i = 1;
 	
 EXIT:
-	ENCRYPTION_END(0x1DFA);
+	ENCRYPTION_END(0x2F11);
 	
 	return i;
 }

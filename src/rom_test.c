@@ -29,7 +29,7 @@ u32 ROMTest_IsBad(void) {
 		}
 	}
 	
-	ENCRYPTION_START(0x4544);
+	ENCRYPTION_START(0x1729);
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
@@ -48,7 +48,7 @@ EXIT:
 		rom_buf[i] = 0;
 	}
 	
-	ENCRYPTION_END(0x4544);
+	ENCRYPTION_END(0x1729);
 	
 	return ret;
 }

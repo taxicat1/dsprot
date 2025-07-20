@@ -1,8 +1,11 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version 1.02 (unconfirmed), as it appears in the game スローンとマクヘールの謎の物語 / Surōn to Makuhēru no Nazo no Sutōrī / Sloane to MacHale no Nazo no Story as overlay 0.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is a version possibly between 1.05 and 1.07, as it appears in these games (but likely appears in several more):
+- Mario & Sonic at the Olympic Winter Games (US and Japan) as overlay 41 (deadstripped)
+- Shin Megami Tensei - Strange Journey (Japan) as overlay 0 (deadstripped)
+- Kingdom Hearts - 358/2 Days (USA) as overlay 28
 
-This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: Surōn to Makuhēru no Nazo no Sutōrī will repeatedly quit from the game back to the title screen.
+This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it.
 
 The existence, mechanics, and effects of DS Protect have been documented as early as 2009 ([link](https://gbatemp.net/threads/seeking-help-for-anti-piracy-protection-removal.134683/post-1768816), [link](https://sourceforge.net/p/desmume/bugs/979/), [link](https://opentrackers.org/scenerules.org/html/2010_NDSr.html)).
 

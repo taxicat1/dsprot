@@ -2,19 +2,6 @@
 
 #include "rc4.h"
 
-static void toggleCache(BOOL disable);
-
-
-static void toggleCache(BOOL disable) {
-	if (disable) {
-		DC_StoreAll();
-		IC_Disable();
-	} else {
-		IC_Enable();
-		DC_StoreAll();
-	}
-}
-
 
 void Encryptor_StartRange(u32* addr) {
     u8   key[16];
@@ -46,7 +33,8 @@ void Encryptor_StartRange(u32* addr) {
         RC4_InitAndDecryptInstructions(&key[0], addr, addr, size * 4);
     }
     
-    toggleCache(TRUE);
+	DC_FlushRange(addr, size * 4);
+	IC_InvalidateRange(addr, size * 4);
 }
 
 
@@ -86,5 +74,6 @@ void Encryptor_EndRange(u32* addr) {
         RC4_InitAndEncryptInstructions(&key[0], addr, addr, size * 4);
     }
     
-    toggleCache(FALSE);
+    DC_FlushRange(addr, size * 4);
+	IC_InvalidateRange(addr, size * 4);
 }
