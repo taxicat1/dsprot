@@ -17,7 +17,7 @@ static inline void clearDataAndInstructionCache(void) {
     @1:
         mov  r0, #0
     @2:
-        orr r2, r1, r0
+        orr  r2, r1, r0
     	mcr  p15, 0, ip, c7, c10, 4
     	mcr  p15, 0, r2, c7, c14, 2
     	
@@ -174,7 +174,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	func_addr -= ENC_VAL_1;
 	
 	RC4_InitAndEncryptInstructions(&expanded_key[0], func_addr, func_addr, size);
-	clearDataAndInstructionCache(func_addr, size);
+	clearDataAndInstructionCache();
 	
 	return key + ((u32)&BSS + ENC_VAL_1);
 	
@@ -214,6 +214,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 		str  ip, [sp, #12]
 		bl   RC4_InitAndEncryptInstructions
 	}
+	// Inlined
 	clearDataAndInstructionCache();
 	asm {
 		ldr  r0, =BSS
