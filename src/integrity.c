@@ -14,7 +14,6 @@ u32 Integrity_ROMTest_IsGood(void);
 
 u32 Integrity_MACOwner_IsBad(void) {
 	u8*  addr;
-	u32  offset;
 	
 	// Obfuscated handling of function address
 	addr = (u8*)(((u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1]) - (ENC_VAL_1 * 2));
@@ -47,7 +46,6 @@ u32 Integrity_MACOwner_IsBad(void) {
 
 u32 Integrity_MACOwner_IsGood(void) {
 	u8*  addr;
-	u32  offset;
 	
 	// Obfuscated handling of function address
 	addr = (u8*)(((u32)&RunEncrypted_MACOwner_IsGood[ENC_VAL_1]) - (ENC_VAL_1 * 2));

@@ -4,7 +4,7 @@
 #include "bss.h"
 #include "rc4.h"
 
-void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes);
+void clearDataAndInstructionCache(void);
 
 
 static inline void clearDataAndInstructionCache(void) {
@@ -194,9 +194,9 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 		mov  r3, r2
 		mov  r2, r1
 		add  r5, r5, #ENC_VAL_1
-		lsr  ip, r4, #24
-		lsr  r1, r4, #16
-		lsr  r0, r4, #8
+		mov  ip, r4, lsr #24
+		mov  r1, r4, lsr #16
+		mov  r0, r4, lsr #8
 		sub  r3, r3, r5
 		orr  r1, r1, r4, lsl #16
 		eor  r5, r4, r3
@@ -216,7 +216,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	}
 	clearDataAndInstructionCache();
 	asm {
-		ldr  r0, =bss
+		ldr  r0, =BSS
 		add  r0, r0, #0x1000
 		add  r0, r4, r0
 		add  sp, sp, #0x10

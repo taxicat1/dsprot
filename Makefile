@@ -198,7 +198,6 @@ $(BUILD_DIR)/coretests_decrypter_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $
 		RunEncrypted_ROMTest_IsGood   \
 		RunEncrypted_MACOwner_IsBad   \
 		RunEncrypted_MACOwner_IsGood  \
-		RunEncrypted_ROMUtil_Read     \
 		RunEncrypted_ROMUtil_CRC32    \
 		RunEncrypted_Dummy_IsBad      \
 		RunEncrypted_Dummy_IsGood
@@ -226,7 +225,6 @@ $(BUILD_DIR)/rom_util_encrypted.o \
 $(BUILD_DIR)/rom_util_decrypter.s: $(BUILD_DIR)/rom_util.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encrypted.o
 	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k c20d -f \
-		ROMUtil_Read   \
 		ROMUtil_CRC32
 
 $(BUILD_DIR)/rom_test_encrypted.o \
