@@ -42,7 +42,7 @@ RunEncrypted_ROMUtil_CRC32:
 	moveq  ip, #0
 	addne  ip, ip, #0x1C
 	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #0x1600
+	sub    ip, ip, #0x1000
 	stmfd  sp!, {ip}        ; Setting up jump to Encryptor_DecryptionWrapperFragment
 	orr    ip, pc, pc       ; Loading data structure below into `ip`
 	ldmfd  sp!, {pc}

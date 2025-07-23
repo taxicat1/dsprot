@@ -24,7 +24,7 @@
 	.macro run_encrypted_func func, length, key
 	; Obfuscated: copy `pc` into `ip`, then add +0x1C and +0x14 for total +0x30.
 	; `pc + 0x30` from the first line is the line with `Encryptor_DecryptionWrapperFragment + ENC_VAL_1`.
-	; Subtract `ENC_VAL_1` (0x1600) from that, store it on the stack.
+	; Subtract `ENC_VAL_1` (0x1000) from that, store it on the stack.
 	; Then set `ip` back to `pc`, which now points at the start of the data structure.
 	; Finally pop the address to `Encryptor_DecryptionWrapperFragment` off the stack onto `pc` to jump.
 	orr    ip, pc, pc

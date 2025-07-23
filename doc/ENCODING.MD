@@ -7,7 +7,7 @@ Frequently throughout the library, values and references are obfuscated until th
 For literal values, the value is obfuscated as:
 
 ```c
-value + &BSS + 0x1600
+value + &BSS + 0x1000
 ```
 
 where `&BSS` is the address of the start of the `.bss` region of library (where uninitialized data is stored). This obfuscation is likely intended to make values, such as a size of 140 bytes, appear to actually be addresses which point to some unknown location.
@@ -15,7 +15,7 @@ where `&BSS` is the address of the start of the `.bss` region of library (where 
 For references, the value is obfuscated as:
 
 ```c
-reference + 0x1600
+reference + 0x1000
 ```
 
 This is likely simply to obscure the actual value of the reference.
@@ -64,7 +64,7 @@ The size of the function body as reported by the ELF symbol table is not the siz
 
 Unkeyed encoding uses a rolling value here known as `xorval` which acts a state value. It is 32 bits wide. It is used to encode each instruction, and then is updated using the resulting encoded instruction. The purpose of this is to run the encoding in a sort of modified cipher feedback mode, such that modifying an encoded instruction (as one attempting to create a patch that disables DS Protect may be doing) will cause all subsequent instructions to decode incorrectly, likely resulting in a crash when the instructions are executed.
 
-Before encoding begins, `xorval` is initialized to a value of `0xF0618C46`.
+Before encoding begins, `xorval` is initialized to a value of `0xF0B9A2EA`.
 
 For a **type-0** instruction:
 
@@ -82,9 +82,9 @@ For both a **type-1** and **type-2** instruction:
 
 - The most significant byte of the instruction is exclusive-ored by `0x01`.
 
-- The three least significant bytes are incremented by `0x582`.
+- The three least significant bytes are incremented by `0x402`.
 
-- A relocation for this instruction has its addend incremented by `0x1600` (and subtraction by 8 removed).
+- A relocation for this instruction has its addend incremented by `0x1000` (and subtraction by 8 removed).
 
 For a **type-3** instruction:
 
@@ -110,7 +110,7 @@ For both a **type-1** and **type-3** instruction:
 
 - The most significant byte is exclusive-ored by `0x01`.
 
-- The three least significant bytes are decremented by `0x582`.
+- The three least significant bytes are decremented by `0x402`.
 
 - `xorval` is updated by exclusive-oring it with the most significant byte of the instruction  (`instruction >> 24`).
 
@@ -147,9 +147,9 @@ For a **type-1** and **type-2** instruction:
 
 - `RC4.x` is incremented by the most significant byte of the instruction (`instruction >> 24`).
 
-- The three least significant bytes are incremented by `0x582`.
+- The three least significant bytes are incremented by `0x402`.
 
-- A relocation for this instruction has its addend incremented by `0x1600` (and subtraction by 8 removed).
+- A relocation for this instruction has its addend incremented by `0x1000` (and subtraction by 8 removed).
 
 For a **type-3** instruction:
 
@@ -179,7 +179,7 @@ For a **type-1** and **type-3** instruction:
 
 - The most significant byte of the instruction is exclusive-ored by `0x01`.
 
-- The three least significant bytes are decremented by `0x582`.
+- The three least significant bytes are decremented by `0x402`.
 
 For a **type-2** instruction:
 
@@ -189,13 +189,13 @@ For a **type-2** instruction:
 
 ### Encoding to instructions vs relocations
 
-Note the association between the two values `0x1600` and `0x582`. When encoding, the addition of `0x1600` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x1600` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x1600` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0x582` to the instruction.
+Note the association between the two values `0x1000` and `0x402`. When encoding, the addition of `0x1000` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x1000` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x1000` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0x402` to the instruction.
 
-Therefore, if the encoding procedure added `0x1600` to the *relocation*, the decoding procedure needs to subtract `0x582` from the instruction.
+Therefore, if the encoding procedure added `0x1000` to the *relocation*, the decoding procedure needs to subtract `0x402` from the instruction.
 
-Meanwhile, if the encoding procedure added `0x1600` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x1600` from the instruction.
+Meanwhile, if the encoding procedure added `0x1000` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x1000` from the instruction.
 
-*(In my opinion the smarter way to do this would have been to encode the relocation by incrementing it by `(0x1600 - 2) * 4 = 0x57F8`, such that the resulting instruction would be incremented by `0x1600` and could then be decoded normally)*
+*(In my opinion the smarter way to do this would have been to encode the relocation by incrementing it by `(0x1000 - 2) * 4 = 0x3FF8`, such that the resulting instruction would be incremented by `0x1000` and could then be decoded normally)*
 
 ### Encoding and linking
 
@@ -219,13 +219,13 @@ E12FFF1E    bx  lr
 The resulting encoded instructions would then be:
 
 ```
-EA000582    b   4880    R_ARM_PC24:  bar+0x1600
-114E73B3    strhne r7, [lr, #-0x33]
+EA000402    b   4112    R_ARM_PC24:  bar+0x1000
+E1965D1F    orrs r5, r6, pc, lsl sp
 ```
 
-Where, as discussed in the previous section, incrementing the relocation by `0x1600` will increment the instruction by `0x582`.
+Where, as discussed in the previous section, incrementing the relocation by `0x1000` will increment the instruction by `0x402`.
 
-Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x582`.
+Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x402`.
 
 In hindsight this is obvious: in order to be able to encode, then link, then decode, the encoding/decoding procedure must be associative with linking. Linking uses addition modulo 2^24, and therefore encoding must also use addition modulo 2^24.
 
@@ -284,13 +284,13 @@ After each time a function is decrypted to be run, it is then re-encrypted using
 new_seed_key = old_seed_key + (obfuscated_function_address >> 20) modulo 2^32
 ```
 
-Where `obfuscated_function_address` is the function address of the target function that is to be encrypted, obfuscated by incrementation by `0x1600`, as described in the above reference obfuscation description.
+Where `obfuscated_function_address` is the function address of the target function that is to be encrypted, obfuscated by incrementation by `0x1000`, as described in the above reference obfuscation description.
 
 Note most addresses are of the form `0x02XXXXXX`, which after a right shift of 20 bits would become `0x02X`, creating only a small actual change to the seed key.
 
-This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is also saved as the seed key (after obfuscating it via incrementing by `&BSS + 0x1600`) to be used for the next decryption of the function.
+This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is also saved as the seed key (after obfuscating it via incrementing by `&BSS + 0x1000`) to be used for the next decryption of the function.
 
-For example, if the library is conducting a ROM read test, it will perform 6 calls to the decryption wrapper function `RunEncrypted_ROMUtil_Read()`, which will change the key 6 times in total. If the original seed key is `0xC20D`, and the address and size of the inner `ROMUtil_Read()` is `0x02300000` + `0x14C`, then the subsequent seed keys and expanded keys will be:
+For example, if the library is conducting a ROM read test, it will perform 6 calls to the decryption wrapper function `RunEncrypted_ROMUtil_CRC32()`, which will change the key 6 times in total. If the original seed key is `0xC20D`, and the address and size of the inner `RunEncrypted_ROMUtil_CRC32()` is `0x02300000` + `0x14C`, then the subsequent seed keys and expanded keys will be:
 
 ```
 C230    7C C3 00 00 4C 31 C2 00 4C 01 30 C2 8E 01 00 30
