@@ -16,10 +16,10 @@ extern u32 DSProt_DetectNotEmulator(void* callback, void* param);
 extern u32 DSProt_DetectDummy(void* callback, void* param);
 extern u32 DSProt_DetectNotDummy(void* callback, void* param);
 
-static u32 __DSProt_compatibility_wrapper(void* callback);
+static u32 __DSProt_compatibilityWrapper(void* callback);
 
 
-static u32 __DSProt_compatibility_wrapper(void* callback) {
+static u32 __DSProt_compatibilityWrapper(void* callback) {
 	if (callback) {
 		((void (*)(void))callback)();
 	}
@@ -29,32 +29,32 @@ static u32 __DSProt_compatibility_wrapper(void* callback) {
 
 
 static inline u32 DSProt_DetectFlashcart_Old(void* callback) {
-	return DSProt_DetectFlashcart(__DSProt_compatibility_wrapper, callback) == ~(u32)callback;
+	return DSProt_DetectFlashcart(__DSProt_compatibilityWrapper, callback) == ~(u32)callback;
 }
 
 
 static inline u32 DSProt_DetectNotFlashcart_Old(void* callback) {
-	return DSProt_DetectNotFlashcart(__DSProt_compatibility_wrapper, callback) == ~(u32)callback;
+	return DSProt_DetectNotFlashcart(__DSProt_compatibilityWrapper, callback) == ~(u32)callback;
 }
 
 
 static inline u32 DSProt_DetectEmulator_Old(void* callback) {
-	return DSProt_DetectEmulator(__DSProt_compatibility_wrapper, callback) == ~(u32)callback;
+	return DSProt_DetectEmulator(__DSProt_compatibilityWrapper, callback) == ~(u32)callback;
 }
 
 
 static inline u32 DSProt_DetectNotEmulator_Old(void* callback) {
-	return DSProt_DetectNotEmulator(__DSProt_compatibility_wrapper, callback) == ~(u32)callback;
+	return DSProt_DetectNotEmulator(__DSProt_compatibilityWrapper, callback) == ~(u32)callback;
 }
 
 
 static inline u32 DSProt_DetectDummy_Old(void* callback) {
-	return DSProt_DetectDummy(__DSProt_compatibility_wrapper, callback) == ~(u32)callback;
+	return DSProt_DetectDummy(__DSProt_compatibilityWrapper, callback) == ~(u32)callback;
 }
 
 
 static inline u32 DSProt_DetectNotDummy_Old(void* callback) {
-	return DSProt_DetectNotDummy(__DSProt_compatibility_wrapper, callback) == ~(u32)callback;
+	return DSProt_DetectNotDummy(__DSProt_compatibilityWrapper, callback) == ~(u32)callback;
 }
 
 #ifdef __cplusplus
