@@ -8,7 +8,7 @@
 char* default_prefix = "RunEncrypted_";
 
 
-static int* allocSizeArray(char** first_symbol) {
+static ASMWriter_SymbolMeta* allocMetaArray(char** first_symbol) {
 	int symbol_count = 0;
 	while (*first_symbol++ != NULL) {
 		symbol_count++;
@@ -17,7 +17,7 @@ static int* allocSizeArray(char** first_symbol) {
 	if (symbol_count == 0) {
 		return NULL;
 	} else {
-		return calloc(sizeof(int), symbol_count);
+		return calloc(sizeof(ASMWriter_SymbolMeta), symbol_count);
 	}
 }
 
@@ -68,12 +68,12 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 			fprintf(output,
 				"\tarm_func_start %s%s\n"
 				"%s%s:\n"
-				"\trun_encrypted_func %s, 0x%x, 0x%x\n"
+				"\trun_encrypted_func %s, 0x%x, 0x%x + 0x%x\n"
 				"\tarm_func_end %s%s\n"
 				"\n",
 				asmw->wrapper_prefix, asmw->symbols[symbol_idx],
 				asmw->wrapper_prefix, asmw->symbols[symbol_idx],
-				asmw->symbols[symbol_idx], asmw->symbol_sizes[symbol_idx], asmw->key,
+				asmw->symbols[symbol_idx], asmw->symbol_metadata[symbol_idx].size, asmw->key, asmw->symbol_metadata[symbol_idx].offset,
 				asmw->wrapper_prefix, asmw->symbols[symbol_idx]
 			);
 		}
@@ -96,7 +96,7 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 			fprintf(output,
 				"\tfunc_table_entry %s, 0x%x\n",
 				asmw->symbols[symbol_idx],
-				asmw->symbol_sizes[symbol_idx]
+				asmw->symbol_metadata[symbol_idx]
 			);
 		}
 		
@@ -138,20 +138,21 @@ void ASMWriter_Init(ASMWriter_Ctx* asmw, EncodingTask* task) {
 	}
 	
 	if (asmw->output_fname == NULL) {
-		asmw->symbol_sizes = NULL;
+		asmw->symbol_metadata = NULL;
 	} else {
-		asmw->symbol_sizes = allocSizeArray(asmw->symbols);
+		asmw->symbol_metadata = allocMetaArray(asmw->symbols);
 	}
 }
 
 
-void ASMWriter_SetSymbolSize(ASMWriter_Ctx* asmw, char* symbol_name, int size) {
+void ASMWriter_SetSymbolMetadata(ASMWriter_Ctx* asmw, char* symbol_name, int size, int offset) {
 	if (asmw->valid && asmw->output_fname != NULL) {
 		int idx = symbolIdxOf(asmw, symbol_name);
 		if (idx == -1) {
 			ASMWriter_SetInvalid(asmw);
 		} else {
-			asmw->symbol_sizes[idx] = size;
+			asmw->symbol_metadata[idx].size   = size;
+			asmw->symbol_metadata[idx].offset = offset;
 		}
 	}
 }
@@ -180,7 +181,7 @@ int ASMWriter_Finalize(ASMWriter_Ctx* asmw) {
 		}
 	}
 	
-	free(asmw->symbol_sizes);
+	free(asmw->symbol_metadata);
 	
 	return ret_code;
 }

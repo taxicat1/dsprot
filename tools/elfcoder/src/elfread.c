@@ -170,7 +170,7 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTa
 	if (task->key_mode == MODE_KEYED) {
 		rc4 = malloc(sizeof(RC4_Ctx));
 		uint8_t rc4key[RC4_KEY_SIZE];
-		createRC4Key(task->key, encoded_size, rc4key);
+		createRC4Key(task->key + start_addr, encoded_size, rc4key);
 		RC4_Init(rc4, rc4key);
 	}
 	
@@ -248,7 +248,7 @@ static int encodeSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name
 	int encoded_bytes = encodeInstructions(elf, start_addr, symbol->st_size, task);
 	
 	if (encoded_bytes != 0) {
-		ASMWriter_SetSymbolSize(asmw, symbol_name, encoded_bytes);
+		ASMWriter_SetSymbolMetadata(asmw, symbol_name, encoded_bytes, start_addr);
 		
 		if (task->verbose) {
 			printf("%s: found @ %04x in %s\n",
