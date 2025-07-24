@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version 1.02 (unconfirmed), as it appears in the game スローンとマクヘールの謎の物語 / Surōn to Makuhēru no Nazo no Sutōrī / Sloane to MacHale no Nazo no Story as overlay 0.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version 1.08 (unconfirmed), as it appears in the game スローンとマクヘールの謎の物語 / Surōn to Makuhēru no Nazo no Sutōrī / Sloane to MacHale no Nazo no Story as overlay 0.
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: Surōn to Makuhēru no Nazo no Sutōrī will repeatedly quit from the game back to the title screen.
 
