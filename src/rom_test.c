@@ -9,7 +9,7 @@ u32 ROMTest_IsGood(void);
 #define ROM_BLOCK_SIZE  (0x200)
 
 
-u32 ROMTest_IsBad(void) { /* ov123_02260504 */
+u32 ROMTest_IsBad(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
@@ -56,7 +56,7 @@ EXIT:
 }
 
 
-u32 ROMTest_IsGood(void) { /* ov123_022605C8 */
+u32 ROMTest_IsGood(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];

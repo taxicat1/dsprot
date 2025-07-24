@@ -4,7 +4,7 @@
 u32 MACOwner_IsBad(void);
 u32 MACOwner_IsGood(void);
 
-static const u8 bad_mac_addr[6] = { /* _02260BD4 */
+static const u8 bad_mac_addr[6] = {
 	// 00:09:BF:00:00:31 after bit flipping
 	0xFF, 0xF6, 0x40, 0xFF, 0xFF, 0xCE
 };
@@ -12,7 +12,7 @@ static const u8 bad_mac_addr[6] = { /* _02260BD4 */
 #define MAC_ADDR_SIZE  (6)
 
 
-u32 MACOwner_IsBad(void) { /* ov123_0225FFE8 */
+u32 MACOwner_IsBad(void) {
 	int          i;
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
@@ -44,7 +44,7 @@ u32 MACOwner_IsBad(void) { /* ov123_0225FFE8 */
 }
 
 
-u32 MACOwner_IsGood(void) { /* ov123_02260098 */
+u32 MACOwner_IsGood(void) {
 	int          i;
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;

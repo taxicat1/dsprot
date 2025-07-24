@@ -63,7 +63,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				ins->operands = (ins->operands & 0x00FFFF) | (subbyte << 16);
 			} else {
 				ins->opcode ^= ENC_OPCODE_2;
-				ins->operands ^= (ENC_BYTE_A << 16) | (ENC_BYTE_B << 8) | ENC_BYTE_A;
+				ins->operands ^= (ENC_BYTE_C << 16) | (ENC_BYTE_B << 8) | ENC_BYTE_A;
 			}
 			break;
 		
@@ -113,7 +113,7 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				ins->operands = (ins->operands & 0x00FFFF) | (subbyte << 16);
 			} else {
 				ins->opcode ^= ENC_OPCODE_2;
-				ins->operands ^= (ENC_BYTE_A << 16) | (ENC_BYTE_B << 8) | ENC_BYTE_A;
+				ins->operands ^= (ENC_BYTE_C << 16) | (ENC_BYTE_B << 8) | ENC_BYTE_A;
 			}
 			break;
 		

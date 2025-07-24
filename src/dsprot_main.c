@@ -7,8 +7,6 @@
 #include "mac_owner.h"
 #include "encoding_constants.h"
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-
 // Functions to be encrypted (cannot be called directly)
 u32 DetectFlashcart(void* callback);
 u32 DetectNotFlashcart(void* callback);
@@ -16,19 +14,6 @@ u32 DetectEmulator(void* callback);
 u32 DetectNotEmulator(void* callback);
 u32 DetectDummy(void* callback);
 u32 DetectNotDummy(void* callback);
-
-#else /* POKEHEARTGOLD_COMPATABILITY */
-
-// Functions to be encrypted (cannot be called directly)
-// pokeheartgold-compatible names
-u32 _0225F430(void* callback);
-u32 _0225F4A8(void* callback);
-u32 _0225F520(void* callback);
-u32 _0225F598(void* callback);
-u32 _0225F610(void* callback);
-u32 _0225F688(void* callback);
-
-#endif /* POKEHEARTGOLD_COMPATABILITY */
 
 static inline BOOL executeFunctionQueue(u32* func_queue, int compare_type);
 
@@ -72,11 +57,7 @@ static inline BOOL executeFunctionQueue(u32* func_queue, int compare_type) {
 }
 
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-u32 DetectFlashcart(void* callback) { /* ov123_0225F020 */
-#else
-u32 _0225F430(void* callback) {
-#endif
+u32 DetectFlashcart(void* callback) {
 	u32   func_queue[32];
 	BOOL  ret;
 	
@@ -94,11 +75,7 @@ u32 _0225F430(void* callback) {
 }
 
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-u32 DetectNotFlashcart(void* callback) { /* ov123_0225F0D8 */
-#else
-u32 _0225F4A8(void* callback) {
-#endif
+u32 DetectNotFlashcart(void* callback) {
 	u32   func_queue[32];
 	BOOL  ret;
 	
@@ -116,11 +93,7 @@ u32 _0225F4A8(void* callback) {
 }
 
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-u32 DetectEmulator(void* callback) { /* ov123_0225F190 */
-#else
-u32 _0225F520(void* callback) {
-#endif
+u32 DetectEmulator(void* callback) {
 	u32   func_queue[32];
 	BOOL  ret;
 	
@@ -138,11 +111,7 @@ u32 _0225F520(void* callback) {
 }
 
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-u32 DetectNotEmulator(void* callback) { /* ov123_0225F248 */
-#else
-u32 _0225F598(void* callback) {
-#endif
+u32 DetectNotEmulator(void* callback) {
 	u32   func_queue[32];
 	BOOL  ret;
 	
@@ -160,11 +129,7 @@ u32 _0225F598(void* callback) {
 }
 
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-u32 DetectDummy(void* callback) { /* ov123_0225F300 */
-#else
-u32 _0225F610(void* callback) {
-#endif
+u32 DetectDummy(void* callback) {
 	u32   func_queue[32];
 	BOOL  ret;
 	
@@ -181,11 +146,7 @@ u32 _0225F610(void* callback) {
 }
 
 
-#ifndef POKEHEARTGOLD_COMPATABILITY
-u32 DetectNotDummy(void* callback) { /* ov123_0225F398 */
-#else
-u32 _0225F688(void* callback) {
-#endif
+u32 DetectNotDummy(void* callback) {
 	u32   func_queue[32];
 	BOOL  ret;
 	

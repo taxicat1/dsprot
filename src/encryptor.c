@@ -7,13 +7,13 @@
 static void clearDataAndInstructionCache(void* start_addr, u32 num_bytes);
 
 
-static void clearDataAndInstructionCache(void* start_addr, u32 num_bytes) { /* ov123_0225FD3C */
+static void clearDataAndInstructionCache(void* start_addr, u32 num_bytes) {
 	DC_FlushRange(start_addr, num_bytes);
 	IC_InvalidateRange(start_addr, num_bytes);
 }
 
 
-u32 Encryptor_CategorizeInstruction(u32 instruction) { /* ov123_0225FD5C */
+u32 Encryptor_CategorizeInstruction(u32 instruction) {
 	u8 upper_byte;
 	
 	upper_byte = (instruction >> 24) & 0xFF;
@@ -34,7 +34,7 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) { /* ov123_0225FD5C */
 }
 
 
-void Encryptor_DecodeFunctionTable(FuncInfo* functions) { /* ov123_0225FD98 */
+void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32  size;
 	u32  addr;
 	u32  end_addr;
@@ -72,7 +72,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) { /* ov123_0225FD98 */
 				default:
 					a = ((u8*)addr)[0] ^ ENC_BYTE_A;
 					b = ((u8*)addr)[1] ^ ENC_BYTE_B;
-					c = ((u8*)addr)[2] ^ ENC_BYTE_A;
+					c = ((u8*)addr)[2] ^ ENC_BYTE_C;
 					d = ((u8*)addr)[3] ^ ENC_OPCODE_2;
 					*(u32*)addr = a | (b << 8) | (c << 16) | (d << 24);
 					break;
@@ -84,7 +84,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) { /* ov123_0225FD98 */
 }
 
 
-void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) { /* ov123_0225FEA8 */
+void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    literal_obfs_offset;
 	u32    key;
@@ -123,7 +123,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 // the registers just never line up. Something very stupid is happening.
 // I suspect there is some sort of obfuscation that is being partially 
 // optimized out, leaving behind only strange register patterns.
-u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) { /* ov123_0225FF30 */
+u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
 #ifdef NONMATCHING
 	
 	u32    expanded_key[4];

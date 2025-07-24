@@ -7,7 +7,7 @@ Module 1 (main):
 		DetectDummy
 		DetectNotDummy
 	
-	Encrypt and create decryption wrappers (key=0x6AB2, prefix=DSProt_):
+	Encrypt and create decryption wrappers (key=0x2E8B, prefix=DSProt_):
 		DetectFlashcart
 		DetectNotFlashcart
 		DetectEmulator
@@ -35,7 +35,7 @@ Module 2 (integrity):
 		Integrity_ROMTest_IsBad
 		Integrity_ROMTest_IsGood
 	
-	Encrypt and create decryption wrappers (key=0x9785):
+	Encrypt and create decryption wrappers (key=0xBE28):
 		Integrity_MACOwner_IsBad
 		Integrity_MACOwner_IsGood
 		Integrity_ROMTest_IsBad
@@ -66,7 +66,7 @@ Module 4 (core tests):
 		MACOwner_IsBad
 		MACOwner_IsGood
 	
-	Encrypt and create decryption wrappers (key=0x0982):
+	Encrypt and create decryption wrappers (key=0xC7EA):
 		MACOwner_IsBad
 		MACOwner_IsGood	
 	
@@ -74,7 +74,7 @@ Module 4 (core tests):
 		ROMUtil_Read
 		ROMUtil_CRC32
 	
-	Encrypt and create decryption wrappers (key=0x0982):
+	Encrypt and create decryption wrappers (key=0xC7EA):
 		ROMUtil_Read
 		ROMUtil_CRC32
 	
@@ -82,7 +82,7 @@ Module 4 (core tests):
 		ROMTest_IsBad
 		ROMTest_IsGood
 	
-	Encrypt and create decryption wrappers (key=0x0982):
+	Encrypt and create decryption wrappers (key=0xC7EA):
 		ROMTest_IsBad
 		ROMTest_IsGood
 	

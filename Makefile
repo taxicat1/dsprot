@@ -42,8 +42,7 @@ CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W 
 DEPS := $(wildcard $(BUILD_DIR)/*.d)
 
 # Output library file
-LIBRARY_NAME       :=  dsprot.a
-LIBRARY_NAME_PKHG  :=  dsprot_pokeheartgold.a
+LIBRARY_NAME := dsprot.a
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
@@ -66,37 +65,13 @@ LIBRARY_FILES := \
 	$(BUILD_DIR)/rc4_encoded.o                    \
 	$(BUILD_DIR)/rc4_decoder.o
 
-LIBRARY_FILES_PKHG := \
-	$(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o          \
-	$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_encoded.o  \
-	$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.o  \
-	$(BUILD_DIR)/extra.o                                        \
-	$(BUILD_DIR)/integrity_encrypted.o                          \
-	$(BUILD_DIR)/integrity_decrypter_encoded.o                  \
-	$(BUILD_DIR)/integrity_decrypter_decoder.o                  \
-	$(BUILD_DIR)/encryptor_encoded.o                            \
-	$(BUILD_DIR)/encryptor_decoder.o                            \
-	$(BUILD_DIR)/mac_owner_encrypted.o                          \
-	$(BUILD_DIR)/mac_owner_decrypter_encoded.o                  \
-	$(BUILD_DIR)/rom_util_encrypted.o                           \
-	$(BUILD_DIR)/rom_util_decrypter_encoded.o                   \
-	$(BUILD_DIR)/rom_test_encrypted.o                           \
-	$(BUILD_DIR)/rom_test_decrypter_encoded.o                   \
-	$(BUILD_DIR)/coretests_decrypter_decoder.o                  \
-	$(BUILD_DIR)/rc4_encoded.o                                  \
-	$(BUILD_DIR)/rc4_decoder.o
 
-
-.PHONY: all pokeheartgold-compatible clean tools dsprot dsprot-pokeheartgold
+.PHONY: all clean tools dsprot
 .DELETE_ON_ERROR : 
 
 all:
 	$(MAKE) tools
 	$(MAKE) dsprot
-
-pokeheartgold-compatible:
-	$(MAKE) tools
-	$(MAKE) dsprot-pokeheartgold
 
 clean:
 	$(MAKE) -C $(ELFCODER_DIR) clean
@@ -110,18 +85,10 @@ tools:
 dsprot:
 	$(MAKE) $(BUILD_DIR)/$(LIBRARY_NAME)
 
-dsprot-pokeheartgold:
-	$(MAKE) $(BUILD_DIR)/$(LIBRARY_NAME_PKHG)
-
 
 # Library output
 $(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
 	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
-
-
-# Library output (pokeheartgold)
-$(BUILD_DIR)/$(LIBRARY_NAME_PKHG): $(LIBRARY_FILES_PKHG)
-	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES_PKHG) -o $(BUILD_DIR)/$(LIBRARY_NAME_PKHG)
 
 
 # Main module
@@ -145,7 +112,7 @@ $(BUILD_DIR)/dsprot_main_decrypter.o: $(BUILD_DIR)/dsprot_main_decrypter.s
 $(BUILD_DIR)/dsprot_main_encrypted.o \
 $(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 6ab2 -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 2e8b -p DSProt_ -f \
 		DetectFlashcart     \
 		DetectNotFlashcart  \
 		DetectEmulator      \
@@ -156,40 +123,6 @@ $(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 $(BUILD_DIR)/dsprot_main.o: $(SRC_DIR)/dsprot_main.c
 	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/dsprot_main.c -o $(BUILD_DIR)/dsprot_main.o
 	$(FIXDEP) $(BUILD_DIR)/dsprot_main.d
-
-
-# Main module (pokeheartgold)
-$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.o: $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.s
-	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.s -o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.o
-
-$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_encoded.o \
-$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.s: $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.o $(ELFCODER)
-	cp $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_encoded.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_encoded.o -o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter_decoder.s -g Garbage -f \
-		ov123_0225F430  \
-		ov123_0225F4A8  \
-		ov123_0225F520  \
-		ov123_0225F598  \
-		ov123_0225F610  \
-		ov123_0225F688
-
-$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.o: $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s
-	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s -o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.o
-
-$(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o \
-$(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s: $(BUILD_DIR)/dsprot_main_pokeheartgold.o $(ELFCODER)
-	cp $(BUILD_DIR)/dsprot_main_pokeheartgold.o $(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o -o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s -k 6ab2 -p ov123 -f \
-		_0225F430  \
-		_0225F4A8  \
-		_0225F520  \
-		_0225F598  \
-		_0225F610  \
-		_0225F688
-
-$(BUILD_DIR)/dsprot_main_pokeheartgold.o: $(SRC_DIR)/dsprot_main.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/dsprot_main.c -o $(BUILD_DIR)/dsprot_main_pokeheartgold.o -d POKEHEARTGOLD_COMPATABILITY
-	$(FIXDEP) $(BUILD_DIR)/dsprot_main_pokeheartgold.d
 
 
 # BSS + Garbage
@@ -217,7 +150,7 @@ $(BUILD_DIR)/integrity_decrypter.o: $(BUILD_DIR)/integrity_decrypter.s
 $(BUILD_DIR)/integrity_encrypted.o \
 $(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ELFCODER)
 	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k 9785 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k be28 -f \
 		Integrity_MACOwner_IsBad   \
 		Integrity_MACOwner_IsGood  \
 		Integrity_ROMTest_IsBad    \
@@ -275,21 +208,21 @@ $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 $(BUILD_DIR)/mac_owner_encrypted.o \
 $(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k 0982 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k c7ea -f \
 		MACOwner_IsBad  \
 		MACOwner_IsGood
 
 $(BUILD_DIR)/rom_util_encrypted.o \
 $(BUILD_DIR)/rom_util_decrypter.s: $(BUILD_DIR)/rom_util.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k 0982 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k c7ea -f \
 		ROMUtil_Read   \
 		ROMUtil_CRC32
 
 $(BUILD_DIR)/rom_test_encrypted.o \
 $(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k 0982 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k c7ea -f \
 		ROMTest_IsBad   \
 		ROMTest_IsGood
 

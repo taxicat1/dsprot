@@ -7,7 +7,7 @@ Frequently throughout the library, values and references are obfuscated until th
 For literal values, the value is obfuscated as:
 
 ```c
-value + &BSS + 0x1300
+value + &BSS + 0x1400
 ```
 
 where `&BSS` is the address of the start of the `.bss` region of library (where uninitialized data is stored). This obfuscation is likely intended to make values, such as a size of 140 bytes, appear to actually be addresses which point to some unknown location.
@@ -15,7 +15,7 @@ where `&BSS` is the address of the start of the `.bss` region of library (where 
 For references, the value is obfuscated as:
 
 ```c
-reference + 0x1300
+reference + 0x1400
 ```
 
 This is likely simply to obscure the actual value of the reference.
@@ -62,27 +62,27 @@ The size of the function body as reported by the ELF symbol table is not the siz
 
 For a **type-0** instruction:
 
-- The most significant byte is exclusive-ored with the value `0xF0`.
+- The most significant byte is exclusive-ored with the value `0xD0`.
 
 - The three least significant bytes are split apart:
 
-	- The least significant byte is exclusive-ored with the value `0x56`.
-	- The second-least-significant byte is exclusive-ored with the value `0x65`.
-	- The third-least-significant byte is exclusive-ored with the value `0x56`.
+	- The least significant byte is exclusive-ored with the value `0x65`.
+	- The second-least-significant byte is exclusive-ored with the value `0x56`.
+	- The third-least-significant byte is exclusive-ored with the value `0x68`.
 
 For both a **type-1** and **type-2** instruction:
 
 - The most significant byte is exclusive-ored with the value `0x01`.
 
-- The three least significant bytes are incremented by the value `0x4C2`.
+- The three least significant bytes are incremented by the value `0x502`.
 
-- A relocation for this instruction has its addend incremented by `0x1300` (and subtraction by 8 removed).
+- A relocation for this instruction has its addend incremented by `0x1400` (and subtraction by 8 removed).
 
 For a **type-3** instruction:
 
 - The most significant byte is exclusive-ored with the value `0x01`.
 
-- The three least significant bytes are incremented by the value `0x1300`.
+- The three least significant bytes are incremented by the value `0x1400`.
 
 Note that, after encoding, a type-2 instruction becomes a type-3 instruction, and vice versa. This is due to flipping the branch link bit, which will change the instruction from a `b` to a `bl` and vice versa.
 
@@ -92,26 +92,26 @@ Decoding applies the reverse procedure based on the new instruction type:
 
 For a **type-0** instruction (this is the same as encoding):
 
-- The most significant byte is exclusive-ored with the value `0xF0`.
+- The most significant byte is exclusive-ored with the value `0xD0`.
 
 - The three least significant bytes are split apart:
 
-	- The least significant byte is exclusive-ored with the value `0x56`.
-	- The second-least-significant byte is exclusive-ored with the value `0x65`.
-	- The third-least-significant byte is exclusive-ored with the value `0x56`.
+	- The least significant byte is exclusive-ored with the value `0x65`.
+	- The second-least-significant byte is exclusive-ored with the value `0x56`.
+	- The third-least-significant byte is exclusive-ored with the value `0x68`.
 
 For both a **type-1** and **type-2** instruction:
 
 - The most significant byte is exclusive-ored with the value `0x01`.
 
-- The three least significant bytes are decremented by the value `0x1300`.
+- The three least significant bytes are decremented by the value `0x1400`.
 
 
 For a **type-3** instruction:
 
 - The most significant byte is exclusive-ored with the value `0x01`.
 
-- The three least significant bytes are decremented by the value `0x4C2`.
+- The three least significant bytes are decremented by the value `0x502`.
 
 ### Keyed encoding
 
@@ -131,13 +131,13 @@ This process, as its own inverse, is identical for decoding.
 
 ### Encoding to instructions vs relocations
 
-Note the association between the two values `0x1300` and `0x4C2`. When encoding, the addition of `0x1300` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x1300` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x1300` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0x4C2` to the instruction.
+Note the association between the two values `0x1400` and `0x502`. When encoding, the addition of `0x1400` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x1400` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x1400` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0x502` to the instruction.
 
-Therefore, if the encoding procedure added `0x1300` to the *relocation*, the decoding procedure needs to subtract `0x4C2` from the instruction.
+Therefore, if the encoding procedure added `0x1400` to the *relocation*, the decoding procedure needs to subtract `0x502` from the instruction.
 
-Meanwhile, if the encoding procedure added `0x1300` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x1300` from the instruction.
+Meanwhile, if the encoding procedure added `0x1400` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x1400` from the instruction.
 
-*(In my opinion the smarter way to do this would have been to encode the relocation by incrementing it by `(0x1300 - 2) * 4 = 0x4BF8`, such that the resulting instruction would be incremented by `0x1300` and could then be decoded normally)*
+*(In my opinion the smarter way to do this would have been to encode the relocation by incrementing it by `(0x1400 - 2) * 4 = 0x4BF8`, such that the resulting instruction would be incremented by `0x1400` and could then be decoded normally)*
 
 ### Encoding and linking
 
@@ -161,13 +161,13 @@ E12FFF1E    bx  lr
 The resulting encoded instructions would then be:
 
 ```
-EA0004C2    b   4880    R_ARM_PC24:  bar+0x1300
-11799A48    cmnne sb, r8, asr #20
+EA000502    b   5136    R_ARM_PC24:  bar+0x1400
+3147A97B    hvc #0x7a9b
 ```
 
-Where, as discussed in the previous section, incrementing the relocation by `0x1300` will increment the instruction by `0x4C2`.
+Where, as discussed in the previous section, incrementing the relocation by `0x1400` will increment the instruction by `0x502`.
 
-Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x4C2`.
+Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x502`.
 
 In hindsight this is obvious: in order to be able to encode, then link, then decode, the encoding/decoding procedure must be associative with linking. Linking uses addition modulo 2^24, and therefore encoding must also use addition modulo 2^24.
 
@@ -220,11 +220,11 @@ After each time a function is decrypted to be run, it is then re-encrypted using
 new_seed_key = old_seed_key + (obfuscated_function_address >> 20) modulo 2^32
 ```
 
-Where `obfuscated_function_address` is the function address of the target function that is to be encrypted, obfuscated by incrementation by `0x1300`, as described in the above reference obfuscation description.
+Where `obfuscated_function_address` is the function address of the target function that is to be encrypted, obfuscated by incrementation by `0x1400`, as described in the above reference obfuscation description.
 
 Note most addresses are of the form `0x02XXXXXX`, which after a right shift of 20 bits would become `0x02X`, creating only a small actual change to the seed key.
 
-This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is also saved as the seed key (after obfuscating it via incrementing by `&BSS + 0x1300`) to be used for the next decryption of the function.
+This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is also saved as the seed key (after obfuscating it via incrementing by `&BSS + 0x1400`) to be used for the next decryption of the function.
 
 For example, if the library is conducting a ROM read test, it will perform 6 calls to the decryption wrapper function `RunEncrypted_ROMUtil_Read()`, which will change the key 6 times in total. If the original seed key is `0x0982`, and the address and size of the inner `ROMUtil_Read()` is `0x02260238` + `0x17C`, then the subsequent seed keys and expanded keys will be:
 
