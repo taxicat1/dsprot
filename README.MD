@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.10 (unconfirmed), as it appears in Japanese versions of Pokémon HeartGold and SoulSilver as overlay 122. 
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.20 (unconfirmed), as it appears in Japanese versions of Pokémon HeartGold and SoulSilver as overlay 122. 
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: HeartGold and SoulSilver will leak memory until the game eventually crashes.
 
