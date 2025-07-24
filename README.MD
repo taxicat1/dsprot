@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is a version possibly between 1.05 and 1.07, as it appears in these games (but likely appears in several more):
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.10 (unconfirmed), as it appears in these games (but likely appears in several more):
 - Mario & Sonic at the Olympic Winter Games (US and Japan) as overlay 41 (deadstripped)
 - Shin Megami Tensei - Strange Journey (Japan) as overlay 0 (deadstripped)
 - Kingdom Hearts - 358/2 Days (USA) as overlay 28
