@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version 1.08 (unconfirmed), as it appears in Rockman.EXE - Operate Shooting Star as overlay 583. 
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.22 (unconfirmed), as it appears in Rockman.EXE - Operate Shooting Star as overlay 583. 
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: Rockman.EXE - Operate Shooting Star will prevent the player from editing the Folder or playing minigames, and random battles will trigger on every step the player takes ([source](https://tcrf.net/Rockman.EXE:_Operate_Shooting_Star#Anti-Piracy)).
 
