@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is an unknown version prior to branch 1.02_unk, as it appears in the game Layton Kyouju to Saigo no Jikan Ryokou / Professor Layton and the Unwound Future (Japan) as overlay 10.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version 1.08 (unconfirmed), as it appears in the game Layton Kyouju to Saigo no Jikan Ryokou / Professor Layton and the Unwound Future (Japan) as overlay 10.
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: Surōn to Makuhēru no Nazo no Sutōrī will repeatedly quit from the game back to the title screen.
 
