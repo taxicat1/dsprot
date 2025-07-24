@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.20 (unconfirmed), as it appears in localized versions of Pokémon HeartGold and SoulSilver as overlay 123. 
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.23 (unconfirmed), as it appears in localized versions of Pokémon HeartGold and SoulSilver as overlay 123. 
 
 See other branches for alternate versions.
 
