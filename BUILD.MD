@@ -25,7 +25,7 @@ The built library file `dsprot.a` and provided header file `dsprot.h` may be use
 
 `dsprot.a` will need to be included in the proper location in the project's `main.lsf`.
 
-The exported functions are:
+The exported functions are (these are actually macros provided by the header file):
 - `u32 DSProt_DetectFlashcart(void* callback);`
 - `u32 DSProt_DetectNotFlashcart(void* callback);`
 - `u32 DSProt_DetectEmulator(void* callback);`
