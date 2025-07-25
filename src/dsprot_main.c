@@ -48,8 +48,8 @@ u32 DetectFlashcart(void* callback, void* param) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
+	if ((ret % PRIME_FALSE) && callback != NULL) {
+		ret = (u32)((ArgFunc)callback)(param);
 	}
 	
 	return ret;
@@ -65,8 +65,8 @@ u32 DetectNotFlashcart(void* callback, void* param) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
+	if (!(ret % PRIME_TRUE) && callback != NULL) {
+		ret = (u32)((ArgFunc)callback)(param);
 	}
 	
 	return ret;
@@ -82,8 +82,8 @@ u32 DetectEmulator(void* callback, void* param) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
+	if ((ret % PRIME_FALSE) && callback != NULL) {
+		ret = (u32)((ArgFunc)callback)(param);
 	}
 	
 	return ret;
@@ -99,8 +99,8 @@ u32 DetectNotEmulator(void* callback, void* param) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
+	if (!(ret % PRIME_TRUE) && callback != NULL) {
+		ret = (u32)((ArgFunc)callback)(param);
 	}
 	
 	return ret;
@@ -116,8 +116,8 @@ u32 DetectDummy(void* callback, void* param) {
 	func_queue[1] = 0;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
+	if ((ret % PRIME_FALSE) && callback != NULL) {
+		ret = (u32)((ArgFunc)callback)(param);
 	}
 	
 	return ret;
@@ -133,8 +133,8 @@ u32 DetectNotDummy(void* callback, void* param) {
 	func_queue[1] = 0;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
+	if (!(ret % PRIME_TRUE) && callback != NULL) {
+		ret = (u32)((ArgFunc)callback)(param);
 	}
 	
 	return ret;

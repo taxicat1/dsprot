@@ -5,7 +5,7 @@
 	- Cygwin/MSYS2/WSL/etc. if on Windows
 	- Wine if not on Windows
 
-1. If you do not have it already, download a copy of the [Metrowerks C compiler](https://github.com/pret/pmd-sky/raw/workflows/assets/mwccarm.zip) and extract version **2.0 sp2p3**. This should consist of these files:
+1. If you do not have it already, download a copy of the [Metrowerks C compiler](https://github.com/pret/pmd-sky/raw/workflows/assets/mwccarm.zip) and extract version **DSi 1.2**. This should consist of these files:
 	- ELFIO.dll
 	- lmgr8c.dll
 	- MSL_All-DLL80_x86.dll

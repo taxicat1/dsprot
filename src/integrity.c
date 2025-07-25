@@ -24,25 +24,25 @@ u32 Integrity_MACOwner_IsBad(void) {
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0x0F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x1] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x2] != 0x8F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x3] != 0xE1) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
 	
-	if (addr[offset+0x4] != 0x0C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x5] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x6] != 0x1C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x7] != 0xE0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
 	
-	if (addr[offset+0x8] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x9] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_TRUE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_TRUE;
 	
 	return PRIME_INTEGRITY * PRIME_FALSE;
 }
@@ -58,25 +58,25 @@ u32 Integrity_MACOwner_IsGood(void) {
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0x0F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x1] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x2] != 0x8F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x3] != 0xE1) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
 	
-	if (addr[offset+0x4] != 0x0C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x5] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x6] != 0x1C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x7] != 0xE0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
 	
-	if (addr[offset+0x8] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x9] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_FALSE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_FALSE;
 	
 	return PRIME_INTEGRITY * PRIME_TRUE;
 }
@@ -92,25 +92,25 @@ u32 Integrity_ROMTest_IsBad(void) {
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0x0F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x1] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x2] != 0x8F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x3] != 0xE1) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
 	
-	if (addr[offset+0x4] != 0x0C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x5] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x6] != 0x1C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x7] != 0xE0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
 	
-	if (addr[offset+0x8] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x9] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_TRUE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_TRUE;
 	
 	return PRIME_INTEGRITY * PRIME_FALSE;
 }
@@ -126,25 +126,25 @@ u32 Integrity_ROMTest_IsGood(void) {
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0x0F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x1] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x2] != 0x8F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x3] != 0xE1) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
 	
-	if (addr[offset+0x4] != 0x0C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x5] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x6] != 0x1C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x7] != 0xE0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
 	
-	if (addr[offset+0x8] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x9] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_FALSE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_FALSE;
 	
 	return PRIME_INTEGRITY * PRIME_TRUE;
 }
