@@ -2,7 +2,7 @@
 #include "bss.h"
 #include "garbage.h"
 
-u8 BSS[4];
+u8 BSS[32];
 
 const u32 Garbage[6] = {
 	0xE8DFFE17,
