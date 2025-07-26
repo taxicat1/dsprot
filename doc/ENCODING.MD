@@ -20,7 +20,7 @@ reference + 0x1200
 
 This is likely simply to obscure the actual value of the reference.
 
-Booleans, rather than use `0` or `1`, instead obsfuscate the value using different prime numbers. `TRUE` is represented as any multiple of 251, while `FALSE` is any multiple of 241. Each function that would normally return a Boolean will instead return some other prime number multiplied by one of these. Branches based on that resulting value are conducted using modulus operations. This is intended to confuse memory debugging.
+Booleans, rather than use `0` or `1`, instead obsfuscate the value using different prime numbers. `TRUE` is represented as any multiple of 173, while `FALSE` is any multiple of 199. Each function that would normally return a Boolean will instead return some other prime number multiplied by one of these. Branches based on that resulting value are conducted using modulus operations. This is intended to confuse memory debugging.
 
 ## Function encoding and encrypting
 
