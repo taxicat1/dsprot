@@ -64,7 +64,7 @@ The size of the function body as reported by the ELF symbol table is not the siz
 
 Unkeyed encoding uses a rolling value here known as `xorval` which acts a state value. It is 32 bits wide. It is used to encode each instruction, and then is updated using the resulting encoded instruction. The purpose of this is to run the encoding in a sort of modified cipher feedback mode, such that modifying an encoded instruction (as one attempting to create a patch that disables DS Protect may be doing) will cause all subsequent instructions to decode incorrectly, likely resulting in a crash when the instructions are executed.
 
-Before encoding begins, `xorval` is initialized to a value of `0xF0618C46`.
+Before encoding begins, `xorval` is initialized to a value of `0xF03852CB`.
 
 For a **type-0** instruction:
 
