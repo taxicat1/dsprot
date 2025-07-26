@@ -2,13 +2,13 @@
 #include "bss.h"
 #include "garbage.h"
 
-u8 BSS[4];
+u8 BSS[32];
 
 const u32 Garbage[6] = {
-	0xE8DFFE17,
-	0xE43DF0DE,
-	0x2AE8335C,
-	0x0AC09826,
-	0xE7A838DC,
-	0xE891A6FC
+	0xEB8FBC31,
+	0xE4EC10CF,
+	0xEF73E592,
+	0xE59A0B7E,
+	0xE78CB309,
+	0xE87F3ED1
 };
