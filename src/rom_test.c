@@ -14,8 +14,8 @@ u32 ROMTest_IsBad(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
-	u32  rom_addr;
 	u16  lock_id;
+	u32  rom_addr;
 	u32  ret;
 	int  i;
 	
@@ -24,16 +24,17 @@ u32 ROMTest_IsBad(void) {
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	for (i = 0; i < 3; i++) {
-		// Use encrypted, obfuscated read for below 0x8000
+	for (i = 0; i < 6; i++) {
 		RunEncrypted_ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// Use standard ROM reading function for above 0x8000
-		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
-		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
-		
-		rom_addr += ROM_BLOCK_SIZE;
+		if (i == 2) {
+			// Must be like this to match
+			rom_addr = 1;
+			rom_addr <<= 15;
+		} else {
+			rom_addr += ROM_BLOCK_SIZE;
+		}
 	}
 	
 	CARD_UnlockRom(lock_id);
@@ -66,8 +67,8 @@ u32 ROMTest_IsGood(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
-	u32  rom_addr;
 	u16  lock_id;
+	u32  rom_addr;
 	u32  ret;
 	int  i;
 	
@@ -76,16 +77,17 @@ u32 ROMTest_IsGood(void) {
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	for (i = 0; i < 3; i++) {
-		// Use encrypted, obfuscated read for below 0x8000
+	for (i = 0; i < 6; i++) {
 		RunEncrypted_ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// Use standard ROM reading function for above 0x8000
-		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
-		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
-		
-		rom_addr += ROM_BLOCK_SIZE;
+		if (i == 2) {
+			// Must be like this to match
+			rom_addr = 1;
+			rom_addr <<= 15;
+		} else {
+			rom_addr += ROM_BLOCK_SIZE;
+		}
 	}
 	
 	CARD_UnlockRom(lock_id);

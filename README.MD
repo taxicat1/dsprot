@@ -1,20 +1,8 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.26 (unconfirmed), as it appears these games (but likely appears in several more):
-- Tetris Party Deluxe (USA) as overlay 1
-- Megaman Zero Collection (USA and Japan) as overlay 8
-- Art Academy (USA and Japan) as overlay 0
-- Toy Story 3 (USA) as overlay 0
-- Phineas and Ferb - Ride Again (USA) as overlay 5
-- Camp Rock: The Final Jam (USA) as overlay 42
-- Harry Potter and the Deathly Hallows Part 1 (USA and EU) as overlay 2
-- MySims: SkyHeros (USA and EU) as overlay 2
-- Super Scribblenauts (USA) as overlay 20
-- Club Penguin: Elite Penguin Force - Herbert's Revenge (USA) as overlay 11
-- Dragon Quest Monsters: Joker 2 (Japan) as overlay 2
-- Lost Identities (EU) as overlay 2
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.25 (unconfirmed), as it appears in River City: Soccer Hooligans as overlay 5 (and very few other games!).
 
-This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it.
+This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: River City: Soccer Hooligans will disable the start button on the title screen ([Source](https://tcrf.net/River_City:_Soccer_Hooligans)).
 
 The existence, mechanics, and effects of DS Protect have been documented as early as 2009 ([link](https://gbatemp.net/threads/seeking-help-for-anti-piracy-protection-removal.134683/post-1768816), [link](https://sourceforge.net/p/desmume/bugs/979/), [link](https://opentrackers.org/scenerules.org/html/2010_NDSr.html)).
 

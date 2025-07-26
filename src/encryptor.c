@@ -11,8 +11,8 @@ asm void clearDataAndInstructionCache(register void* start_addr, register u32 nu
 	// This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange.
 	// Both of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
 	
-	add  r1, r1, r0
 	mov  ip, #0
+	add  r1, r1, r0
 	bic  r0, r0, #31
 	
 @1:
@@ -80,9 +80,6 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 				case 3:
 					*(u32*)addr = ((*(u32*)addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
 					              (((*(u32*)addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
-					
-					xorval ^= *(u32*)addr >> 24;
-					xorval &= 0x00FFFFFF;
 					break;
 				
 				case 2:
@@ -91,8 +88,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 				default:
 					*(u32*)addr ^= xorval;
 					
-					xorval ^= *(u32*)addr;
-					xorval ^= *(u32*)addr >> 8;
+					xorval <<= 1;
+					xorval += *(u32*)addr;
 					xorval &= 0x00FFFFFF;
 					break;
 			}

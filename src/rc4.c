@@ -79,7 +79,7 @@ u8 RC4_Byte(RC4_Ctx* ctx) {
 
 
 u32 RC4_InitSBox(u8* sbox) {
-	// S[i] = i ^ 0xFF (optimized to write 4 bytes at a time)
+	// S[i] = i ^ 0x3F (optimized to write 4 bytes at a time)
 	u32   x;
 	u32   y;
 	u32*  sbox_start;
@@ -90,7 +90,7 @@ u32 RC4_InitSBox(u8* sbox) {
 	sbox_start = (u32*)&sbox[0];
 	sbox_end = (u32*)&sbox[256];
 	do {
-		*sbox_start++ = x ^ 0xFFFFFFFF;
+		*sbox_start++ = x ^ 0x3F3F3F3F;
 		x += y;
 	} while(sbox_start < sbox_end);
 	
@@ -104,8 +104,6 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8*  dst_bytes;
 	u32  idx;
 	u32  ins_word;
-	u32  upper;
-	u32  lower;
 	u8   ins_byte;
 	u8   rand_byte;
 	
@@ -124,17 +122,12 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			case 1:
 			case 2:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
-				
-				lower = ((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF;
-				upper = (*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24);
-				
-				ctx->x += (upper >> 24);
-				
-				*(u32*)(dst + idx) = upper | lower;
+				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
+				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
 				break;
 			
 			case 3:
-				// Likely a typo: Modified source data
+				// Error correction: this should never happen, should be a type-0 instruction
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
 			default:
@@ -157,9 +150,6 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
-				
-				// Update x
-				ctx->x = (ctx->x * dst_bytes[idx+2]) - dst_bytes[idx+3];
 				break;
 		}
 	}
@@ -198,38 +188,15 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case 1:
 			case 3:
-				ctx->x += (ins_word >> 24);
 				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
 				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 				
 				break;
 			
 			case 2:
-				// First byte
-				ins_byte = src_bytes[idx];
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte ^ rand_byte;
-				
-				// Second byte
-				ins_byte = getInsByte(src_bytes, idx, 1);
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx+1] = ins_byte ^ rand_byte;
-				
-				// Update x
-				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
-				
-				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
-				
-				// Fourth byte
-				dst_bytes[idx+3] = src_bytes[idx+3];
-				
-				// Likely a typo: Modified source data
+				// Error correction: this should never happen, should be a type-0 instruction
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
-				break;
-			
+				// Fall through
 			default:
 				// First byte
 				ins_byte = src_bytes[idx];
@@ -242,9 +209,6 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				rand_byte = RC4_Byte(ctx);
 				ctx->x = ins_byte;
 				dst_bytes[idx+1] = ins_byte ^ rand_byte;
-				
-				// Update x
-				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
 				
 				// Third byte
 				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
