@@ -42,7 +42,7 @@ CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W 
 DEPS := $(wildcard $(BUILD_DIR)/*.d)
 
 # Output library file
-LIBRARY_NAME := dsprot.a
+LIBRARY_NAME := dsprot_instant.a
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \

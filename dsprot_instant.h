@@ -1,5 +1,5 @@
-#ifndef DSPROT_H
-#define DSPROT_H
+#ifndef DSPROT_INSTANT_H
+#define DSPROT_INSTANT_H
 
 #ifndef SDK_ASM
 
@@ -48,4 +48,4 @@ static inline void* DSProt_DetectInstant(void* callback, void* param1, void* par
 
 #endif /* SDK_ASM */
 
-#endif /* DSPROT_H */
+#endif /* DSPROT_INSTANT_H */
