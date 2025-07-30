@@ -134,8 +134,7 @@ static void createRC4Key(uint32_t inkey, unsigned int func_size, uint8_t* outkey
 	memcpy(outkey, &k[0], RC4_KEY_SIZE);
 }
 
-
-static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
+static int keyedEncodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
 	Encoding_Ctx ctx;
 	Encode_Init(&ctx, task);
 	
@@ -165,14 +164,10 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTa
 	int encoded_instructions = last_idx + 1;
 	int encoded_size = encoded_instructions * 4;
 	
-	// RC4 setup if neccessary, else use NULL
-	RC4_Ctx* rc4 = NULL;
-	if (task->key_mode == MODE_KEYED) {
-		rc4 = malloc(sizeof(RC4_Ctx));
-		uint8_t rc4key[RC4_KEY_SIZE];
-		createRC4Key(task->key + start_addr, encoded_size, rc4key);
-		RC4_Init(rc4, rc4key);
-	}
+	RC4_Ctx* rc4 = malloc(sizeof(RC4_Ctx));
+	uint8_t rc4key[RC4_KEY_SIZE];
+	createRC4Key(task->key + start_addr, encoded_size, rc4key);
+	RC4_Init(rc4, rc4key);
 	
 	for (int i = 0; i < encoded_instructions; i++) {
 		if (task->encoding_type == ENC_DECODE) {
@@ -189,6 +184,70 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTa
 	free(rc4);
 	
 	return encoded_size;
+}
+
+static int unkeyedEncodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
+	Encoding_Ctx ctx;
+	Encode_Init(&ctx, task);
+	
+	int num_ins = size / 4;
+	fseek(elf->fhandle, start_addr, SEEK_SET);
+	Instruction* ins_buffer = malloc(size);
+	fread(ins_buffer, sizeof(Instruction), num_ins, elf->fhandle);
+	
+	// If decoding, decode all of the routine first,
+	// then decide if there was anything that shouldn't have been decoded
+	if (task->encoding_type == ENC_DECODE) {
+		for (int i = 0; i < num_ins; i++) {
+			Decode_Instruction(&ctx, &ins_buffer[i], NULL);
+		}
+	}
+	
+	// Finding last executed instruction (ignoring data at the end of the routine)
+	// Looking for bx / pop
+	uint32_t target_bxlr = 0xE12FFF1E;
+	uint32_t target_pop = 0xE8BD8000 >> 15;
+	
+	int last_idx = num_ins - 1;
+	while (ins_buffer[last_idx].raw != target_bxlr && (ins_buffer[last_idx].raw >> 15) != target_pop) {
+		last_idx--;
+		
+		if (last_idx < 0) {
+			// Could not find target, probably wrong encoding direction specified
+			return 0;
+		}
+	}
+	
+	int encoded_instructions = last_idx + 1;
+	int encoded_size = encoded_instructions * 4;
+	
+	// If encoding, encode the instructions after counting
+	if (task->encoding_type == ENC_ENCODE) {
+		for (int i = 0; i < num_ins; i++) {
+			Encode_Instruction(&ctx, &ins_buffer[i], NULL);
+		}
+	}
+	
+	// Write back to file
+	fseek(elf->fhandle, start_addr, SEEK_SET);
+	fwrite(ins_buffer, sizeof(Instruction), encoded_instructions, elf->fhandle);
+	
+	free(ins_buffer);
+	
+	return encoded_size;
+}
+
+static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
+	switch (task->key_mode) {
+		case MODE_KEYED:
+			return keyedEncodeInstructions(elf, start_addr, size, task);
+		
+		case MODE_UNKEYED:
+			return unkeyedEncodeInstructions(elf, start_addr, size, task);
+		
+		default:
+			return 0;
+	}
 }
 
 
@@ -256,13 +315,13 @@ static int encodeSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name
 			
 			if (task->encoding_type == ENC_DECODE) {
 				if (task->key_mode == MODE_KEYED) {
-					printf(INDENT "Decoded +%x (key = %04x)\n", encoded_bytes, task->key);
+					printf(INDENT "Decoded +%x (key = %04x)\n", encoded_bytes, task->key + start_addr);
 				} else {
 					printf(INDENT "Decoded +%x\n", encoded_bytes);
 				}
 			} else {
 				if (task->key_mode == MODE_KEYED) {
-					printf(INDENT "Encoded +%x (key = %04x)\n", encoded_bytes, task->key);
+					printf(INDENT "Encoded +%x (key = %04x)\n", encoded_bytes, task->key + start_addr);
 				} else {
 					printf(INDENT "Encoded +%x\n", encoded_bytes);
 				}

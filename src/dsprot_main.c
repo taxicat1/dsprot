@@ -4,138 +4,75 @@
 
 #include "primes.h"
 #include "encoding_constants.h"
+#include "crash.h"
 #include "integrity.h"
 #include "rom_test.h"
 #include "mac_owner.h"
-#include "dummy.h"
 
-// Functions to be encrypted (cannot be called directly)
-u32 DetectFlashcart(void* callback, void* param);
-u32 DetectNotFlashcart(void* callback, void* param);
-u32 DetectEmulator(void* callback, void* param);
-u32 DetectNotEmulator(void* callback, void* param);
-u32 DetectDummy(void* callback, void* param);
-u32 DetectNotDummy(void* callback, void* param);
-
-static inline u32 executeFunctionQueue(u32* func_queue_ptr);
-
-#define DSP_OBFS_OFFSET  (0x320)
-
-typedef u32 (*U32Func)(void);
-typedef u32 (*ArgFunc)(void*);
+// Function to be encrypted (cannot be called directly)
+u32 DetectAll(void* callback, void* param1, void* param2);
 
 
-// This was likely not originally an inline, but an inline is able to match here nicely
-static inline u32 executeFunctionQueue(u32* func_queue_ptr) {
-	u32 func_checksum;
+#define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
+
+typedef u32 (*U32Func)(u32);
+typedef void* (*CallbackFunc)(void*, void*);
+
+u32 DetectAll(void* callback, void* param1, void* param2) {
+	u32      func_queue[5];
+	u32      ret;
+	u32      i;
+	u32*     func_queue_ptr;
+	u32*     func_data_ptr;
+	u32      func_data_checksum;
+	u32      func_ret;
+	U32Func  queued_func;
+	u32      func_ret_total;
 	
-	func_checksum = PRIME_DSPROT_MAIN * PRIME_TRUE * PRIME_FALSE;
+	func_queue[0] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1];
+	func_queue[1] = (u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1];
+	func_queue[2] = (u32)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1];
+	func_queue[3] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1];
+	func_queue[4] = 0;
+	
+	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
+	
+	func_queue_ptr = &func_queue[0];
 	do {
-		func_checksum += ((U32Func)(*func_queue_ptr - ENC_VAL_1 - DSP_OBFS_OFFSET))();
-		func_queue_ptr++;
-	} while(*func_queue_ptr != 0);
+		queued_func = (U32Func)(*func_queue_ptr - ENC_VAL_1);
+		
+		func_data_ptr = (u32*)queued_func;
+		i = 9;
+		func_data_checksum = 0;
+		do {
+			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
+			func_data_ptr++;
+		} while (--i);
+		
+		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
+			ret = DSProt_Crash(0, 0);
+			goto EXIT;
+		}
+		
+		func_ret = queued_func(0);
+		if (func_ret == 0) {
+			ret = DSProt_Crash(0, 0);
+			goto EXIT;
+		} else {
+			func_ret_total += func_ret;
+		}
+	} while (*++func_queue_ptr != 0);
 	
-	return func_checksum;
-}
-
-
-u32 DetectFlashcart(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
-	
-	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
+	if (!(func_ret_total % PRIME_FALSE)) {
+		if (callback != NULL) {
+			ret = (u32)((CallbackFunc)callback)(param1, param2);
+		} else {
+			ret = 0;
+		}
+	} else {
+		ret = DSProt_Crash(0, 0);
 	}
 	
-	return ret;
-}
-
-
-u32 DetectNotFlashcart(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
-	
-	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_ROMTest_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
-}
-
-
-u32 DetectEmulator(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
-	
-	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
-}
-
-
-u32 DetectNotEmulator(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
-	
-	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_MACOwner_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
-}
-
-
-u32 DetectDummy(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
-	
-	// No integrity check on dummy detectors
-	func_queue[0] = (u32)&RunEncrypted_Dummy_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = 0;
-	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
-}
-
-
-u32 DetectNotDummy(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
-	
-	// No integrity check on dummy detectors
-	func_queue[0] = (u32)&RunEncrypted_Dummy_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = 0;
-	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
+EXIT:
 	return ret;
 }

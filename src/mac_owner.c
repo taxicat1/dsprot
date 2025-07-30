@@ -1,11 +1,11 @@
 #include "mac_owner.h"
 
+#include "crash.h"
 #include "primes.h"
 #include "encoding_constants.h"
 
-// Functions to be encrypted (cannot be called directly)
+// Function to be encrypted (cannot be called directly)
 u32 MACOwner_IsBad(void);
-u32 MACOwner_IsGood(void);
 
 static const u8 bad_mac_addr[6] = {
 	// 00:09:BF:00:00:31 after bit flipping
@@ -17,12 +17,12 @@ static const u8 bad_mac_addr[6] = {
 
 u32 MACOwner_IsBad(void) {
 	int          i;
-	u8           mac_addr[MAC_ADDR_SIZE];
+	u8           mac_addr[6];
 	OSOwnerInfo  owner_info;
-	u32          ret;
+	u32          mul;
 	
 	OS_GetMacAddress(&mac_addr[0]);
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
+	for (i = 0; i < 6; i++) {
 		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
 			break;
 		}
@@ -30,62 +30,26 @@ u32 MACOwner_IsBad(void) {
 	
 	OS_GetOwnerInfo(&owner_info);
 	if (
-		i == MAC_ADDR_SIZE &&
+		i == 6 &&
 		owner_info.birthday.month == 1 &&
 		owner_info.birthday.day   == 1 &&
 		owner_info.nickNameLength == 0
 	) {
-		ret = PRIME_TRUE;
+		DSProt_Crash(0, 0);
+		mul = PRIME_TRUE;
 		goto EXIT;
 	}
 	
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
+	for (i = 0; i < 6; i++) {
 		if (mac_addr[i] != 0x00) {
-			ret = PRIME_FALSE;
+			mul = PRIME_FALSE;
 			goto EXIT;
 		}
 	}
 	
-	ret = PRIME_TRUE;
+	DSProt_Crash(0, 0);
+	mul = PRIME_TRUE;
 	
 EXIT:
-	return ret * PRIME_MAC_OWNER_1;
-}
-
-
-u32 MACOwner_IsGood(void) {
-	int          i;
-	u8           mac_addr[MAC_ADDR_SIZE];
-	OSOwnerInfo  owner_info;
-	u32          ret;
-	
-	OS_GetMacAddress(&mac_addr[0]);
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
-			break;
-		}
-	}
-	
-	OS_GetOwnerInfo(&owner_info);
-	if (
-		i == MAC_ADDR_SIZE &&
-		owner_info.birthday.month == 1 &&
-		owner_info.birthday.day   == 1 &&
-		owner_info.nickNameLength == 0
-	) {
-		ret = PRIME_FALSE;
-		goto EXIT;
-	}
-	
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (mac_addr[i] != 0x00) {
-			ret = PRIME_TRUE;
-			goto EXIT;
-		}
-	}
-	
-	ret = PRIME_FALSE;
-	
-EXIT:
-	return ret * PRIME_MAC_OWNER_2;
+	return mul * PRIME_MAC_OWNER;
 }

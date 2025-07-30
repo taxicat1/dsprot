@@ -3,6 +3,69 @@
 #include "encoding_constants.h"
 #include "encryptor.h"
 
+typedef struct {
+	int  x;
+	int  i;
+	int  j;
+	u8   S[256];
+} RC4_Ctx;
+
+u32 RC4_CategorizeInstruction(u32 instruction);
+void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len);
+u8 RC4_Byte(RC4_Ctx* ctx);
+u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size);
+u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size);
+u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size);
+u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size);
+
+// These variables must be declared in this exact order to maintain rodata layout.
+// Must also be compiled with `-ipa file`
+//
+//  [5] .rodata
+//      00  Proxy_RC4_InitAndDecryptInstructions
+//  [7] .rodata
+//      00  Proxy_RC4_InitAndEncryptInstructions
+//  [9] .rodata
+//      00  Proxy_RC4_CategorizeInstruction
+//      04  Proxy_RC4_EncryptInstructions
+//      08  Proxy_RC4_DecryptInstructions
+//      0C  Proxy_RC4_Byte
+//      10  Proxy_RC4_Init
+const u32 Proxy_RC4_Byte                       = (u32)&RC4_Byte[ENC_VAL_1];
+const u32 Proxy_RC4_DecryptInstructions        = (u32)&RC4_DecryptInstructions[ENC_VAL_1];
+const u32 Proxy_RC4_EncryptInstructions        = (u32)&RC4_EncryptInstructions[ENC_VAL_1];
+const u32 Proxy_RC4_CategorizeInstruction      = (u32)&RC4_CategorizeInstruction[ENC_VAL_1];
+const u32 Proxy_RC4_InitAndEncryptInstructions = (u32)&RC4_InitAndEncryptInstructions[ENC_VAL_1];
+const u32 Proxy_RC4_InitAndDecryptInstructions = (u32)&RC4_InitAndDecryptInstructions[ENC_VAL_1];
+const u32 Proxy_RC4_Init                       = (u32)&RC4_Init[ENC_VAL_1];
+
+typedef u8  (*FuncType_RC4_Byte)(RC4_Ctx*);
+typedef u32 (*FuncType_RC4_EncryptInstructions)(RC4_Ctx*, void*, void*, u32);
+typedef u32 (*FuncType_RC4_DecryptInstructions)(RC4_Ctx*, void*, void*, u32);
+typedef u32 (*FuncType_RC4_CategorizeInstruction)(u32);
+typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
+
+
+static u32 RC4_CategorizeInstruction(u32 instruction) {
+	u8 upper_byte;
+	
+	upper_byte = (instruction >> 24) & 0xFF;
+	
+	if ((upper_byte & 0x0E) == 0x0A) {
+		if ((upper_byte & 0xF0) == 0xF0) {
+			return 1;
+		}
+		
+		if (upper_byte & 0x01) {
+			return 2;
+		} else {
+			return 3;
+		}
+	}
+	
+	return 0;
+}
+
 
 void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	u8    tmp1;
@@ -78,36 +141,16 @@ u8 RC4_Byte(RC4_Ctx* ctx) {
 }
 
 
-u32 RC4_InitSBox(u8* sbox) {
-	// S[i] = i ^ 0xFF (optimized to write 4 bytes at a time)
-	u32   x;
-	u32   y;
-	u32*  sbox_start;
-	u32*  sbox_end;
-	
-	x = 0x03020100;
-	y = 0x04040404;
-	sbox_start = (u32*)&sbox[0];
-	sbox_end = (u32*)&sbox[256];
-	do {
-		*sbox_start++ = x ^ 0xFFFFFFFF;
-		x += y;
-	} while(sbox_start < sbox_end);
-	
-	return 0;
-}
-
-
 u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
-	u8   sbox[256];
-	u8*  src_bytes;
-	u8*  dst_bytes;
-	u32  idx;
-	u32  ins_word;
-	u32  upper;
-	u32  lower;
-	u8   ins_byte;
-	u8   rand_byte;
+	u32                idx;
+	u32                ins_byte;
+	u32                rand_byte;
+	u32                ins_word;
+	u8*                src_bytes;
+	u8*                dst_bytes;
+	u32                rc4_byte_addr;
+	FuncType_RC4_Byte  rc4_byte;
+	u32                upper, lower;
 	
 	if (size & 3) {
 		return -1;
@@ -116,50 +159,59 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	src_bytes = (u8*)src;
 	dst_bytes = (u8*)dst;
 	
-	RC4_InitSBox(&sbox[0]);
-	
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
-		switch (Encryptor_CategorizeInstruction(ins_word)) {
+		
+		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
 			case 1:
 			case 2:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
 				
-				lower = ((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF;
-				upper = (*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24);
+				upper = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
+				lower = (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
 				
-				ctx->x += (upper >> 24);
+				ctx->x += upper >> 24;
 				
 				*(u32*)(dst + idx) = upper | lower;
+				
 				break;
 			
 			case 3:
-				// Likely a typo: Modified source data
+				// Error correction (this case should never be run)
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
 			default:
+				rc4_byte_addr = Proxy_RC4_Byte;
+				rc4_byte_addr -= ENC_VAL_1;
+				rc4_byte = (FuncType_RC4_Byte)rc4_byte_addr;
+				
 				// First byte
-				rand_byte = RC4_Byte(ctx);
+				rand_byte = rc4_byte(ctx);
 				ins_byte = src_bytes[idx];
 				ins_byte ^= rand_byte;
 				ctx->x = ins_byte;
 				dst_bytes[idx] = ins_byte;
 				
 				// Second byte
-				rand_byte = RC4_Byte(ctx);
+				rand_byte = rc4_byte(ctx);
 				ins_byte = src_bytes[idx+1];
 				ins_byte ^= rand_byte;
 				ctx->x = ins_byte;
 				dst_bytes[idx+1] = ins_byte;
 				
 				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				rand_byte = rc4_byte(ctx);
+				ins_byte = src_bytes[idx+2];
+				ins_byte ^= rand_byte;
+				ctx->x = ins_byte;
+				dst_bytes[idx+2] = ins_byte;
 				
-				// Fourth byte
-				dst_bytes[idx+3] = src_bytes[idx+3];
+				// Fourth byte (temporary assignment is required to match)
+				ins_byte = src_bytes[idx+3];
+				dst_bytes[idx+3] = ins_byte;
 				
-				// Update x
-				ctx->x = (ctx->x * dst_bytes[idx+2]) - dst_bytes[idx+3];
+				// Update `x`
+				ctx->x -= ins_byte;
 				break;
 		}
 	}
@@ -168,21 +220,15 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 }
 
 
-// For some reason this inline is required to match
-static inline u8 getInsByte(u8 *ins_byte_ptr, u32 offset, u32 byte);
-static inline u8 getInsByte(u8 *ins_byte_ptr, u32 offset, u32 byte) {
-	return ins_byte_ptr[offset + byte];
-}
-
-
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
-	u8   sbox[256];
-	u8*  src_bytes;
-	u8*  dst_bytes;
-	u32  idx;
-	u32  ins_word;
-	u8   ins_byte;
-	u8   rand_byte;
+	u32                idx;
+	u32                ins_word;
+	u32                rand_byte;
+	u32                rc4_byte_addr;
+	FuncType_RC4_Byte  rc4_byte;
+	u32                ins_byte;
+	u8*                src_bytes;
+	u8*                dst_bytes;
 	
 	if (size & 3) {
 		return -1;
@@ -190,64 +236,78 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	src_bytes = (u8*)src;
 	dst_bytes = (u8*)dst;
-	
-	RC4_InitSBox(&sbox[0]);
-	
+
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
-		switch (Encryptor_CategorizeInstruction(ins_word)) {
+		
+		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
 			case 1:
 			case 3:
-				ctx->x += (ins_word >> 24);
-				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
+				ctx->x += ins_word >> 24; 
+				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
 				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 				
 				break;
 			
 			case 2:
+				rc4_byte_addr = Proxy_RC4_Byte;
+				rc4_byte_addr -= ENC_VAL_1;
+				
 				// First byte
-				ins_byte = src_bytes[idx];
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte ^ rand_byte;
+				// Required to match: randomly using `ins_word` here instead of `ins_byte`
+				ins_word = src_bytes[idx];
+				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
+				ctx->x = ins_word;
+				dst_bytes[idx] = ins_byte ^ rand_byte; // This extra write here is required to match as well
+				dst_bytes[idx] = ins_word ^ rand_byte;
 				
 				// Second byte
-				ins_byte = getInsByte(src_bytes, idx, 1);
-				rand_byte = RC4_Byte(ctx);
+				ins_byte = src_bytes[idx+1];
+				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
 				ctx->x = ins_byte;
 				dst_bytes[idx+1] = ins_byte ^ rand_byte;
 				
-				// Update x
-				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
-				
 				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				ins_byte = src_bytes[idx+2];
+				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
+				ctx->x = ins_byte;
+				dst_bytes[idx+2] = ins_byte ^ rand_byte;
 				
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
 				
-				// Likely a typo: Modified source data
+				// Update `x`
+				ctx->x -= src_bytes[idx+3];
+				
+				// Error correction (this case should never be run)
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				break;
 			
 			default:
+				rc4_byte_addr = Proxy_RC4_Byte;
+				rc4_byte_addr -= ENC_VAL_1;
+				rc4_byte = (FuncType_RC4_Byte)rc4_byte_addr;
+				
 				// First byte
 				ins_byte = src_bytes[idx];
-				rand_byte = RC4_Byte(ctx);
+				rand_byte = rc4_byte(ctx);
 				ctx->x = ins_byte;
 				dst_bytes[idx] = ins_byte ^ rand_byte;
 				
 				// Second byte
-				ins_byte = getInsByte(src_bytes, idx, 1);
-				rand_byte = RC4_Byte(ctx);
+				ins_byte = src_bytes[idx+1];
+				rand_byte = rc4_byte(ctx);
 				ctx->x = ins_byte;
 				dst_bytes[idx+1] = ins_byte ^ rand_byte;
 				
-				// Update x
-				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
-				
 				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				ins_byte = src_bytes[idx+2];
+				rand_byte = rc4_byte(ctx);
+				ctx->x = ins_byte;
+				dst_bytes[idx+2] = ins_byte ^ rand_byte;
+				
+				// Update `x`
+				ctx->x -= src_bytes[idx+3];
 				
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
@@ -260,16 +320,38 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 
 u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
-	RC4_Ctx ctx;
-	RC4_Init(&ctx, key, 16);
-	// Must coerce output to -1 or 0 like this to match
-	return RC4_EncryptInstructions(&ctx, dst, src, size) == -1 ? -1 : 0;
+	RC4_Ctx  ctx;
+	u32      rc4_init;
+	u32      rc4_encrypt;
+	u32      enc_ret;
+	
+	rc4_init = Proxy_RC4_Init;
+	rc4_init -= ENC_VAL_1;
+	((FuncType_RC4_Init)rc4_init)(&ctx, key, 16);
+	
+	rc4_encrypt = Proxy_RC4_EncryptInstructions;
+	rc4_encrypt -= ENC_VAL_1;
+	enc_ret = ((FuncType_RC4_EncryptInstructions)rc4_encrypt)(&ctx, dst, src, size);
+	
+	// Must coerce return to -1 or 0
+	return enc_ret == -1 ? -1 : 0;
 }
 
 
 u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size) {
-	RC4_Ctx ctx;
-	RC4_Init(&ctx, key, 16);
-	// Must coerce output to -1 or 0 like this to match
-	return RC4_DecryptInstructions(&ctx, dst, src, size) == -1 ? -1 : 0;
+	RC4_Ctx  ctx;
+	u32      rc4_init;
+	u32      rc4_encrypt;
+	u32      enc_ret;
+	
+	rc4_init = Proxy_RC4_Init;
+	rc4_init -= ENC_VAL_1;
+	((FuncType_RC4_Init)rc4_init)(&ctx, key, 16);
+	
+	rc4_encrypt = Proxy_RC4_DecryptInstructions;
+	rc4_encrypt -= ENC_VAL_1;
+	enc_ret = ((FuncType_RC4_DecryptInstructions)rc4_encrypt)(&ctx, dst, src, size);
+	
+	// Must coerce return to -1 or 0
+	return enc_ret == -1 ? -1 : 0;
 }

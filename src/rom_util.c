@@ -1,8 +1,5 @@
 #include "rom_util.h"
 
-// Functions to be encrypted (cannot be called directly)
-u32 ROMUtil_CRC32(void* buf, u32 size);
-
 
 u32 ROMUtil_CRC32(void* buf, u32 size) {
 	u32  crc;
