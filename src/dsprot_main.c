@@ -41,6 +41,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 	do {
 		queued_func = (U32Func)(*func_queue_ptr - ENC_VAL_1);
 		
+		// Preliminary integrity check
 		func_data_ptr = (u32*)queued_func;
 		i = 9;
 		func_data_checksum = 0;
@@ -50,13 +51,18 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		} while (--i);
 		
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
-			ret = DSProt_Crash(0, 0);
+			// The goto is useless, but required to match
+			ret = DSProt_Crash(0, 0); // No return
 			goto EXIT;
 		}
 		
 		func_ret = queued_func(0);
+		
+		// `func_ret` should always be a prime-encoded Boolean
+		// 0 would indicate tampering
 		if (func_ret == 0) {
-			ret = DSProt_Crash(0, 0);
+			// The goto is useless, but required to match
+			ret = DSProt_Crash(0, 0); // No return
 			goto EXIT;
 		} else {
 			func_ret_total += func_ret;
