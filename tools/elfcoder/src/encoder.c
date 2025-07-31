@@ -62,7 +62,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				rc4->x = c;
 				
 				d = d;
-				rc4->x -= d;
+				rc4->x = ((uint32_t)rc4->x - d) & 0xff;
 				
 				ins->opcode = d;
 				ins->operands = (c << 16) | (b << 8) | a;
