@@ -6,15 +6,29 @@ DS Protect has two methods of antipiracy detection:
 	- A MAC address of `00:00:00:00:00:00` (indicating an emulator that is not emulating a MAC address at all)
 	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of No$GBA)
 
-2. ROM read check. It will conduct six reads of the cartridge ROM at these locations:
+2. ROM read check. It will conduct twelve reads of the cartridge ROM, performing six with a manual read (writing to I/O registers), and six with the SDK's `CARDi_ReadRom`.
+	
+	The manual reads will read these pages:
 	- `0x1000 - 0x11FF`
 	- `0x1200 - 0x13FF`
 	- `0x1400 - 0x15FF`
+	- `0xA000 - 0xA1FF`
+	- `0xD000 - 0xD1FF`
+	- `0xE000 - 0xE1FF`
+	
+	`CARDi_ReadRom` then reads these pages:
 	- `0x8000 - 0x81FF`
 	- `0x8200 - 0x83FF`
 	- `0x8400 - 0x85FF`
+	- `0xA000 - 0xA1FF`
+	- `0xD000 - 0xD1FF`
+	- `0xE000 - 0xE1FF`
 	
-	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first four reads will all receive the same data. The last two reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. If the expected read pattern is not matched (`1 == 2 == 3 == 4` and `4 != 5 != 6`) it will report it is running on a flashcart.
+	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. 
+	
+	Additionally, many flashcarts will patch over `CARDi_ReadRom` with their own code, in order to properly read from their SD cards. If this was done, then reads of the same location will return different data between the manual read and SDK read.
+	
+	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 
 3. Additionally, there is a third "dummy" method which does not actually do any antipiracy detection. This is apparently purely to confuse reverse engineering.
 
@@ -22,16 +36,16 @@ Note that modern emulators, such as [MelonDS](https://github.com/melonDS-emu/mel
 
 ## Exported functions
 
-Each of the three methods exists as two copies, which are identical except for reversed return values. That is, there are six functions in total with these purposes:
+Two functions are exported:
 
-- Detect flashcart
-- Detect not flashcart
-- Detect emulator
-- Detect not emulator
-- Detect dummy (always fails)
-- Detect not dummy (always succeeds)
+- Detect all (flashcart, emulator, memory tampering)
+- Crash
 
-Each of these functions takes as argument a callback function and a parameter for that callback of type `void*`. The callback function will be run if the target detection succeeds. Meaning, `DetectFlashcart(callback, param)` will run the callback function only if a flashcart is detected. `DetectNotFlashcart(callback, param)` will inversely run the callback function only if a flashcart is *not* detected. They will return the return value of the inner callback function if detection succeeded and the callback was run. Otherwise, some other integer value will be returned.
+Additionally, a standard wrapper for these two functions is provided as an inline in the header file.
+
+The crash function, as the name implies, will immediately crash the system by clobbering the stack and then going into an infinite loop via calling `OS_Terminate`. 
+
+The detection function takes as argument an optional callback function and two parameters for that callback of type `void*`. The callback will be run if the function fails to detect anything. If it does detect piracy or tampering, it will call the crash function instead. The return value from the callback is passed back as the return value of the detection function, or `NULL` if no callback was provided.
 
 ## Obfuscation
 
@@ -47,7 +61,9 @@ For technical details on the encoding and obfuscation, see [ENCODING.MD](./ENCOD
 
 ## Integrity
 
-Before running any of the core check functions, it also conducts an integrity check of their decryption wrappers. It checks the first 16 bytes (4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected. There is no integrity check on the dummy detection functions.
+Before running any of the core check functions, it also conducts an integrity check of their decryption wrappers. It checks the first 16 bytes (4 instructions) of the code of the function against its own hardcoded record, and if it mismatches, it will automatically report that a flashcart or emulator was detected.
+
+The wrapper provided in the header file also conducts its own integrity check. This is so attempting to bypass integrity checks via ROM patching will require tracking down and patching every single place the wrapper was inlined.
 
 ## Dummy data
 
@@ -55,4 +71,4 @@ As a final trick, the library also includes 24 bytes of data designed to appear 
 
 ## Note on language
 
-The majority of the library is written in C, but the decryption wrappers, decoder initializers, and another helper function are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
+The majority of the library is written in C, but the decryption wrappers, decoder initializers, the crashing function, and another helper function are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).

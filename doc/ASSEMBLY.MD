@@ -1,6 +1,6 @@
 # Assembly functions
 
-Decryption wrappers, decoding static initializers, and the helper function to clear the data and instruction cache are all written at least partially in assembly. This can be proven. All other functions in the library may or may not be written partially or wholly in assembly, but they all may be decompiled to some C code which matches, and therefore can be assumed to have originally been written in C.
+Decryption wrappers, decoding static initializers, a helper function to clear the data and instruction cache, and the crashing function are all written at least partially in assembly. This can be proven. All other functions in the library may or may not be written partially or wholly in assembly, but they all may be decompiled to some C code which matches, and therefore can be assumed to have originally been written in C.
 
 ## Decryption wrappers
 
@@ -12,16 +12,22 @@ Encryptor_DecryptionWrapperFragment:
 	stmfd  sp!, {r0-r3}
 	str    r10, [ip, #0x10]
 	mov    r10, ip
+	ldr    ip, =Proxy_Encryptor_DecryptFunction  ; Load and deobfuscate address of decryption routine
 	str    lr, [r10]
+	ldr    ip, [ip]
 	ldmib  r10, {r0-r2}
-	bl     Encryptor_DecryptFunction    ; Function decryption routine
+	sub    ip, ip, #0x2100
+	blx    ip                                    ; Run function decryption routine
 	mov    ip, r0
 	ldmia  sp!, {r0-r3}
-	blx    ip                           ; Call decrypted function
+	blx    ip                                    ; Run internal function
+	ldr    ip, =Proxy_Encryptor_EncryptFunction  ; Load and deobfuscate function re-encryption routine
 	stmdb  sp!, {r4}
+	ldr    ip, [ip]
 	mov    r4, r0
+	sub    ip, ip, #0x2100
 	ldmib  r10, {r0-r2}
-	bl     Encryptor_EncryptFunction    ; Function re-encryption routine
+	blx    ip                                    ; Run function re-encryption routine
 	str    r0, [r10, #0x4]
 	mov    r0, r4
 	ldmia  sp!, {r4}
@@ -35,21 +41,21 @@ Encryptor_DecryptionWrapperFragment:
 Second, the "head" function that sets up the `ip` register before calling the universal wrapper:
 
 ```asm
-	arm_func_start RunEncrypted_ROMUtil_CRC32
-RunEncrypted_ROMUtil_CRC32:
+	arm_func_start RunEncrypted_ROMTest_IsBad
+RunEncrypted_ROMTest_IsBad:
 	orr    ip, pc, pc
 	ands   ip, ip, ip
 	moveq  ip, #0
 	addne  ip, ip, #0x1C
 	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #0x1000
+	sub    ip, ip, #0x2100
 	stmfd  sp!, {ip}        ; Setting up jump to Encryptor_DecryptionWrapperFragment
 	orr    ip, pc, pc       ; Loading data structure below into `ip`
 	ldmfd  sp!, {pc}
 	.word  BSS + 0x1        ; Storage space
-	.word  0xC20D           ; Encryption key
-	.word  ROMUtil_CRC32    ; Function to decrypt-run-encrypt
-	.word  0x90             ; Function size
+	.word  0x1654C          ; Encryption key
+	.word  ROMTest_IsBad    ; Function to decrypt-run-encrypt
+	.word  0x2B4            ; Function size
 	.word  0                ; Storage space
 	.word  Encryptor_DecryptionWrapperFragment
 	arm_func_end RunEncrypted_ROMUtil_CRC32
@@ -63,6 +69,7 @@ All decryption wrappers are identical, save for different values at the foot: th
 
 There are three giveaways that these are originally assembly:
 - The "body" function is a seamless universal wrapper function. The registers `r0` through `r3` and the stack pointer are all preserved going into the inner function call, meaning this wrapper will wrap any inner function regardless of its arguments. This is impossible in C: functions that accept some fixed format of arguments will need specific wrappers sharing those arguments (or specific handling of the argument size and order), and functions which accept variable arguments such as `printf(char*, ...)` cannot be wrapped at all, and must have a varargs version of the function instead (`vprintf(char*, va_list)`).
+- The "body" function also pre-supposes an appropriate data structure containing metadata for the inner function (decryption key, size, and address) has been loaded into `ip`. C would not assume this, it would require the address be passed into the function using `r0-r3` or the stack.
 - The "head" function accesses `pc` to store into another register, and the "body" function accesses `lr` to store into a memory location. This is impossible in vanilla C. Some compilers support `__builtin_return_address()`, `__current_pc()`, or other similar intrinsics to do this, but mwccarm does not.
 - The "head" function stores a data structure in instructional memory, and passes a pointer to it along to the "body" function where it is read from and written to. C would never, ever do this: it would store the data in the instructional memory, then load the data into registers and push it onto the stack, and then finally pass a stack pointer through to the body routine. Alternatively, it could store the function table in a `.data` or `.rodata` region and pass a pointer to that.
 
@@ -79,7 +86,6 @@ NitroStaticInit:
 	adds  r0, r0, #0x4
 	bne   Encryptor_DecodeFunctionTable
 	.word RC4_Init,                        0x84   ; (Function address, size) data pairs
-	.word RC4_InitSBox,                    0x30
 	.word RC4_EncryptInstructions,         0x118
 	.word RC4_DecryptInstructions,         0x184
 	.word RC4_InitAndEncryptInstructions,  0x58
@@ -95,6 +101,31 @@ This has two giveaways that it is assembly:
 - Similar to the "head" decryption wrapper function, it moves `pc` into another register to manipulate its value, rather than perform a PC-relative load.
 - Identically to the decryption wrapper head, the function table data structure is stored in the pool of instructional memory, and a pointer to this region is passed into the decoding routine. Again, C would never do this.
 
+## `Crash` function
+
+The crash function takes the form:
+
+```asm
+	asm_func_start Crash
+Crash:
+	mov    r10, pc
+	orrs   r10, r10, r10
+	eorne  lr,  lr,  lr
+	subs   r10, r10, #8
+	ldr    r9, =memClear+0x2100
+	mov    r0, sp
+	sub    r9, r9, #0x2100
+	mov    r1, #0x100
+	blx    r9
+	ldr    lr, =OS_Terminate+0x2100
+	mov    r0, r10
+	mov    r1, #0x1000
+	sub    lr, lr, #0x2100
+	bx     r9
+	arm_func_end Crash
+```
+
+Like the other assembly functions, it moves `pc` into another register for manipulation. It also manipulates `lr` directly without preserving its original value. This is intentional here as there is no intent to ever return.
 
 ## `clearDataAndInstructionCache` helper function
 
