@@ -3,12 +3,12 @@
 #include "encoding_constants.h"
 
 // Function to be encrypted (cannot be called directly)
-u32 Crash(register u32 __unused1, register u32 __unused2);
+void* Crash(register u32 __unused1, register u32 __unused2);
 
 static void memClear(void* addr, u32 size);
 
 
-asm u32 Crash(register u32 __unused1, register u32 __unused2) {
+asm void* Crash(register u32 __unused1, register u32 __unused2) {
 	mov    r10, pc                      // Copy `pc` out
 	orrs   r10, r10, r10                // Checking if `pc` was 0 (would never be)
 	eorne  lr,  lr,  lr                 // If 0, `lr` is cleared (which does nothing since `lr` is overwritten anyway)

@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-extern u32 DSProt_Crash(u32 __unused1, u32 __unused2);
+extern void* DSProt_Crash(u32 __unused1, u32 __unused2);
 extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
 
 #define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
@@ -31,7 +31,7 @@ static inline void* DSProt_DetectInstant(void* callback, void* param1, void* par
 	if (func_data_checksum == DSP_EXPECTED_CHECKSUM) {
 		return DSProt_DetectAll(callback, param1, param2);
 	} else {
-		return (void*)DSProt_Crash(0, 0);
+		return DSProt_Crash(0, 0);
 	}
 }
 

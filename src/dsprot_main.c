@@ -10,7 +10,7 @@
 #include "mac_owner.h"
 
 // Function to be encrypted (cannot be called directly)
-u32 DetectAll(void* callback, void* param1, void* param2);
+void* DetectAll(void* callback, void* param1, void* param2);
 
 
 #define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
@@ -18,9 +18,9 @@ u32 DetectAll(void* callback, void* param1, void* param2);
 typedef u32 (*U32Func)(u32);
 typedef void* (*CallbackFunc)(void*, void*);
 
-u32 DetectAll(void* callback, void* param1, void* param2) {
+void* DetectAll(void* callback, void* param1, void* param2) {
 	u32      func_queue[5];
-	u32      ret;
+	void*    ret;
 	u32      i;
 	u32*     func_queue_ptr;
 	u32*     func_data_ptr;
@@ -65,7 +65,7 @@ u32 DetectAll(void* callback, void* param1, void* param2) {
 	
 	if (!(func_ret_total % PRIME_FALSE)) {
 		if (callback != NULL) {
-			ret = (u32)((CallbackFunc)callback)(param1, param2);
+			ret = ((CallbackFunc)callback)(param1, param2);
 		} else {
 			ret = 0;
 		}
