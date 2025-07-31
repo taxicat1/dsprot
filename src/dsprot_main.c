@@ -67,7 +67,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		if (callback != NULL) {
 			ret = ((CallbackFunc)callback)(param1, param2);
 		} else {
-			ret = 0;
+			ret = NULL;
 		}
 	} else {
 		ret = DSProt_Crash(0, 0);
