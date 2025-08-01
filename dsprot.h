@@ -1,5 +1,5 @@
-#ifndef DSPROT_INSTANT_H
-#define DSPROT_INSTANT_H
+#ifndef DSPROT_H
+#define DSPROT_H
 
 #ifndef SDK_ASM
 
@@ -131,4 +131,4 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 
 #endif /* SDK_ASM */
 
-#endif /* DSPROT_INSTANT_H */
+#endif /* DSPROT_H */
