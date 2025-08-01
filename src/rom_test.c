@@ -212,13 +212,13 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	
 	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-        ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
+		ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
 		return PRIME_TRUE * PRIME_ROM_TEST_1;
 	}
-    
+	
 	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-        ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
+		ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
 		return PRIME_TRUE * PRIME_ROM_TEST_1;
 	}
 	
@@ -425,13 +425,13 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	
 	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-        ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
+		ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
 		return PRIME_FALSE * PRIME_ROM_TEST_2;
 	}
-    
+	
 	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-        ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
+		ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
 		return PRIME_FALSE * PRIME_ROM_TEST_2;
 	}
 	
