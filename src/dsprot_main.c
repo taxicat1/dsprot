@@ -15,8 +15,8 @@ void* DetectFlashcartB(void* param1, void* param2);
 void* DetectEmulatorA(void* param1, void* param2);
 void* DetectEmulatorB(void* param1, void* param2);
 
-#define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
-#define DSP_OBFS_OFFSET        (0x100)
+#define DSP_EXPECTED_CHECKSUM  (0x9FBB82E0)
+#define DSP_OBFS_OFFSET        (0x700)
 
 typedef u32 (*DSProt_Task)(DSProt_Ctx*);
 
@@ -24,7 +24,7 @@ typedef u32 (*DSProt_Task)(DSProt_Ctx*);
 void* DetectFlashcartA(void* param1, void* param2) {
 	DSProt_Ctx        work;
 	u32               func_queue[32];
-	u32               tmp;
+	void*             tmp;
 	DSProt_Callback*  callback_tbl;
 	u32               callback_idx;
 	u32               i;
@@ -41,18 +41,18 @@ void* DetectFlashcartA(void* param1, void* param2) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1];
 	
 	
-	tmp = (u32)(&DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32));
+	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
 	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
-	tmp = (u32)callback_tbl[callback_idx];
-	work.success_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx];
+	work.success_callback = tmp;
 	
-	tmp = (u32)callback_tbl[callback_idx^1];
-	work.failure_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx ^ 1];
+	work.failure_callback = tmp;
 	
 	work.callback_param_1        = param1;
 	work.callback_param_2        = param2;
@@ -116,7 +116,7 @@ void* DetectFlashcartA(void* param1, void* param2) {
 void* DetectFlashcartB(void* param1, void* param2) {
 	DSProt_Ctx        work;
 	u32               func_queue[32];
-	u32               tmp;
+	void*             tmp;
 	DSProt_Callback*  callback_tbl;
 	u32               callback_idx;
 	u32               i;
@@ -133,18 +133,18 @@ void* DetectFlashcartB(void* param1, void* param2) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsGood[ENC_VAL_1];
 	
 	
-	tmp = (u32)(&DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32));
+	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
 	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
-	tmp = (u32)callback_tbl[callback_idx];
-	work.success_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx];
+	work.success_callback = tmp;
 	
-	tmp = (u32)callback_tbl[callback_idx^1];
-	work.failure_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx ^ 1];
+	work.failure_callback = tmp;
 	
 	work.callback_param_1        = param1;
 	work.callback_param_2        = param2;
@@ -208,7 +208,7 @@ void* DetectFlashcartB(void* param1, void* param2) {
 void* DetectEmulatorA(void* param1, void* param2) {
 	DSProt_Ctx        work;
 	u32               func_queue[32];
-	u32               tmp;
+	void*             tmp;
 	DSProt_Callback*  callback_tbl;
 	u32               callback_idx;
 	u32               i;
@@ -225,18 +225,18 @@ void* DetectEmulatorA(void* param1, void* param2) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1];
 	
 	
-	tmp = (u32)(&DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32));
+	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
 	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
-	tmp = (u32)callback_tbl[callback_idx];
-	work.success_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx];
+	work.success_callback = tmp;
 	
-	tmp = (u32)callback_tbl[callback_idx^1];
-	work.failure_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx ^ 1];
+	work.failure_callback = tmp;
 	
 	work.callback_param_1        = param1;
 	work.callback_param_2        = param2;
@@ -300,7 +300,7 @@ void* DetectEmulatorA(void* param1, void* param2) {
 void* DetectEmulatorB(void* param1, void* param2) {
 	DSProt_Ctx        work;
 	u32               func_queue[32];
-	u32               tmp;
+	void*             tmp;
 	DSProt_Callback*  callback_tbl;
 	u32               callback_idx;
 	u32               i;
@@ -317,18 +317,18 @@ void* DetectEmulatorB(void* param1, void* param2) {
 	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsGood[ENC_VAL_1];
 	
 	
-	tmp = (u32)(&DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32));
+	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
 	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
-	tmp = (u32)callback_tbl[callback_idx];
-	work.success_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx];
+	work.success_callback = tmp;
 	
-	tmp = (u32)callback_tbl[callback_idx^1];
-	work.failure_callback = (DSProt_Callback)tmp;
+	tmp = callback_tbl[callback_idx ^ 1];
+	work.failure_callback = tmp;
 	
 	work.callback_param_1        = param1;
 	work.callback_param_2        = param2;

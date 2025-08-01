@@ -46,24 +46,25 @@ LIBRARY_NAME := dsprot.a
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
-	$(BUILD_DIR)/integrity_encrypted.o            \
-	$(BUILD_DIR)/integrity_decrypter_encoded.o    \
-	$(BUILD_DIR)/integrity_decrypter_decoder.o    \
-	$(BUILD_DIR)/rc4_encoded.o                    \
-	$(BUILD_DIR)/rc4_decoder.o                    \
 	$(BUILD_DIR)/dsprot_main_encrypted.o          \
 	$(BUILD_DIR)/dsprot_main_decrypter_encoded.o  \
 	$(BUILD_DIR)/dsprot_main_decrypter_decoder.o  \
 	$(BUILD_DIR)/callback.o                       \
 	$(BUILD_DIR)/extra.o                          \
+	$(BUILD_DIR)/integrity_encrypted.o            \
+	$(BUILD_DIR)/integrity_decrypter_encoded.o    \
+	$(BUILD_DIR)/integrity_decrypter_decoder.o    \
 	$(BUILD_DIR)/encryptor_encoded.o              \
 	$(BUILD_DIR)/encryptor_decoder.o              \
 	$(BUILD_DIR)/mac_owner_encrypted.o            \
-	$(BUILD_DIR)/rom_util_encoded.o               \
+	$(BUILD_DIR)/rom_util_encrypted.o             \
+	$(BUILD_DIR)/rom_util_decrypter_encoded.o     \
 	$(BUILD_DIR)/rom_test_encrypted.o             \
 	$(BUILD_DIR)/rom_test_decrypter_encoded.o     \
 	$(BUILD_DIR)/mac_owner_decrypter_encoded.o    \
-	$(BUILD_DIR)/coretests_decoder.o
+	$(BUILD_DIR)/coretests_decoder.o              \
+	$(BUILD_DIR)/rc4_encoded.o                    \
+	$(BUILD_DIR)/rc4_decoder.o
 
 
 .PHONY: all clean tools dsprot
@@ -91,56 +92,6 @@ $(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
 	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
 
 
-# Integrity module
-$(BUILD_DIR)/integrity_decrypter_decoder.o: $(BUILD_DIR)/integrity_decrypter_decoder.s
-	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/integrity_decrypter_decoder.s -o $(BUILD_DIR)/integrity_decrypter_decoder.o
-
-$(BUILD_DIR)/integrity_decrypter_encoded.o \
-$(BUILD_DIR)/integrity_decrypter_decoder.s: $(BUILD_DIR)/integrity_decrypter.o $(ELFCODER)
-	cp $(BUILD_DIR)/integrity_decrypter.o $(BUILD_DIR)/integrity_decrypter_encoded.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_decrypter_encoded.o -o $(BUILD_DIR)/integrity_decrypter_decoder.s -n Integrity_DecodeFunctions -f \
-		RunEncrypted_Integrity_MACOwner_IsBad   \
-		RunEncrypted_Integrity_MACOwner_IsGood  \
-		RunEncrypted_Integrity_ROMTest_IsBad    \
-		RunEncrypted_Integrity_ROMTest_IsGood
-
-$(BUILD_DIR)/integrity_decrypter.o: $(BUILD_DIR)/integrity_decrypter.s
-	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/integrity_decrypter.s -o $(BUILD_DIR)/integrity_decrypter.o
-
-$(BUILD_DIR)/integrity_encrypted.o \
-$(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ELFCODER)
-	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k ec46 -f \
-		Integrity_MACOwner_IsBad   \
-		Integrity_MACOwner_IsGood  \
-		Integrity_ROMTest_IsBad    \
-		Integrity_ROMTest_IsGood
-
-$(BUILD_DIR)/integrity.o: $(SRC_DIR)/integrity.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/integrity.c -o $(BUILD_DIR)/integrity.o
-	$(FIXDEP) $(BUILD_DIR)/integrity.d
-
-
-# RC4 module
-$(BUILD_DIR)/rc4_decoder.o: $(BUILD_DIR)/rc4_decoder.s
-	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rc4_decoder.s -o $(BUILD_DIR)/rc4_decoder.o
-
-$(BUILD_DIR)/rc4_encoded.o \
-$(BUILD_DIR)/rc4_decoder.s: $(BUILD_DIR)/rc4.o $(ELFCODER)
-	cp $(BUILD_DIR)/rc4.o $(BUILD_DIR)/rc4_encoded.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rc4_encoded.o -o $(BUILD_DIR)/rc4_decoder.s -n RC4_DecodeFunctions -f \
-		RC4_Init                        \
-		RC4_EncryptInstructions         \
-		RC4_DecryptInstructions         \
-		RC4_InitAndEncryptInstructions  \
-		RC4_InitAndDecryptInstructions  \
-		RC4_Byte
-
-$(BUILD_DIR)/rc4.o: $(SRC_DIR)/rc4.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rc4.c -o $(BUILD_DIR)/rc4.o
-	$(FIXDEP) $(BUILD_DIR)/rc4.d
-
-
 # Main module
 $(BUILD_DIR)/dsprot_main_decrypter_decoder.o: $(BUILD_DIR)/dsprot_main_decrypter_decoder.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/dsprot_main_decrypter_decoder.s -o $(BUILD_DIR)/dsprot_main_decrypter_decoder.o
@@ -165,7 +116,7 @@ $(BUILD_DIR)/dsprot_main_decrypter.o: $(BUILD_DIR)/dsprot_main_decrypter.s
 $(BUILD_DIR)/dsprot_main_encrypted.o \
 $(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 170b4 -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 1c695 -p DSProt_ -f \
 		DetectFlashcartA     \
 		DetectEmulatorA      \
 		DetectFlashcartB     \
@@ -184,6 +135,37 @@ $(BUILD_DIR)/extra.o: $(SRC_DIR)/extra.c
 $(BUILD_DIR)/callback.o: $(SRC_DIR)/callback.c
 	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/callback.c -o $(BUILD_DIR)/callback.o
 	$(FIXDEP) $(BUILD_DIR)/callback.d
+
+
+# Integrity module
+$(BUILD_DIR)/integrity_decrypter_decoder.o: $(BUILD_DIR)/integrity_decrypter_decoder.s
+	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/integrity_decrypter_decoder.s -o $(BUILD_DIR)/integrity_decrypter_decoder.o
+
+$(BUILD_DIR)/integrity_decrypter_encoded.o \
+$(BUILD_DIR)/integrity_decrypter_decoder.s: $(BUILD_DIR)/integrity_decrypter.o $(ELFCODER)
+	cp $(BUILD_DIR)/integrity_decrypter.o $(BUILD_DIR)/integrity_decrypter_encoded.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_decrypter_encoded.o -o $(BUILD_DIR)/integrity_decrypter_decoder.s -n Integrity_DecodeFunctions -f \
+		RunEncrypted_Integrity_MACOwner_IsBad   \
+		RunEncrypted_Integrity_MACOwner_IsGood  \
+		RunEncrypted_Integrity_ROMTest_IsBad    \
+		RunEncrypted_Integrity_ROMTest_IsGood
+
+$(BUILD_DIR)/integrity_decrypter.o: $(BUILD_DIR)/integrity_decrypter.s
+	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/integrity_decrypter.s -o $(BUILD_DIR)/integrity_decrypter.o
+
+$(BUILD_DIR)/integrity_encrypted.o \
+$(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ELFCODER)
+	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k 14e24 -f \
+		Integrity_MACOwner_IsBad   \
+		Integrity_MACOwner_IsGood  \
+		Integrity_ROMTest_IsBad    \
+		Integrity_ROMTest_IsGood
+
+$(BUILD_DIR)/integrity.o: $(SRC_DIR)/integrity.c
+	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/integrity.c -o $(BUILD_DIR)/integrity.o
+	$(FIXDEP) $(BUILD_DIR)/integrity.d
+
 
 # Encryptor module
 $(BUILD_DIR)/encryptor_decoder.o: $(BUILD_DIR)/encryptor_decoder.s
@@ -208,20 +190,23 @@ $(BUILD_DIR)/coretests_decoder.o: $(BUILD_DIR)/coretests_decoder.s
 
 $(BUILD_DIR)/mac_owner_decrypter_encoded.o \
 $(BUILD_DIR)/rom_test_decrypter_encoded.o  \
-$(BUILD_DIR)/rom_util_encoded.o            \
-$(BUILD_DIR)/coretests_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_test_decrypter.o $(ELFCODER)
+$(BUILD_DIR)/rom_util_decrypter_encoded.o  \
+$(BUILD_DIR)/coretests_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/rom_util_decrypter.o $(BUILD_DIR)/rom_test_decrypter.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/mac_owner_decrypter_encoded.o
 	cp $(BUILD_DIR)/rom_test_decrypter.o $(BUILD_DIR)/rom_test_decrypter_encoded.o
-	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encoded.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_decrypter_encoded.o $(BUILD_DIR)/rom_util_encoded.o $(BUILD_DIR)/rom_test_decrypter_encoded.o -o $(BUILD_DIR)/coretests_decoder.s -n CoreTests_DecodeFunctions -f \
+	cp $(BUILD_DIR)/rom_util_decrypter.o $(BUILD_DIR)/rom_util_decrypter_encoded.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_decrypter_encoded.o $(BUILD_DIR)/rom_util_decrypter_encoded.o $(BUILD_DIR)/rom_test_decrypter_encoded.o -o $(BUILD_DIR)/coretests_decoder.s -n CoreTests_DecodeFunctions -f \
 		RunEncrypted_ROMTest_IsBad    \
 		RunEncrypted_ROMTest_IsGood   \
 		RunEncrypted_MACOwner_IsBad   \
 		RunEncrypted_MACOwner_IsGood  \
-		ROMUtil_CRC32
+		RunEncrypted_ROMUtil_CRC32
 
 $(BUILD_DIR)/mac_owner_decrypter.o: $(BUILD_DIR)/mac_owner_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/mac_owner_decrypter.s -o $(BUILD_DIR)/mac_owner_decrypter.o
+
+$(BUILD_DIR)/rom_util_decrypter.o: $(BUILD_DIR)/rom_util_decrypter.s
+	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rom_util_decrypter.s -o $(BUILD_DIR)/rom_util_decrypter.o
 
 $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rom_test_decrypter.s -o $(BUILD_DIR)/rom_test_decrypter.o
@@ -229,14 +214,20 @@ $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 $(BUILD_DIR)/mac_owner_encrypted.o \
 $(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k 10e4a -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k 33f8 -f \
 		MACOwner_IsBad   \
 		MACOwner_IsGood
+
+$(BUILD_DIR)/rom_util_encrypted.o \
+$(BUILD_DIR)/rom_util_decrypter.s: $(BUILD_DIR)/rom_util.o $(ELFCODER)
+	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encrypted.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k 36f8 -f \
+		ROMUtil_CRC32
 
 $(BUILD_DIR)/rom_test_encrypted.o \
 $(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k 110da -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k 36f8 -f \
 		ROMTest_IsBad   \
 		ROMTest_IsGood
 
@@ -251,6 +242,26 @@ $(BUILD_DIR)/rom_util.o: $(SRC_DIR)/rom_util.c
 $(BUILD_DIR)/rom_test.o: $(SRC_DIR)/rom_test.c
 	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rom_test.c -o $(BUILD_DIR)/rom_test.o
 	$(FIXDEP) $(BUILD_DIR)/rom_test.d
+
+
+# RC4 module
+$(BUILD_DIR)/rc4_decoder.o: $(BUILD_DIR)/rc4_decoder.s
+	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rc4_decoder.s -o $(BUILD_DIR)/rc4_decoder.o
+
+$(BUILD_DIR)/rc4_encoded.o \
+$(BUILD_DIR)/rc4_decoder.s: $(BUILD_DIR)/rc4.o $(ELFCODER)
+	cp $(BUILD_DIR)/rc4.o $(BUILD_DIR)/rc4_encoded.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/rc4_encoded.o -o $(BUILD_DIR)/rc4_decoder.s -n RC4_DecodeFunctions -f \
+		RC4_Init                        \
+		RC4_EncryptInstructions         \
+		RC4_DecryptInstructions         \
+		RC4_InitAndEncryptInstructions  \
+		RC4_InitAndDecryptInstructions  \
+		RC4_Byte
+
+$(BUILD_DIR)/rc4.o: $(SRC_DIR)/rc4.c
+	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rc4.c -o $(BUILD_DIR)/rc4.o
+	$(FIXDEP) $(BUILD_DIR)/rc4.d
 
 
 -include $(DEPS)

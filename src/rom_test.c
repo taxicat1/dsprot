@@ -1,5 +1,6 @@
 #include "rom_test.h"
 
+#include "encoding_constants.h"
 #include "dsprot_types.h"
 #include "failure_codes.h"
 #include "primes.h"
@@ -10,29 +11,35 @@
 u32 ROMTest_IsBad(DSProt_Ctx* ctx);
 u32 ROMTest_IsGood(DSProt_Ctx* ctx);
 
-#define ROM_BLOCK_SIZE  (0x200)
+#define ROM_BLOCK_SIZE              (0x200)
+#define ROM_TEST_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
 u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
-	u32  crcs[12];
-	u8   rom_buf[ROM_BLOCK_SIZE];
-	u32  rom_addr;
-	u32  rom_addr_offset;
-	u16  lock_id;
-	int  i;
+	u32    crcs[7];
+	u8     rom_buf[ROM_BLOCK_SIZE];
+	u16    lock_id;
+	void*  buf_ptr;
+	s32    i;
+	u32    rom_addr;
+	u32    crc_data_addr;
 	
-	rom_addr_offset = 0x7000;
 	rom_addr = 0x1000;
 	
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	for (i = 0; i < 6; i++) {
+	buf_ptr = &rom_buf[0];
+	crc_data_addr = (u32)&RunEncrypted_ROMUtil_CRC32[ENC_VAL_1] - ENC_VAL_1;
+	
+	for (i = 0; i < 3; i++) {
+		
 		// Cannot be an inlined function here
 		do {
-			void* dest      = &rom_buf[0];
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
+			void*         dest      = buf_ptr;
+			unsigned int  addr      = rom_addr;
+			s32           num_bytes = ROM_BLOCK_SIZE;
+			
 			
 			// This is executing an obfuscated manual cartridge ROM read.
 			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
@@ -148,43 +155,36 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
 		} while (0);
 		
-		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARDi_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(-1, (void*)rom_addr + rom_addr_offset, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
-		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		
-		// Address changes as we loop.
-		//
-		// Manual read:    i   addr
-		//                ----------
-		//                 0   1000*
-		//                 1   1200*
-		//                 2   1400*
-		//                 3   A000
-		//                 4   D000
-		//                 5   E000
-		//
-		//   * = redirected to 8000
-		// 
-		// 
-		// CARDi_ReadRom:  i   addr
-		//                ----------
-		//                 6   8000
-		//                 7   8200
-		//                 8   8400
-		//                 9   A000
-		//                 10  D000
-		//                 11  E000
-		if (i < 3) {
-			rom_addr += ROM_BLOCK_SIZE;
-		} else if (i == 3) {
-			rom_addr = 0xA000;
-			rom_addr_offset = 0;
-		} else if (i > 3) {
-			rom_addr = (i * 0x1000) + 0x9000;
-		}
+		// Run an integrity check on the CRC function
+		do {
+			u32  checksum;
+			u32  i;
+			u32* crc_data_ptr;
+			
+			crc_data_ptr = (u32*)crc_data_addr;
+			i = 9;
+			checksum = 0;
+			do {
+				checksum ^= (*crc_data_ptr >> 5) | (*crc_data_ptr << 27);
+				crc_data_ptr++;
+			} while (--i);
+			
+			if (checksum != ROM_TEST_EXPECTED_CHECKSUM) {
+				ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
+				ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
+				return PRIME_TRUE * PRIME_ROM_TEST_1;
+			}
+		} while (0);
+		
+		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		
+		rom_addr += 0x200;
 	}
 	
 	CARD_UnlockRom(lock_id);
@@ -196,27 +196,18 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	}
 	
 	// Checking the ROM reading results were as expected:
-	//   0 == 1 == 2 == 6
-	//   3 == 9 (not checked)
-	//   4 == 10
-	//   5 == 11
-	//   6 != 7 and 6 != 8
+	//   0 == 1 == 2 == 3
+	//   3 != 4 and 3 != 5
 	
 	for (i = 0; i < 3; i++) {
-		if (crcs[i] != crcs[6]) {
+		if (crcs[i] != crcs[3]) {
 			ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-			ctx->failure_code = FAILURE_CODE_ROM_TEST_1;
+			ctx->failure_code = FAILURE_CODE_ROM_TEST_4;
 			return PRIME_TRUE * PRIME_ROM_TEST_1;
 		}
 	}
 	
-	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
-		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-		ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
-		return PRIME_TRUE * PRIME_ROM_TEST_1;
-	}
-	
-	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
+	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
 		ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
 		return PRIME_TRUE * PRIME_ROM_TEST_1;
@@ -227,25 +218,30 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 
 
 u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
-	u32  crcs[12];
-	u8   rom_buf[ROM_BLOCK_SIZE];
-	u32  rom_addr;
-	u32  rom_addr_offset;
-	u16  lock_id;
-	int  i;
+	u32    crcs[7];
+	u8     rom_buf[ROM_BLOCK_SIZE];
+	u16    lock_id;
+	void*  buf_ptr;
+	s32    i;
+	u32    rom_addr;
+	u32    crc_data_addr;
 	
-	rom_addr_offset = 0x7000;
 	rom_addr = 0x1000;
 	
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	for (i = 0; i < 6; i++) {
+	buf_ptr = &rom_buf[0];
+	crc_data_addr = (u32)&RunEncrypted_ROMUtil_CRC32[ENC_VAL_1] - ENC_VAL_1;
+	
+	for (i = 0; i < 3; i++) {
+		
 		// Cannot be an inlined function here
 		do {
-			void* dest      = &rom_buf[0];
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
+			void*         dest      = buf_ptr;
+			unsigned int  addr      = rom_addr;
+			s32           num_bytes = ROM_BLOCK_SIZE;
+			
 			
 			// This is executing an obfuscated manual cartridge ROM read.
 			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
@@ -361,43 +357,36 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
 		} while (0);
 		
-		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARDi_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(-1, (void*)rom_addr + rom_addr_offset, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
-		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		
-		// Address changes as we loop.
-		//
-		// Manual read:    i   addr
-		//                ----------
-		//                 0   1000*
-		//                 1   1200*
-		//                 2   1400*
-		//                 3   A000
-		//                 4   D000
-		//                 5   E000
-		//
-		//   * = redirected to 8000
-		// 
-		// 
-		// CARDi_ReadRom:  i   addr
-		//                ----------
-		//                 6   8000
-		//                 7   8200
-		//                 8   8400
-		//                 9   A000
-		//                 10  D000
-		//                 11  E000
-		if (i < 3) {
-			rom_addr += ROM_BLOCK_SIZE;
-		} else if (i == 3) {
-			rom_addr = 0xA000;
-			rom_addr_offset = 0;
-		} else if (i > 3) {
-			rom_addr = (i * 0x1000) + 0x9000;
-		}
+		// Run an integrity check on the CRC function
+		do {
+			u32  checksum;
+			u32  i;
+			u32* crc_data_ptr;
+			
+			crc_data_ptr = (u32*)crc_data_addr;
+			i = 9;
+			checksum = 0;
+			do {
+				checksum ^= (*crc_data_ptr >> 5) | (*crc_data_ptr << 27);
+				crc_data_ptr++;
+			} while (--i);
+			
+			if (checksum != ROM_TEST_EXPECTED_CHECKSUM) {
+				ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
+				ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
+				return PRIME_FALSE * PRIME_ROM_TEST_2;
+			}
+		} while (0);
+		
+		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		
+		rom_addr += 0x200;
 	}
 	
 	CARD_UnlockRom(lock_id);
@@ -409,27 +398,18 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	}
 	
 	// Checking the ROM reading results were as expected:
-	//   0 == 1 == 2 == 6
-	//   3 == 9 (not checked)
-	//   4 == 10
-	//   5 == 11
-	//   6 != 7 and 6 != 8
+	//   0 == 1 == 2 == 3
+	//   3 != 4 and 3 != 5
 	
 	for (i = 0; i < 3; i++) {
-		if (crcs[i] != crcs[6]) {
+		if (crcs[i] != crcs[3]) {
 			ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-			ctx->failure_code = FAILURE_CODE_ROM_TEST_4;
+			ctx->failure_code = FAILURE_CODE_ROM_TEST_1;
 			return PRIME_FALSE * PRIME_ROM_TEST_2;
 		}
 	}
 	
-	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
-		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-		ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
-		return PRIME_FALSE * PRIME_ROM_TEST_2;
-	}
-	
-	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
+	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
 		ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
 		return PRIME_FALSE * PRIME_ROM_TEST_2;
