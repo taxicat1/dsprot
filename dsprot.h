@@ -25,7 +25,7 @@ extern u32 DSProt_CallbackIndex;
 
 
 static inline void DSProt_RegisterCallbacks(DSProt_Callback success_callback, DSProt_Callback failure_callback) {
-	DSProt_CallbackIndex = OS_GetVBlankCount & 1;
+	DSProt_CallbackIndex = OS_GetVBlankCount() & 1;
 	DSProt_CallbackTable[DSProt_CallbackIndex    ] = success_callback;
 	DSProt_CallbackTable[DSProt_CallbackIndex ^ 1] = failure_callback;
 }
