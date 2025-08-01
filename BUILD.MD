@@ -17,19 +17,26 @@
 
 2. Enter the root of the repository in the command line and run `make`.
 
-3. The output file will be `build/dsprot_instant.a`.
+3. The output file will be `build/dsprot.a`.
 
 ## General integration
 
-The built library file `dsprot_instant.a` and provided header file `dsprot_instant.h` may be used to integrate the library into any decompilation project that uses this version of DS Protect. The header is compatible with C, C++, and assembly.
+The built library file `dsprot.a` and provided header file `dsprot.h` may be used to integrate the library into any decompilation project that uses this version of DS Protect. The header is compatible with C, C++, and assembly.
 
-`dsprot_instant.a` will need to be included in the proper location in the project's `main.lsf`.
+`dsprot.a` will need to be included in the proper location in the project's `main.lsf`.
 
 The exported functions are:
-- `u32 DSProt_Crash(u32 __unused1, u32 __unused2)`
-- `void* DSProt_DetectAll(void* callback, void* param1, void* param2);`
+- `void DSProt_DecodeFunctions(void);`
+- `void* DSProt_DetectFlashcartA(void* param1, void* param2);`
+- `void* DSProt_DetectFlashcartB(void* param1, void* param2);`
+- `void* DSProt_DetectEmulatorA(void* param1, void* param2);`
+- `void* DSProt_DetectEmulatorB(void* param1, void* param2);`
 
-Plus an inline function within the header:
-- `inline void* DSProt_DetectInstant(void* callback, void* param1, void* param2);`
+Plus inline functions within the header:
+- `void DSProt_RegisterCallbacks(DSProt_Callback success_callback, DSProt_Callback failure_callback);`
+- `void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2);`
+- `void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2);`
+- `void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2);`
+- `void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2);`
 
 See [FUNCTIONALITY.MD](./doc/FUNCTIONALITY.MD) for more details on using these functions.

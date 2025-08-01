@@ -241,23 +241,21 @@ B6 03 59 09 01 73 29 BD 19 4A 69 BF FC 00 E4 FC 89 1B 61 88 70 E1 66 5E 0E 15 FB
 After each time a function is decrypted to be run, it is then re-encrypted using a new seed key. This new seed key is derived from the previous seed key:
 
 ```
-new_seed_key = old_seed_key + (obfuscated_function_address >> 20) modulo 2^32
+new_seed_key = old_seed_key + (obfuscated_function_address & 0xFFFF) modulo 2^32
 ```
 
 Where `obfuscated_function_address` is the function address of the target function that is to be encrypted, obfuscated by incrementation by `0x2100`, as described in the above reference obfuscation description.
 
-Note most addresses are of the form `0x02XXXXXX`, which after a right shift of 20 bits would become `0x02X`, creating only a small actual change to the seed key.
-
 This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is also saved as the seed key (after obfuscating it via incrementing by `&BSS + 0x2100`) to be used for the next decryption of the function.
 
-For example, if the original seed key is `0xC20D`, and the address and size of the encrypted function is `0x02300000` + `0x14C`, then the subsequent seed keys and expanded keys for subsequent calls will be:
+For example, if the original seed key is `0xC20D`, and the address and size of the encrypted function is `0x02301234` + `0x14C`, then the subsequent seed keys and expanded keys for subsequent calls will be:
 
 ```
-C230    7C C3 00 00 4C 31 C2 00 4C 01 30 C2 8E 01 00 30
-C253    1F C3 00 00 4C 52 C2 00 4C 01 53 C2 8E 01 00 53
-C276    3A C3 00 00 4C 77 C2 00 4C 01 76 C2 8E 01 00 76
-C299    D5 C3 00 00 4C 98 C2 00 4C 01 99 C2 8E 01 00 99
-C2BC    F0 C3 00 00 4C BD C2 00 4C 01 BC C2 8E 01 00 BC
-C2DF    93 C3 00 00 4C DE C2 00 4C 01 DF C2 8E 01 00 DF
+ D441   0D D5 00 00 4C 40 D4 00 4C 01 41 D4 98 01 00 41
+ E675   39 E7 00 00 4C 74 E6 00 4C 01 75 E6 AA 01 00 75
+ F8A9   E5 F9 00 00 4C A8 F8 00 4C 01 A9 F8 B4 01 00 A9
+10ADD   91 0B 01 00 4C DC 0A 01 4D 01 DD 0A 46 00 00 DD
+11D11   5D 1C 01 00 4C 10 1D 01 4D 01 11 1D 51 00 00 11
+12F45   09 2E 01 00 4C 44 2F 01 4D 01 45 2F 63 00 00 45
 ...                           ...
 ```

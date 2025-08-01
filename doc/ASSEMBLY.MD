@@ -1,6 +1,6 @@
 # Assembly functions
 
-Decryption wrappers, decoding static initializers, a helper function to clear the data and instruction cache, and the crashing function are all written at least partially in assembly. This can be proven. All other functions in the library may or may not be written partially or wholly in assembly, but they all may be decompiled to some C code which matches, and therefore can be assumed to have originally been written in C.
+Decryption wrappers, decoding static initializers, and a helper function to clear the data and instruction cache are all written at least partially in assembly. This can be proven. All other functions in the library may or may not be written partially or wholly in assembly, but they all may be decompiled to some C code which matches, and therefore can be assumed to have originally been written in C.
 
 ## Decryption wrappers
 
@@ -80,8 +80,8 @@ For more documentation on how these functions work, see inline comments in `src/
 Decoding initializers take the form:
 
 ```asm
-	local_arm_func_start NitroStaticInit
-NitroStaticInit:
+	arm_func_start RC4_DecodeFunctions
+RC4_DecodeFunctions:
 	orr   r0, pc, #0x0
 	adds  r0, r0, #0x4
 	bne   Encryptor_DecodeFunctionTable
@@ -92,7 +92,7 @@ NitroStaticInit:
 	.word RC4_InitAndDecryptInstructions,  0x58
 	.word RC4_Byte,                        0x58
 	.word 0, 0                                    ; End-of-data (0, 0)
-	arm_func_end NitroStaticInit
+	arm_func_end RC4_DecodeFunctions
 ```
 
 (Data obfuscation as described in [ENCODING.MD](./ENCODING.MD) has been removed for clarity)
@@ -101,55 +101,63 @@ This has two giveaways that it is assembly:
 - Similar to the "head" decryption wrapper function, it moves `pc` into another register to manipulate its value, rather than perform a PC-relative load.
 - Identically to the decryption wrapper head, the function table data structure is stored in the pool of instructional memory, and a pointer to this region is passed into the decoding routine. Again, C would never do this.
 
-## `Crash` function
+There is a separate form of decoding initializer, here called the primary initializer, which will call other initializers, erase its own instructions from RAM os it cannot be run again, and then finally perform its own decoding. This must be called after loading DS Protect, taking the place of `NitroStaticInit` functions that were run automatially.
 
-The crash function takes the form:
+The primary initializer takes the form:
 
 ```asm
-	asm_func_start Crash
-Crash:
-	mov    r10, pc
-	orrs   r10, r10, r10
-	eorne  lr,  lr,  lr
-	subs   r10, r10, #8
-	ldr    r9, =memClear+0x2100
-	mov    r0, sp
-	sub    r9, r9, #0x2100
-	mov    r1, #0x100
-	blx    r9
-	ldr    lr, =OS_Terminate+0x2100
-	mov    r0, r10
-	mov    r1, #0x1000
-	sub    lr, lr, #0x2100
-	bx     r9
-	arm_func_end Crash
+	arm_func_start DSProt_DecodeFunctions
+DSProt_DecodeFunctions:
+	stmdb sp!, {lr}
+	bl CoreTests_DecodeFunctions            ; Call all other decoders
+	bl Encryptor_DecodeFunctions
+	bl Integrity_DecodeFunctions
+	bl RC4_DecodeFunctions
+	ldmfd sp!, {lr}
+	ldr r0, =DSProt_DecodeFunctions+0x2100
+	ldr r1, =0xE12FFF1E                     ; <bx lr> instruction to write
+	sub r0, r0, #0x2100
+	stmia r0!, {r1-r10}                     ; Clobber the first 10 instructions of itself
+	orr   r0, pc, #0x0                      ; Continue with normal decoding as above
+	adds  r0, r0, #0x4
+	bne   Encryptor_DecodeFunctionTable
+	.word DSProt_DetectFlashcartA, 0x24
+	.word DSProt_DetectEmulatorA, 0x24
+	.word DSProt_DetectFlashcartB, 0x24
+	.word DSProt_DetectEmulatorB, 0x24
+	.word 0, 0
+	.word Garbage
+	arm_func_end DSProt_DecodeFunctions
 ```
 
-Like the other assembly functions, it moves `pc` into another register for manipulation. It also manipulates `lr` directly without preserving its original value. This is intentional here as there is no intent to ever return.
+This has an additional giveaway that it is assembly: rather than using any kind of fixed data or looping, it uses whatever data happens to be in registers `r1-r10` to clobber itself.
 
-## `clearDataAndInstructionCache` helper function
+## `clearDataAndInstructionCache` helper inline function
 
-This is a function that, as the name suggests, clears the caches for instructions and data after a function has been encoded/decoded/encrypted/decrypted so the relevant data will be reloaded from RAM.
+This is a code snippet that, as the name suggests, clears the caches for instructions and data after a function has been encoded/decoded/encrypted/decrypted so the relevant data will be reloaded from RAM.
 
 This is typically accomplished using the Nitro SDK functions `DC_FlushRange` and `IC_InvalidateRange`. However, DS Protect has combined both of those functions and inlined them together.
 
-The function is of the form:
+The snippet is of the form:
 
 ```asm
-	arm_func_start clearDataAndInstructionCache
-clearDataAndInstructionCache:
-	add  r1, r1, r0
 	mov  ip, #0
-	bic  r0, r0, #31
+	mov  r1, #0
 @1:
-	mcr  p15, 0, r0, c7, c5, 1
+	mov  r0, #0
+@2:
+	orr  r2, r1, r0
 	mcr  p15, 0, ip, c7, c10, 4
-	mcr  p15, 0, r0, c7, c14, 1
+	mcr  p15, 0, r2, c7, c14, 2
 	add  r0, r0, #32
-	cmp  r0, r1
-	blt  @1
-	bx   lr
-	arm_func_end clearDataAndInstructionCache
+	cmp  r0, 0x400
+	blt  @2
+	add  r1, r1, 0x40000000
+	cmp  r1, #0
+	bne  @1
+	mov  r0, #0
+	mcr  p15, 0, r0, c7, c5, 0
+	mcr  p15, 0, ip, c7, c10, 4
 ```
 
 The original Nitro implementation is in assembly using extremely similar instructions. The presence of the `mcr` instruction at all, indicating an instruction to interop with the coprocessor, would not be output by any C.

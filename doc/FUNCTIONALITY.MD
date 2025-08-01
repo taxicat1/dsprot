@@ -30,28 +30,33 @@ DS Protect has two methods of antipiracy detection:
 	
 	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 
-3. Additionally, there is a third "dummy" method which does not actually do any antipiracy detection. This is apparently purely to confuse reverse engineering.
-
 Note that modern emulators, such as [MelonDS](https://github.com/melonDS-emu/melonDS) and [DeSmuME](https://github.com/TASEmulators/desmume), correctly emulate both a MAC address and the ROM reading behavior and are therefore undetected by this library. Some flashcarts do correctly emulate the ROM reading behavior, but many still sold today do not.
 
 ## Exported functions
 
-Two functions are exported:
+Five main functions are exported:
 
-- Detect all (flashcart, emulator, memory tampering)
-- Crash
+- Initializer
+- Detect flashcart A
+- Detect flashcart B
+- Detect emulator A
+- Detect emulator B
 
-Additionally, a standard wrapper for these two functions is provided as an inline in the header file.
+Another function is provided as an inline in the header file:
 
-The crash function, as the name implies, will immediately crash the system by clobbering the stack and then going into an infinite loop via calling `OS_Terminate`. 
+- Register callbacks
 
-The detection function takes as argument an optional callback function and two parameters for that callback of type `void*`. The callback will be run if the function fails to detect anything. If it does detect piracy or tampering, it will call the crash function instead. The return value from the callback is passed back as the return value of the detection function, or `NULL` if no callback was provided.
+Additionally, a standard wrapper for each of the four detection functions is provided as an inline in the header file.
+
+Prior to calling any of the detection functions, it is required to call the initalization function (`DSProt_DecodeFunctions`). Otherwise, calling any detection function will immediately cause a crash. Next, it is required to register two callback functions (`DSProt_RegisterCallbacks`): a "success" callback, when no emulator or flashcart is detected, and a "failure" callback, when an emulator or flashcart *is* detected. These callback functions must be of the type `void* callback(void*, void*)`.
+
+The detection functions take two parameters as arguments, each of type `void*`, which are passed along to the callback. The appropriate callback will be run based on the results of the detection. The return value of the detection function is the return value of the callback.
 
 ## Obfuscation
 
 The code has multiple layers of obfuscation present. Many of the core functions are written in convoluted ways intended to deter reverse engineering, and/or encrypted and accessible only through special decryption wrappers. Decryption wrappers will decrypt the function, run it with the specified arguments, re-encrypt the function (with a new key), and return. This is designed such that the raw code of the function spends as little time in RAM as possible.
 
-Other functions are encoded using an unkeyed encoding scheme. These functions are decoded immediately upon being loaded, and remain decoded for as long as they remain in RAM. This is seemingly designed to deter reading dumps of the ROM.
+Other functions are encoded using an unkeyed encoding scheme. These functions are decoded upon calling the initializer function (`DSProt_DecodeFunctions`), and remain decoded for as long as they remain in RAM. This is seemingly designed to deter reading dumps of the ROM.
 
 Typically, a file will have some selected functions encrypted, then decryption wrappers are created for those functions, then those decryption wrappers are encoded, and included in the table to decode upon being loaded. Some functions are encoded directly without encryption, and other functions remain in plain code.
 
@@ -71,4 +76,4 @@ As a final trick, the library also includes 24 bytes of data designed to appear 
 
 ## Note on language
 
-The majority of the library is written in C, but the decryption wrappers, decoder initializers, the crashing function, and another helper function are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
+The majority of the library is written in C, but the decryption wrappers, decoder initializers, and another helper snippet are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
