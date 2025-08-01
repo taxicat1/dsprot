@@ -50,7 +50,6 @@ Module 2 (integrity):
 
 Module 3 (encryptor):
 	Functions:
-		clearDataAndInstructionCache
 		Encryptor_CategorizeInstruction
 		Encryptor_DecodeFunctionTable
 		Encryptor_DecryptFunction
