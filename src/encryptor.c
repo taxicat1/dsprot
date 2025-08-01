@@ -9,8 +9,8 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 
 static void clearDataAndInstructionCache(void);
 
-const u32 Proxy_Encryptor_EncryptFunction = (u32)&Encryptor_EncryptFunction[ENC_VAL_1];
 const u32 Proxy_Encryptor_DecryptFunction = (u32)&Encryptor_DecryptFunction[ENC_VAL_1];
+const u32 Proxy_Encryptor_EncryptFunction = (u32)&Encryptor_EncryptFunction[ENC_VAL_1];
 
 
 static inline void clearDataAndInstructionCache(void) {
@@ -119,7 +119,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 }
 
 
-// This function sucks. https://decomp.me/scratch/34NCb
+// This function sucks. https://decomp.me/scratch/VeHlh
 // 
 // This *should* be identical to `Encryptor_DecryptFunction` with the extra step
 // of modifying the key, and calling the encryption function instead of decryption.
@@ -139,20 +139,20 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	rc4_enc = Proxy_RC4_InitAndEncryptInstructions;
 	rc4_enc -= ENC_VAL_1;
 	
-	key  = obfs_key;
-	size = obfs_size;
-	key  -= (u32)&BSS + ENC_VAL_1;
-	size -= (u32)&BSS + ENC_VAL_1;
+	func_addr = obfs_func_addr;
+	func_addr -= ENC_VAL_1;
 	
-	key += (u32)obfs_func_addr >> 20;
+	key = obfs_key;
+	key -= (u32)&BSS + ENC_VAL_1;
+	key += (u32)obfs_func_addr & 0xFFFF;
+	
+	size = obfs_size;
+	size -= (u32)&BSS + ENC_VAL_1;
 	
 	expanded_key[0] = key ^ size;
 	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
 	expanded_key[2] = ((key << 16) | (key >> 16)) ^ size;
 	expanded_key[3] = ((key << 24) | (key >>  8)) ^ size;
-	
-	func_addr = obfs_func_addr;
-	func_addr -= ENC_VAL_1;
 	
 	((FuncType_RC4_InitAndEncryptInstructions)rc4_enc)(&expanded_key[0], func_addr, func_addr, size);
 	
@@ -167,40 +167,42 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 		sub  sp, sp, #16
 		ldr  r3, =BSS
 		mov  r4, r0
-		add  r0, r3, #ENC_VAL_1
-		sub  r4, r4, r0
-		ldr  r5, =BSS
-		add  r4, r4, r1, lsr #20
-		ldr  r0, =Proxy_RC4_InitAndEncryptInstructions
+		add  r5, r3, #ENC_VAL_1
+		ldr  lr, =BSS
+		ldr  ip, =0x0000FFFF
 		mov  r3, r2
-		add  r6, r5, #ENC_VAL_1
+		add  r6, lr, #ENC_VAL_1
+		ldr  r0, =Proxy_RC4_InitAndEncryptInstructions
 		mov  r2, r1
-		ldr  ip, [r0]
-		mov  r5, r4, lsr #24
-		mov  lr, r4, lsr #16
+		ldr  lr, [r0]
+		sub  r4, r4, r5
+		and  r0, r1, ip
+		add  r4, r4, r0
+		mov  ip, r4, lsr #24
+		mov  r1, r4, lsr #16
+		mov  r0, r4, lsr #8
 		sub  r3, r3, r6
-		orr  r0, r5, r4, lsl #8
-		eor  r0, r3, r0
-		mov  r1, r4, lsr #8
-		str  r0, [sp, #4]
-		orr  r0, r1, r4, lsl #24
-		eor  r1, r4, r3
-		orr  lr, lr, r4, lsl #16
-		str  r1, [sp]
-		eor  r1, r3, lr
-		eor  lr, r3, r0
+		orr  ip, ip, r4, lsl #8
+		eor  ip, r3, ip
+		str  ip, [sp, #4]
+		orr  r1, r1, r4, lsl #16
+		eor  ip, r4, r3
+		eor  r1, r3, r1
+		orr  r0, r0, r4, lsl #24
+		str  ip, [sp]
+		eor  ip, r3, r0
+		str  ip, [sp, #12]
 		sub  r2, r2, #ENC_VAL_1
 		str  r1, [sp, #8]
 		add  r0, sp, #0
 		mov  r1, r2
-		sub  ip, ip, #ENC_VAL_1
-		str  lr, [sp, #12]
+		sub  ip, lr, #ENC_VAL_1
 		blx  ip
 	}
 	// Inlined
 	clearDataAndInstructionCache();
 	asm {
-		ldr  r0, [pc, #12]
+		ldr  r0, =BSS
 		add  r0, r0, #ENC_VAL_1
 		add  r0, r4, r0
 		add  sp, sp, #16

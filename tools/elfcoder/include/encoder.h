@@ -26,6 +26,8 @@ typedef struct {
 	int       key_mode;
 	char**    symbols;
 	char*     wrapper_prefix;
+	char*     decoder_name;
+	char**    children;
 	char*     garbage;
 	uint32_t  key;
 	int       verbose;

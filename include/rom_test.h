@@ -2,6 +2,7 @@
 #define ROM_TEST_H
 
 #include "types.h"
+#include "dsprot_types.h"
 
 // Nitro functions
 // <nitro/os.h>
@@ -14,7 +15,11 @@ extern void OS_ReleaseLockID(u16 lock_id);
 // Nitro function without header support (anymore)
 extern void CARDi_ReadRom(u32 dma, const void *src, void *dst, u32 len, void* callback, void *arg, BOOL is_async);
 
-// Assembly decryption wrapper
-extern u32 RunEncrypted_ROMTest_IsBad(void);
+// Assembly decryption wrappers
+extern u32 RunEncrypted_ROMTest_IsBad(DSProt_Ctx* ctx);
+extern u32 RunEncrypted_ROMTest_IsGood(DSProt_Ctx* ctx);
+
+// Assembly decoder
+extern void CoreTests_DecodeFunctions(void);
 
 #endif

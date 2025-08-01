@@ -45,6 +45,14 @@
 	.endm
 
 
+	.macro overwrite_instructions self
+	ldr r0, =\self+ENC_VAL_1
+	ldr r1, =0xE12FFF1E       ; <bx lr> command
+	sub r0, r0, #ENC_VAL_1
+	stmia r0!, {r1-r10}       ; Writes <bx lr> followed by whatever garbage happened to be in `r2`-`r10`
+	.endm
+
+
 	.public Encryptor_DecodeFunctionTable
 
 	.macro decode_following_func_table

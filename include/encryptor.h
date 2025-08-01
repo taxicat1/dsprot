@@ -11,4 +11,7 @@ typedef struct {
 void Encryptor_DecodeFunctionTable(FuncInfo* functions);
 u32 Encryptor_DecryptionWrapperFragment(void);
 
+// Assembly decoder
+extern void Encryptor_DecodeFunctions(void);
+
 #endif

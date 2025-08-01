@@ -14,6 +14,8 @@ typedef struct {
 	char*                  output_fname;
 	char**                 symbols;
 	char*                  wrapper_prefix;
+	char*                  decoder_name;
+	char**                 children;
 	char*                  garbage;
 	ASMWriter_SymbolMeta*  symbol_metadata;
 	int                    key_mode;

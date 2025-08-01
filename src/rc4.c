@@ -22,21 +22,22 @@ u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size);
 // Must also be compiled with `-ipa file`
 //
 //  [5] .rodata
-//      00  Proxy_RC4_InitAndDecryptInstructions
-//  [7] .rodata
 //      00  Proxy_RC4_InitAndEncryptInstructions
-//  [9] .rodata
+//  [7] .rodata
 //      00  Proxy_RC4_CategorizeInstruction
 //      04  Proxy_RC4_EncryptInstructions
 //      08  Proxy_RC4_DecryptInstructions
 //      0C  Proxy_RC4_Byte
 //      10  Proxy_RC4_Init
+//  [9] .rodata
+//      00  Proxy_RC4_InitAndDecryptInstructions
+
+const u32 Proxy_RC4_InitAndDecryptInstructions = (u32)&RC4_InitAndDecryptInstructions[ENC_VAL_1];
 const u32 Proxy_RC4_Byte                       = (u32)&RC4_Byte[ENC_VAL_1];
 const u32 Proxy_RC4_DecryptInstructions        = (u32)&RC4_DecryptInstructions[ENC_VAL_1];
 const u32 Proxy_RC4_EncryptInstructions        = (u32)&RC4_EncryptInstructions[ENC_VAL_1];
 const u32 Proxy_RC4_CategorizeInstruction      = (u32)&RC4_CategorizeInstruction[ENC_VAL_1];
 const u32 Proxy_RC4_InitAndEncryptInstructions = (u32)&RC4_InitAndEncryptInstructions[ENC_VAL_1];
-const u32 Proxy_RC4_InitAndDecryptInstructions = (u32)&RC4_InitAndDecryptInstructions[ENC_VAL_1];
 const u32 Proxy_RC4_Init                       = (u32)&RC4_Init[ENC_VAL_1];
 
 typedef u8  (*FuncType_RC4_Byte)(RC4_Ctx*);

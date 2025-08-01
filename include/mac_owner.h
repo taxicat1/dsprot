@@ -2,6 +2,7 @@
 #define MAC_OWNER_H
 
 #include "types.h"
+#include "dsprot_types.h"
 
 // Copy of Nitro struct
 // <nitro/os.h>
@@ -23,7 +24,11 @@ typedef struct {
 extern void OS_GetMacAddress(u8* mac_addr);
 extern void OS_GetOwnerInfo(OSOwnerInfo* info);
 
-// Assembly decryption wrapper
-extern u32 RunEncrypted_MACOwner_IsBad(void);
+// Assembly decryption wrappers
+extern u32 RunEncrypted_MACOwner_IsBad(DSProt_Ctx* ctx);
+extern u32 RunEncrypted_MACOwner_IsGood(DSProt_Ctx* ctx);
+
+// Assembly decoder
+extern void CoreTests_DecodeFunctions(void);
 
 #endif

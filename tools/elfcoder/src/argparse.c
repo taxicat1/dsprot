@@ -59,6 +59,8 @@ static void printUsage(const char* self_name) {
 		"  -f, --functions [func1, [func2, [ ... ]]]  List of functions to encode/decode.\n"
 		"  -k, --key [key]                            Optional encryption key.           \n"
 		"  -p, --prefix [prefix = RunEncrypted_]      Prefix for decryption wrappers.    \n"
+		"  -n, --name [name]                          Name for decoding initializers.    \n"
+		"  -P, --primary [child1, [child2, [ ... ]]]  Declare as primary decoder.        \n"
 		"  -g  --garbage [symbol]                     Optional added garbage reference.  \n"
 		"  -v, --verbose                              Print encoding progress.           \n",
 		self_name
@@ -75,6 +77,7 @@ static int argCompare(char* arg, char short_letter, char* long_str) {
 enum {
 	AWAIT_INPUT_FILE,
 	AWAIT_SYMBOL,
+	AWAIT_CHILD,
 	AWAIT_NONE
 };
 
@@ -86,6 +89,8 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 	task->key_mode        = MODE_UNKEYED;
 	task->symbols         = NULL;
 	task->wrapper_prefix  = NULL;
+	task->decoder_name    = NULL;
+	task->children        = NULL;
 	task->garbage         = NULL;
 	task->key             = 0;
 	task->verbose         = 0;
@@ -110,12 +115,17 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 	
 	int max_files = 16;
 	int max_symbols = 64;
+	int max_children = 8;
 	
 	task->symbols = calloc(max_symbols, sizeof(char*));
 	int symbol_idx = 0;
 	
 	task->inputs = calloc(max_files, sizeof(FILE*));
 	int file_idx = 0;
+	
+	// Do not eager allocate children, the field is optional
+	task->children = NULL;
+	int child_idx = 0;
 	
 	int await_state = AWAIT_NONE;
 	
@@ -213,6 +223,33 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 				task->wrapper_prefix = next_arg;
 				arg_idx++;
 			
+			} else if (argCompare(curr_arg, 'n', "--name")) {
+				if (next_arg == NULL || next_arg[0] == '-') {
+					printf("Error: %s but no identifier provided\n", curr_arg);
+					return 1;
+				}
+				
+				if (task->decoder_name != NULL) {
+					printf("Error: multiple decoder names provided\n");
+					return 1;
+				}
+				
+				if (!isValidIdentifier(next_arg)) {
+					printf("Error: invalid identifier: %s\n", next_arg);
+					return 1;
+				}
+				
+				task->decoder_name = next_arg;
+				arg_idx++;
+			
+			} else if (argCompare(curr_arg, 'P', "--primary")) {
+				if (next_arg == NULL || next_arg[0] == '-') {
+					printf("Error: %s but no children identifiers provided\n", curr_arg);
+					return 1;
+				}
+				
+				await_state = AWAIT_CHILD;
+			
 			} else if (argCompare(curr_arg, 'g', "--garbage")) {
 				if (next_arg == NULL || next_arg[0] == '-') {
 					printf("Error: %s but no reference provided\n", curr_arg);
@@ -281,6 +318,35 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 					task->inputs[file_idx] = NULL;
 					break;
 				
+				case AWAIT_CHILD:
+					// Lazy allocate
+					if (task->children == NULL) {
+						task->children = calloc(max_children, sizeof(char*));
+					}
+					
+					if ((child_idx + 1) == max_children) {
+						max_children += 8;
+						task->children = realloc(task->children, max_children * sizeof(char*));
+					}
+					
+					if (!isValidIdentifier(curr_arg)) {
+						printf("Error: invalid identifier: %s\n", curr_arg);
+						return 1;
+					}
+					
+					for (int i = 0; i < child_idx; i++) {
+						if (strcmp(curr_arg, task->children[i]) == 0) {
+							printf("Error: duplicate child decoder: %s\n", curr_arg);
+							return 1;
+						}
+					}
+					
+					task->children[child_idx] = curr_arg;
+					child_idx++;
+					task->children[child_idx] = NULL;
+					
+					break;
+				
 				default:
 				case AWAIT_NONE:
 					printf("Unknown argument: %s\n\n", curr_arg);
@@ -306,6 +372,11 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 		return 1;
 	}
 	
+	if (task->decoder_name == NULL && task->output_fname != NULL && task->encoding_type == ENC_ENCODE && task->key_mode == MODE_UNKEYED) {
+		printf("Error: no output decoder name provided (-n)\n");
+		return 1;
+	}
+	
 	
 	if (task->output_fname != NULL && task->encoding_type == ENC_DECODE) {
 		printf("Warning: output file name provided, but no output will be generated for decoding\n");
@@ -322,6 +393,14 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 		task->garbage = NULL;
 	}
 	
+	if (task->children != NULL && task->encoding_type == ENC_DECODE) {
+		printf("Warning: primary decoder declared, but will not be used for decoding\n");
+	}
+	
+	if (task->children != NULL && task->key_mode == MODE_KEYED) {
+		printf("Warning: primary decoder declared, but will not be used unless encoding without key\n");
+	}
+	
 	return 0;
 }
 
@@ -330,5 +409,6 @@ void ArgParse_DestroyTask(EncodingTask* task) {
 	if (task != NULL) {
 		free(task->symbols);
 		free(task->inputs);
+		free(task->children);
 	}
 }

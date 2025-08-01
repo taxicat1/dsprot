@@ -46,6 +46,15 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 		);
 	}
 	
+	if (asmw->children != NULL && asmw->key_mode == MODE_UNKEYED) {
+		for (int child_idx = 0; asmw->children[child_idx] != NULL; child_idx++) {
+			fprintf(output,
+				".public %s\n",
+				asmw->children[child_idx]
+			);
+		}
+	}
+	
 	if (asmw->garbage != NULL) {
 		fprintf(output,
 			".public %s\n",
@@ -87,8 +96,35 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 		}
 	} else {
 		fprintf(output,
-			"\tlocal_arm_func_start NitroStaticInit\n"
-			"NitroStaticInit:\n"
+			"\tarm_func_start %s\n"
+			"%s:\n",
+			asmw->decoder_name,
+			asmw->decoder_name
+		);
+		
+		if (asmw->children != NULL) {
+			fprintf(output,
+				"\tstmdb sp!, {lr}\n"
+			);
+			
+			for (int child_idx = 0; asmw->children[child_idx] != NULL; child_idx++) {
+				fprintf(output,
+					"\tbl %s\n",
+					asmw->children[child_idx]
+				);
+			}
+			
+			fprintf(output,
+				"\tldmfd sp!, {lr}\n"
+			);
+			
+			fprintf(output,
+				"\toverwrite_instructions %s\n",
+				asmw->decoder_name
+			);
+		}
+		
+		fprintf(output,
 			"\tdecode_following_func_table\n"
 		);
 		
@@ -102,22 +138,19 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 		
 		fprintf(output,
 			"\tfunc_table_end\n"
-			"\tarm_func_end NitroStaticInit\n"
-			"\n"
 		);
 		
 		if (asmw->garbage != NULL) {
 			fprintf(output,
-				"\tgarbage_ref %s\n"
-				"\n",
+				"\tgarbage_ref %s\n",
 				asmw->garbage
 			);
 		}
 		
 		fprintf(output,
-			"\t.section .sinit, 4\n"
-			"\t.word NitroStaticInit\n"
-			"\n"
+			"\tarm_func_end %s\n"
+			"\n",
+			asmw->decoder_name
 		);
 	}
 }
@@ -129,6 +162,8 @@ void ASMWriter_Init(ASMWriter_Ctx* asmw, EncodingTask* task) {
 	asmw->output_fname   = task->output_fname;
 	asmw->symbols        = task->symbols;
 	asmw->garbage        = task->garbage;
+	asmw->decoder_name   = task->decoder_name;
+	asmw->children       = task->children;
 	asmw->valid          = 1;
 	
 	if (task->wrapper_prefix == NULL) {
