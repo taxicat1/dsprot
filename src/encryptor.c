@@ -17,31 +17,31 @@ static inline void clearDataAndInstructionCache(void) {
 	// This function is an inlining and combination of DC_FlushAll, IC_InvalidateAll, and DC_WaitWriteBufferEmpty.
 	// All of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
 	asm {
-        /* DC_FlushAll */
-    	mov  ip, #0
-    	mov  r1, #0
-    @1:
-        mov  r0, #0
-    @2:
-        orr  r2, r1, r0
-    	mcr  p15, 0, ip, c7, c10, 4
-    	mcr  p15, 0, r2, c7, c14, 2
-    	
-    	add  r0, r0, #32
-    	cmp  r0, 0x400
-    	blt  @2
-        
-        add  r1, r1, 0x40000000
-        cmp  r1, #0
-        bne  @1
-        
-        /* IC_InvalidateAll */
-        mov  r0, #0
-        mcr  p15, 0, r0, c7, c5, 0
-        
-        /* DC_WaitWriteBufferEmpty */
-        mcr  p15, 0, ip, c7, c10, 4
-    }
+		/* DC_FlushAll */
+		mov  ip, #0
+		mov  r1, #0
+	@1:
+		mov  r0, #0
+	@2:
+		orr  r2, r1, r0
+		mcr  p15, 0, ip, c7, c10, 4
+		mcr  p15, 0, r2, c7, c14, 2
+		
+		add  r0, r0, #32
+		cmp  r0, 0x400
+		blt  @2
+		
+		add  r1, r1, 0x40000000
+		cmp  r1, #0
+		bne  @1
+		
+		/* IC_InvalidateAll */
+		mov  r0, #0
+		mcr  p15, 0, r0, c7, c5, 0
+		
+		/* DC_WaitWriteBufferEmpty */
+		mcr  p15, 0, ip, c7, c10, 4
+	}
 }
 
 
