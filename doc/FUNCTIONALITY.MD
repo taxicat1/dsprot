@@ -69,4 +69,4 @@ As a final trick, the library also includes 24 bytes of data designed to appear 
 
 ## Note on language
 
-The majority of the library is written in C, but the decryption wrappers, decoder initializers, the crashing function, and another helper function are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
+The majority of the library is written in C, but the decryption wrappers, decoder initializers, the crashing function, and another helper snippet are written in assembly. For details about this, see [ASSEMBLY.MD](./ASSEMBLY.MD).
