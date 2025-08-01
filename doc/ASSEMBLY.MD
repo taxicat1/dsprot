@@ -127,29 +127,32 @@ Crash:
 
 Like the other assembly functions, it moves `pc` into another register for manipulation. It also manipulates `lr` directly without preserving its original value. This is intentional here as there is no intent to ever return.
 
-## `clearDataAndInstructionCache` helper function
+## `clearDataAndInstructionCache` helper inline function
 
-This is a function that, as the name suggests, clears the caches for instructions and data after a function has been encoded/decoded/encrypted/decrypted so the relevant data will be reloaded from RAM.
+This is a code snippet that, as the name suggests, clears the caches for instructions and data after a function has been encoded/decoded/encrypted/decrypted so the relevant data will be reloaded from RAM.
 
 This is typically accomplished using the Nitro SDK functions `DC_FlushRange` and `IC_InvalidateRange`. However, DS Protect has combined both of those functions and inlined them together.
 
-The function is of the form:
+The snippet is of the form:
 
 ```asm
-	arm_func_start clearDataAndInstructionCache
-clearDataAndInstructionCache:
-	add  r1, r1, r0
 	mov  ip, #0
-	bic  r0, r0, #31
+	mov  r1, #0
 @1:
-	mcr  p15, 0, r0, c7, c5, 1
+	mov  r0, #0
+@2:
+	orr  r2, r1, r0
 	mcr  p15, 0, ip, c7, c10, 4
-	mcr  p15, 0, r0, c7, c14, 1
+	mcr  p15, 0, r2, c7, c14, 2
 	add  r0, r0, #32
-	cmp  r0, r1
-	blt  @1
-	bx   lr
-	arm_func_end clearDataAndInstructionCache
+	cmp  r0, 0x400
+	blt  @2
+	add  r1, r1, 0x40000000
+	cmp  r1, #0
+	bne  @1
+	mov  r0, #0
+	mcr  p15, 0, r0, c7, c5, 0
+	mcr  p15, 0, ip, c7, c10, 4
 ```
 
 The original Nitro implementation is in assembly using extremely similar instructions. The presence of the `mcr` instruction at all, indicating an instruction to interop with the coprocessor, would not be output by any C.
