@@ -1,3 +1,27 @@
+Module 3 (main):
+	Functions:
+		DetectFlashcartA
+		DetectFlashcartB
+		DetectEmulatorA
+		DetectEmulatorB
+	
+	Encrypt and create decryption wrappers (key=0x1C695, prefix=DSProt_):
+		DetectFlashcartA
+		DetectFlashcartB
+		DetectEmulatorA
+		DetectEmulatorB
+	
+	Encode and create primary decoder function:
+		DSProt_DetectFlashcartA
+		DSProt_DetectFlashcartB
+		DSProt_DetectEmulatorA
+		DSProt_DetectEmulatorB
+
+
+Module 3.5 (BSS + garbage + callbacks):
+	(no functions, only .bss and .rodata regions)
+
+
 Module 1 (integrity):
 	Functions:
 		Integrity_MACOwner_IsBad
@@ -5,7 +29,7 @@ Module 1 (integrity):
 		Integrity_ROMTest_IsBad
 		Integrity_ROMTest_IsGood
 	
-	Encrypt and create decryption wrappers (key=0xEC46):
+	Encrypt and create decryption wrappers (key=0x14E24):
 		Integrity_MACOwner_IsBad
 		Integrity_MACOwner_IsGood
 		Integrity_ROMTest_IsBad
@@ -16,6 +40,50 @@ Module 1 (integrity):
 		RunEncrypted_Integrity_MACOwner_IsGood
 		RunEncrypted_Integrity_ROMTest_IsBad
 		RunEncrypted_Integrity_ROMTest_IsGood
+
+
+Module 4 (encryptor):
+	Functions:
+		Encryptor_DecodeFunctionTable
+		Encryptor_DecryptFunction
+		Encryptor_EncryptFunction
+		Encryptor_DecryptionWrapperFragment
+	
+	Encode and create decoder function:
+		Encryptor_EncryptFunction
+		Encryptor_DecryptFunction
+		Encryptor_DecryptionWrapperFragment
+
+
+Module 5 (core tests):
+	Functions:
+		MACOwner_IsBad
+		MACOwner_IsGood
+	
+	Functions:
+		ROMUtil_CRC32
+	
+	Encrypt and create decryption wrappers (key=0x36F8):
+		ROMUtil_CRC32
+	
+	Functions:
+		ROMTest_IsBad
+		ROMTest_IsGood
+	
+	Encrypt and create decryption wrappers (key=0x36F8):
+		ROMTest_IsBad
+		ROMTest_IsGood
+	
+	Encrypt and create decryption wrappers (key=0x33F8):
+		MACOwner_IsBad
+		MACOwner_IsGood
+	
+	Encode and create decoder function:
+		RunEncrypted_ROMTest_IsBad  
+		RunEncrypted_ROMTest_IsGood 
+		RunEncrypted_MACOwner_IsBad 
+		RunEncrypted_MACOwner_IsGood
+		RunEncrypted_ROMUtil_CRC32
 
 
 Module 2 (RC4):
@@ -36,67 +104,3 @@ Module 2 (RC4):
 		RC4_InitAndDecryptInstructions
 		RC4_Byte
 
-
-Module 3 (main):
-	Functions:
-		DetectFlashcartA
-		DetectFlashcartB
-		DetectEmulatorA
-		DetectEmulatorB
-	
-	Encrypt and create decryption wrappers (key=0x170B4, prefix=DSProt_):
-		DetectFlashcartA
-		DetectFlashcartB
-		DetectEmulatorA
-		DetectEmulatorB
-	
-	Encode and create primary decoder function:
-		DSProt_DetectFlashcartA
-		DSProt_DetectFlashcartB
-		DSProt_DetectEmulatorA
-		DSProt_DetectEmulatorB
-
-
-Module 3.5 (BSS + garbage + callbacks):
-	(no functions, only .bss and .rodata regions)
-
-
-Module 4 (encryptor):
-	Functions:
-		Encryptor_DecodeFunctionTable
-		Encryptor_DecryptFunction
-		Encryptor_EncryptFunction
-	    Encryptor_DecryptionWrapperFragment
-	
-	Encode and create decoder function:
-		Encryptor_EncryptFunction
-		Encryptor_DecryptFunction
-		Encryptor_DecryptionWrapperFragment
-
-
-Module 5 (core tests):
-	Functions:
-		MACOwner_IsBad
-		MACOwner_IsGood
-	
-	Functions:
-		ROMUtil_CRC32
-	
-	Functions:
-		ROMTest_IsBad
-		ROMTest_IsGood
-	
-	Encrypt and create decryption wrappers (key=0x110DA):
-		ROMTest_IsBad
-		ROMTest_IsGood
-	
-	Encrypt and create decryption wrappers (key=0x10E4A):
-		MACOwner_IsBad
-		MACOwner_IsGood
-	
-	Encode and create decoder function:
-		RunEncrypted_ROMTest_IsBad  
-        RunEncrypted_ROMTest_IsGood 
-        RunEncrypted_MACOwner_IsBad 
-        RunEncrypted_MACOwner_IsGood
-        ROMUtil_CRC32

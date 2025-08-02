@@ -16,7 +16,7 @@ Encryptor_DecryptionWrapperFragment:
 	str    lr, [r10]
 	ldr    ip, [ip]
 	ldmib  r10, {r0-r2}
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x1700
 	blx    ip                                    ; Run function decryption routine
 	mov    ip, r0
 	ldmia  sp!, {r0-r3}
@@ -25,7 +25,7 @@ Encryptor_DecryptionWrapperFragment:
 	stmdb  sp!, {r4}
 	ldr    ip, [ip]
 	mov    r4, r0
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x1700
 	ldmib  r10, {r0-r2}
 	blx    ip                                    ; Run function re-encryption routine
 	str    r0, [r10, #0x4]
@@ -48,7 +48,7 @@ RunEncrypted_ROMTest_IsBad:
 	moveq  ip, #0
 	addne  ip, ip, #0x1C
 	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x1700
 	stmfd  sp!, {ip}        ; Setting up jump to Encryptor_DecryptionWrapperFragment
 	orr    ip, pc, pc       ; Loading data structure below into `ip`
 	ldmfd  sp!, {pc}
@@ -114,9 +114,9 @@ DSProt_DecodeFunctions:
 	bl Integrity_DecodeFunctions
 	bl RC4_DecodeFunctions
 	ldmfd sp!, {lr}
-	ldr r0, =DSProt_DecodeFunctions+0x2100
+	ldr r0, =DSProt_DecodeFunctions+0x1700
 	ldr r1, =0xE12FFF1E                     ; <bx lr> instruction to write
-	sub r0, r0, #0x2100
+	sub r0, r0, #0x1700
 	stmia r0!, {r1-r10}                     ; Clobber the first 10 instructions of itself
 	orr   r0, pc, #0x0                      ; Continue with normal decoding as above
 	adds  r0, r0, #0x4
