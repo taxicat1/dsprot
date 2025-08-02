@@ -58,7 +58,8 @@ LIBRARY_FILES := \
 	$(BUILD_DIR)/encryptor_encoded.o              \
 	$(BUILD_DIR)/encryptor_decoder.o              \
 	$(BUILD_DIR)/mac_owner_encrypted.o            \
-	$(BUILD_DIR)/rom_util_encoded.o               \
+	$(BUILD_DIR)/rom_util_encrypted.o             \
+	$(BUILD_DIR)/rom_util_decrypter_encoded.o     \
 	$(BUILD_DIR)/rom_test_encrypted.o             \
 	$(BUILD_DIR)/rom_test_decrypter_encoded.o     \
 	$(BUILD_DIR)/mac_owner_decrypter_encoded.o    \
@@ -114,13 +115,13 @@ $(BUILD_DIR)/dsprot_main_decrypter.o: $(BUILD_DIR)/dsprot_main_decrypter.s
 $(BUILD_DIR)/crash_encrypted.o \
 $(BUILD_DIR)/crash_decrypter.s: $(BUILD_DIR)/crash.o $(ELFCODER)
 	cp $(BUILD_DIR)/crash.o $(BUILD_DIR)/crash_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/crash_encrypted.o -o $(BUILD_DIR)/crash_decrypter.s -k 39f6 -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/crash_encrypted.o -o $(BUILD_DIR)/crash_decrypter.s -k 11515 -p DSProt_ -f \
 		Crash
 
 $(BUILD_DIR)/dsprot_main_encrypted.o \
 $(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 3ab6 -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 115d5 -p DSProt_ -f \
 		DetectAll
 
 $(BUILD_DIR)/crash.o: $(SRC_DIR)/crash.c
@@ -155,7 +156,7 @@ $(BUILD_DIR)/integrity_decrypter.o: $(BUILD_DIR)/integrity_decrypter.s
 $(BUILD_DIR)/integrity_encrypted.o \
 $(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ELFCODER)
 	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k 10f22 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k 101ec -f \
 		Integrity_MACOwner_IsBad   \
 		Integrity_ROMTest_IsBad
 
@@ -187,18 +188,21 @@ $(BUILD_DIR)/coretests_decoder.o: $(BUILD_DIR)/coretests_decoder.s
 
 $(BUILD_DIR)/mac_owner_decrypter_encoded.o \
 $(BUILD_DIR)/rom_test_decrypter_encoded.o  \
-$(BUILD_DIR)/rom_util_encoded.o            \
-$(BUILD_DIR)/coretests_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_test_decrypter.o $(ELFCODER)
+$(BUILD_DIR)/rom_util_decrypter_encoded.o  \
+$(BUILD_DIR)/coretests_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/rom_util_decrypter.o $(BUILD_DIR)/rom_test_decrypter.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/mac_owner_decrypter_encoded.o
 	cp $(BUILD_DIR)/rom_test_decrypter.o $(BUILD_DIR)/rom_test_decrypter_encoded.o
-	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encoded.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_decrypter_encoded.o $(BUILD_DIR)/rom_util_encoded.o $(BUILD_DIR)/rom_test_decrypter_encoded.o -o $(BUILD_DIR)/coretests_decoder.s -f \
+	cp $(BUILD_DIR)/rom_util_decrypter.o $(BUILD_DIR)/rom_util_decrypter_encoded.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_decrypter_encoded.o $(BUILD_DIR)/rom_util_decrypter_encoded.o $(BUILD_DIR)/rom_test_decrypter_encoded.o -o $(BUILD_DIR)/coretests_decoder.s -f \
 		RunEncrypted_ROMTest_IsBad    \
 		RunEncrypted_MACOwner_IsBad   \
-		ROMUtil_CRC32
+		RunEncrypted_ROMUtil_CRC32
 
 $(BUILD_DIR)/mac_owner_decrypter.o: $(BUILD_DIR)/mac_owner_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/mac_owner_decrypter.s -o $(BUILD_DIR)/mac_owner_decrypter.o
+
+$(BUILD_DIR)/rom_util_decrypter.o: $(BUILD_DIR)/rom_util_decrypter.s
+	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rom_util_decrypter.s -o $(BUILD_DIR)/rom_util_decrypter.o
 
 $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rom_test_decrypter.s -o $(BUILD_DIR)/rom_test_decrypter.o
@@ -206,13 +210,19 @@ $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 $(BUILD_DIR)/mac_owner_encrypted.o \
 $(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k 1621c -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k db88 -f \
 		MACOwner_IsBad
+
+$(BUILD_DIR)/rom_util_encrypted.o \
+$(BUILD_DIR)/rom_util_decrypter.s: $(BUILD_DIR)/rom_util.o $(ELFCODER)
+	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encrypted.o
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k dd18 -f \
+		ROMUtil_CRC32
 
 $(BUILD_DIR)/rom_test_encrypted.o \
 $(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k 1636c -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k dd48 -f \
 		ROMTest_IsBad
 
 $(BUILD_DIR)/mac_owner.o: $(SRC_DIR)/mac_owner.c

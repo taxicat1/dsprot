@@ -3,8 +3,10 @@ Module 1 (main):
 		Crash
 		DetectAll
 	
-	Encrypt and create decryption wrappers (key=0x39F6, prefix=DSProt_):
+	Encrypt and create decryption wrappers (key=0x11515, prefix=DSProt_):
 		Crash
+	
+	Encrypt and create decryption wrappers (key=0x115D5, prefix=DSProt_):
 		DetectAll
 	
 	Encode and create decoder function:
@@ -21,7 +23,7 @@ Module 2 (integrity):
 		Integrity_MACOwner_IsBad
 		Integrity_ROMTest_IsBad
 	
-	Encrypt and create decryption wrappers (key=0x10F22):
+	Encrypt and create decryption wrappers (key=0x101EC):
 		Integrity_MACOwner_IsBad
 		Integrity_ROMTest_IsBad
 	
@@ -35,7 +37,7 @@ Module 3 (encryptor):
 		Encryptor_DecodeFunctionTable
 		Encryptor_DecryptFunction
 		Encryptor_EncryptFunction
-	    Encryptor_DecryptionWrapperFragment
+		Encryptor_DecryptionWrapperFragment
 	
 	Encode and create decoder function:
 		Encryptor_EncryptFunction
@@ -50,19 +52,22 @@ Module 4 (core tests):
 	Functions:
 		ROMUtil_CRC32
 	
+	Encrypt and create decryption wrappers (key=0xDD18):
+		ROMUtil_CRC32
+	
 	Functions:
 		ROMTest_IsBad
 	
-	Encrypt and create decryption wrappers (key=0x1621C):
+	Encrypt and create decryption wrappers (key=0xDB88):
 		MACOwner_IsBad
 	
-	Encrypt and create decryption wrappers (key=0x1636C):
+	Encrypt and create decryption wrappers (key=0xDD48):
 		ROMTest_IsBad
 	
 	Encode and create decoder function:
 		RunEncrypted_ROMTest_IsBad
 		RunEncrypted_MACOwner_IsBad
-		ROMUtil_CRC32
+		Runencrypted_ROMUtil_CRC32
 
 
 Module 5 (RC4):

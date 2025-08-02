@@ -16,7 +16,7 @@ Encryptor_DecryptionWrapperFragment:
 	str    lr, [r10]
 	ldr    ip, [ip]
 	ldmib  r10, {r0-r2}
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x1700
 	blx    ip                                    ; Run function decryption routine
 	mov    ip, r0
 	ldmia  sp!, {r0-r3}
@@ -25,7 +25,7 @@ Encryptor_DecryptionWrapperFragment:
 	stmdb  sp!, {r4}
 	ldr    ip, [ip]
 	mov    r4, r0
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x1700
 	ldmib  r10, {r0-r2}
 	blx    ip                                    ; Run function re-encryption routine
 	str    r0, [r10, #0x4]
@@ -48,7 +48,7 @@ RunEncrypted_ROMTest_IsBad:
 	moveq  ip, #0
 	addne  ip, ip, #0x1C
 	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x1700
 	stmfd  sp!, {ip}        ; Setting up jump to Encryptor_DecryptionWrapperFragment
 	orr    ip, pc, pc       ; Loading data structure below into `ip`
 	ldmfd  sp!, {pc}
@@ -112,15 +112,15 @@ Crash:
 	orrs   r10, r10, r10
 	eorne  lr,  lr,  lr
 	subs   r10, r10, #8
-	ldr    r9, =memClear+0x2100
+	ldr    r9, =memClear+0x1700
 	mov    r0, sp
-	sub    r9, r9, #0x2100
+	sub    r9, r9, #0x1700
 	mov    r1, #0x100
 	blx    r9
-	ldr    lr, =OS_Terminate+0x2100
+	ldr    lr, =OS_Terminate+0x1700
 	mov    r0, r10
 	mov    r1, #0x1000
-	sub    lr, lr, #0x2100
+	sub    lr, lr, #0x1700
 	bx     r9
 	arm_func_end Crash
 ```

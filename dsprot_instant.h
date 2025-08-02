@@ -12,7 +12,7 @@ extern "C" {
 extern void* DSProt_Crash(u32 __unused1, u32 __unused2);
 extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
 
-#define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
+#define DSP_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
 static inline void* DSProt_DetectInstant(void* callback, void* param1, void* param2) {

@@ -13,7 +13,7 @@
 void* DetectAll(void* callback, void* param1, void* param2);
 
 
-#define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
+#define DSP_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 typedef u32 (*U32Func)(u32);
 typedef void* (*CallbackFunc)(void*, void*);

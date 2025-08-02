@@ -3,6 +3,7 @@
 
 #include "types.h"
 
-u32 ROMUtil_CRC32(void* buf, u32 size);
+// Assembly decryption wrapper
+u32 RunEncrypted_ROMUtil_CRC32(void* buf, u32 size);
 
 #endif
