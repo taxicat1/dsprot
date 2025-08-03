@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is an unknown version, likely either 2.02 and 2.04 (not 2.01, 2.03, or 2.05, unlikely to be newer than 2.05, and unlikely to be 2.00), as it appears in these games:
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 2.00 (unconfirmed) as it appears in these games:
 - Ishin no Arashi - Shippuu Ryouma Den (Japan) as overlay 0
 - Gokujou!! Mecha Mote Iinchou: MM My Best Friend! (Japan) as overlay 1
 
