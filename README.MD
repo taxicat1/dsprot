@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is an unknown version, likely either 2.02/Instant and 2.04/Instant (not 2.01, 2.03, or 2.05, unlikely to be newer than 2.05, and unlikely to be 2.00), as it appears in these games:
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 2.00/Instant (unconfirmed), as it appears in these games:
 - Ishin no Arashi - Shippuu Ryouma Den (Japan) as overlay 1
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. If it detects this, it will crash the system.
