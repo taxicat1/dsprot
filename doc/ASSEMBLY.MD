@@ -16,7 +16,7 @@ Encryptor_DecryptionWrapperFragment:
 	str    lr, [r10]
 	ldr    ip, [ip]
 	ldmib  r10, {r0-r2}
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x3200
 	blx    ip                                    ; Run function decryption routine
 	mov    ip, r0
 	ldmia  sp!, {r0-r3}
@@ -25,7 +25,7 @@ Encryptor_DecryptionWrapperFragment:
 	stmdb  sp!, {r4}
 	ldr    ip, [ip]
 	mov    r4, r0
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x3200
 	ldmib  r10, {r0-r2}
 	blx    ip                                    ; Run function re-encryption routine
 	str    r0, [r10, #0x4]
@@ -43,22 +43,42 @@ Second, the "head" function that sets up the `ip` register before calling the un
 ```asm
 	arm_func_start RunEncrypted_ROMTest_IsBad
 RunEncrypted_ROMTest_IsBad:
-	orr    ip, pc, pc
-	ands   ip, ip, ip
-	moveq  ip, #0
-	addne  ip, ip, #0x1C
-	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #0x2100
-	stmfd  sp!, {ip}        ; Setting up jump to Encryptor_DecryptionWrapperFragment
-	orr    ip, pc, pc       ; Loading data structure below into `ip`
-	ldmfd  sp!, {pc}
-	.word  BSS + 0x1        ; Storage space
-	.word  0x1654C          ; Encryption key
-	.word  ROMTest_IsBad    ; Function to decrypt-run-encrypt
-	.word  0x2B4            ; Function size
-	.word  0                ; Storage space
-	.word  Encryptor_DecryptionWrapperFragment
-	arm_func_end RunEncrypted_ROMUtil_CRC32
+	orr      ip, pc, pc
+	ands     ip, ip, ip
+	moveq    ip, #0
+	addne    ip, ip, #0x68
+	ldr      ip, [ip, #0x14]
+	sub      ip, ip, #0
+	stmfd    sp!, {r0, r1, r2, r3, r4}
+	mov      r1, ip, lsr #26
+	eor      r3, r3, r3
+	mov      ip, ip, lsl #6
+	mov      ip, ip, lsr #6
+	mov      r0, ip
+hash_loop:                              ; Hash `Encryptor_DecryptionWrapperFragment`
+	ldr      r2, [r0]
+	mov      r4, r2, lsr #24
+	cmp      r4, #0xEA
+	cmpne    r4, #0xEB
+	eorne    r3, r3, r2, ror #17
+	addne    r3, r3, r2, ror #28
+	eorne    r3, r3, r2, ror r1
+	subs     r1, r1, #1
+	add      r0, r0, #4
+	bne      hash_loop
+	streq    r3, [pc, #0x14]           ; Store resulting hash in data structure
+	ldmeqfd  sp!, {r0, r1, r2, r3, r4}
+	ldmnefd  sp!, {r5, r6, r7, r8, sb}
+	stmeqdb  sp!, {ip}
+	orr      ip, pc, pc                ; Set `ip` to point at data structure
+	ldmeqia  sp!, {pc}                 ; Call `Encryptor_DecryptionWrapperFragment`
+	.word BSS + 1                      ; Dummy storage space
+	.word BSS + 3                      ; Dummy storage space 
+	.word ROMtest_IsBad                ; Function to decrypt-run-encrypt
+	.word 0x540                        ; Function size
+	.word 0                            ; Dummy storage space
+	.word Encryptor_DecryptionWrapperFragment + 0x68000000
+	arm_func_end RunEncrypted_ROMTest_IsBad
 ```
 
 (Data obfuscation as described in [ENCODING.MD](./ENCODING.MD) has been removed for clarity)
@@ -114,9 +134,9 @@ DSProt_DecodeFunctions:
 	bl Integrity_DecodeFunctions
 	bl RC4_DecodeFunctions
 	ldmfd sp!, {lr}
-	ldr r0, =DSProt_DecodeFunctions+0x2100
+	ldr r0, =DSProt_DecodeFunctions+0x3200
 	ldr r1, =0xE12FFF1E                     ; <bx lr> instruction to write
-	sub r0, r0, #0x2100
+	sub r0, r0, #0x3200
 	stmia r0!, {r1-r10}                     ; Clobber the first 10 instructions of itself
 	orr   r0, pc, #0x0                      ; Continue with normal decoding as above
 	adds  r0, r0, #0x4

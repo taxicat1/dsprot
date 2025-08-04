@@ -7,7 +7,7 @@ Frequently throughout the library, values and references are obfuscated until th
 For literal values, the value is obfuscated as:
 
 ```c
-value + &BSS + 0x2100
+value + &BSS + 0x3200
 ```
 
 where `&BSS` is the address of the start of the `.bss` region of library (where uninitialized data is stored). This obfuscation is likely intended to make values, such as a size of 140 bytes, appear to actually be addresses which point to some unknown location.
@@ -15,7 +15,7 @@ where `&BSS` is the address of the start of the `.bss` region of library (where 
 For references, the value is obfuscated as:
 
 ```c
-reference + 0x2100
+reference + 0x3200
 ```
 
 This is likely simply to obscure the actual value of the reference.
@@ -85,6 +85,8 @@ A modified version of the RC4 stream cipher algorithm is used to generate pseudo
 
 Among the modifications, the RC4 state has been modified to include an additional variable alongside its typical `i` and `j`, here referred to as `RC4.x`. This variable is modified by the instructions that are being encoded, and is used in the RC4 byte generation to modify the output. This aims to have a similar goal as `xorval` in unkeyed encoding of running the cipher in a modified CFB mode, preventing encoded instructions from being changed without altering the decoding of all subsequent instructions. See the RC4 section below for specific details.
 
+During encoding, another variable denoted as `prev_opcode` is maintained, which is used to encode or decode the most significant byte of the instructions. This byte is, in effect, encoded completely independently from the others; it must be decoded first in order to properly categorize the instruction, and correspondingly must be encoded last, after the rest of the instruction has been encoded. At the start of the encoding/decoding procedure, `prev_opcode` is initialized to `0x00`.
+
 For a **type-0** instruction:
 
 - The most significant byte is left unmodified.
@@ -97,17 +99,19 @@ For a **type-0** instruction:
 	- The third-least-significant byte is exclusive-ored by a byte from RC4.
 	- `RC4.x` is updated to be the encoded byte from the previous step.
 
-- `RC4.x` is updated by subtracting the most significant byte from it.
-
-For a **type-1** and **type-2** instruction:
+For a **type-2** instruction:
 
 - The most significant byte of the instruction is exclusive-ored by `0x01`.
 
-- `RC4.x` is incremented by the most significant byte of the instruction (`instruction >> 24`).
+- The three least significant bytes are incremented by `0xC82`.
 
-- The three least significant bytes are incremented by `0x842`.
+- A relocation for this instruction has its addend incremented by `0x3200` (and subtraction by 8 removed).
 
-- A relocation for this instruction has its addend incremented by `0x2100` (and subtraction by 8 removed).
+For a **type-1** instruction:
+
+- The most significant byte is exclusive-ored by `0x01`.
+
+- The entire encoding procedure for a type-2 instruction is performed.
 
 For a **type-3** instruction:
 
@@ -115,9 +119,15 @@ For a **type-3** instruction:
 
 - The entire encoding procedure for a type-0 instruction is performed.
 
+After the instruction has been encoded according to its type, the most significant byte is encoded by exclusive-oring it with `prev_opcode`. Afterwards, `prev_opcode` is updated to be this newly encoded byte.
+
+Subsequently, `RC4.x` is updated by subtracting `prev_opcode` from it.
+
 This process leaves type-0 and type-1 instructions as they are, meanwhile type-2 instructions become type-3 instructions and vice versa.
 
 Decoding is simply performing the operations in reverse:
+
+Prior to categorizing the instruction, the most significant byte is updated by exclusive-oring it with `prev_opcode`. Then, `prev_opcode` is updated to be the byte of the instruction *before* it was updated by exclusive-oring.
 
 For a **type-0** instruction:
 
@@ -133,27 +143,35 @@ For a **type-0** instruction:
 
 - `RC4.x` is updated by subtracting the most significant byte from it.
 
-For a **type-1** and **type-3** instruction:
+For a **type-3** instruction:
 
 - `RC4.x` is incremented by the most significant byte of the instruction (`instruction >> 24`).
 
 - The most significant byte of the instruction is exclusive-ored by `0x01`.
 
-- The three least significant bytes are decremented by `0x842`.
+- The three least significant bytes are decremented by `0xC82`.
 
+For a **type-1** instruction:
+
+- The most significant byte is exclusive-ored by `0x01`.
+
+- The entire encoding procedure for a type-3 instruction is performed.
+ 
 For a **type-2** instruction:
 
 - The entire encoding procedure for a type-0 instruction is performed.
 
 - The most significant byte is exclusive-ored by `0x01`.
 
+Subsequently, `RC4.x` is updated by subtracting `prev_opcode` from it.
+
 ### Encoding to instructions vs relocations
 
-Note the association between the two values `0x2100` and `0x842`. When encoding, the addition of `0x2100` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x2100` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x2100` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0x842` to the instruction.
+Note the association between the two values `0x3200` and `0xC82`. When encoding, the addition of `0x3200` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x3200` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x3200` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0xC82` to the instruction.
 
-Therefore, if the encoding procedure added `0x2100` to the *relocation*, the decoding procedure needs to subtract `0x842` from the instruction.
+Therefore, if the encoding procedure added `0x3200` to the *relocation*, the decoding procedure needs to subtract `0xC82` from the instruction.
 
-Meanwhile, if the encoding procedure added `0x2100` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x2100` from the instruction.
+Meanwhile, if the encoding procedure added `0x3200` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x3200` from the instruction.
 
 ### Encoding and linking
 
@@ -177,13 +195,13 @@ E12FFF1E    bx  lr
 The resulting encrypted instructions might then be (depending upon key and function size):
 
 ```
-EA000842    b   4112    R_ARM_PC24:  bar+0x2100
+EA000C82    b   4112    R_ARM_PC24:  bar+0x3200
 E1A3B7E2    <undefined instruction>
 ```
 
-Where, as discussed in the previous section, incrementing the relocation by `0x2100` will increment the instruction by `0x842`.
+Where, as discussed in the previous section, incrementing the relocation by `0x3200` will increment the instruction by `0xC82`.
 
-Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x842`.
+Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0xC82`.
 
 In hindsight this is obvious: in order to be able to encode, then link, then decode, the encoding/decoding procedure must be associative with linking. Linking uses addition modulo 2^24, and therefore encoding must also use addition modulo 2^24.
 
@@ -209,7 +227,7 @@ The key size is always 128 bits.
 
 ### Key generation
 
-The 128-bit RC4 key is derived from a 16-bit seed key, together with the size in bytes to be encrypted. This seed key is actually declared as 32 bits wide, however, in all instances, only 16-bit values are defined for it.
+The 128-bit RC4 key is derived from a 32-bit seed key, together with the size in bytes to be encrypted. This seed key is derived on-the-fly by computing a checksum of another function, `Encryptor_DecryptionWrapperFragment` AKA the "body" of the decryption wrapper. The correct value for this seed key is `0xFA8FD0EA`.
 
 Four 32-bit values are generated as such:
 
@@ -224,38 +242,16 @@ Where `⊕` represents exclusive-or and `<<<` represents a 32-bit bitwise left r
 
 The expanded key buffer is then treated as a little-endian array of 16 bytes, which makes up the resulting 128-bit key.
 
-For example, a seed key of `0x946F` and a size of `0x8C` would create the key:
+For example, a size of `0x8C` would create the key:
 
 ```
-E3 94 00 00 8C 6F 94 00 8C 00 6F 94 18 00 00 6F
+66 D0 8F FA 76 EA D0 8F 03 FA EA D0 5C 8F FA EA
 ```
 
 This key would then produce the RC4 keystream (ignoring outside updates to `x`):
 
 ```
-B6 03 59 09 01 73 29 BD 19 4A 69 BF FC 00 E4 FC 89 1B 61 88 70 E1 66 5E 0E 15 FB ED 36 77 22 AB ...
+3C 99 D2 9F 03 BE 37 67 A8 AD FE 4B 3E E4 29 93 CC 81 A3 66 5C 10 9A 46 FA EA 12 DD 83 E7 48 6D ...
 ```
 
-### Key changing
-
-After each time a function is decrypted to be run, it is then re-encrypted using a new seed key. This new seed key is derived from the previous seed key:
-
-```
-new_seed_key = old_seed_key + (obfuscated_function_address & 0xFFFF) modulo 2^32
-```
-
-Where `obfuscated_function_address` is the function address of the target function that is to be encrypted, obfuscated by incrementation by `0x2100`, as described in the above reference obfuscation description.
-
-This newly modified seed key is expanded into a 128-bit RC4 key as normal. It is also saved as the seed key (after obfuscating it via incrementing by `&BSS + 0x2100`) to be used for the next decryption of the function.
-
-For example, if the original seed key is `0xC20D`, and the address and size of the encrypted function is `0x02301234` + `0x14C`, then the subsequent seed keys and expanded keys for subsequent calls will be:
-
-```
- D441   0D D5 00 00 4C 40 D4 00 4C 01 41 D4 98 01 00 41
- E675   39 E7 00 00 4C 74 E6 00 4C 01 75 E6 AA 01 00 75
- F8A9   E5 F9 00 00 4C A8 F8 00 4C 01 A9 F8 B4 01 00 A9
-10ADD   91 0B 01 00 4C DC 0A 01 4D 01 DD 0A 46 00 00 DD
-11D11   5D 1C 01 00 4C 10 1D 01 4D 01 11 1D 51 00 00 11
-12F45   09 2E 01 00 4C 44 2F 01 4D 01 45 2F 63 00 00 45
-...                           ...
-```
+Although there is a procedure to generate a new key and store it into the encryption wrapper data structure, this key is never used.

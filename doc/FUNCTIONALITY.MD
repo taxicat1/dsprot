@@ -6,23 +6,27 @@ DS Protect has two methods of antipiracy detection:
 	- A MAC address of `00:00:00:00:00:00` (indicating an emulator that is not emulating a MAC address at all)
 	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of No$GBA)
 
-2. ROM read check. It will conduct twelve reads of the cartridge ROM, performing six with a manual read (writing to I/O registers), and six with the SDK's `CARDi_ReadRom`.
+2. ROM read check. It will conduct sixteen reads of the cartridge ROM, performing eight with a manual read (writing to I/O registers), and eight with the SDK's `CARDi_ReadRom`.
 	
 	The manual reads will read these pages:
 	- `0x1000 - 0x11FF`
 	- `0x1200 - 0x13FF`
 	- `0x1400 - 0x15FF`
+	- `0x1600 - 0x17FF`
 	- `0xA000 - 0xA1FF`
 	- `0xD000 - 0xD1FF`
-	- `0xE000 - 0xE1FF`
+	- `0x2C000 - 0x2C1FF`
+	- `0x2D000 - 0x2D1FF`
 	
 	`CARDi_ReadRom` then reads these pages:
 	- `0x8000 - 0x81FF`
 	- `0x8200 - 0x83FF`
 	- `0x8400 - 0x85FF`
+	- `0x8600 - 0x87FF`
 	- `0xA000 - 0xA1FF`
 	- `0xD000 - 0xD1FF`
-	- `0xE000 - 0xE1FF`
+	- `0x2C000 - 0x2C1FF`
+	- `0x2D000 - 0x2D1FF`
 	
 	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. 
 	

@@ -174,7 +174,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		//                 2   1400*
 		//                 3   1600*
 		//                 4   A000
-		//                 5   C000
+		//                 5   D000
 		//
 		//   * = redirected to 8000
 		// 
@@ -186,7 +186,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		//                 8   8400
 		//                 9   8600
 		//                 10  A000
-		//                 11  C000
+		//                 11  D000
 		if (i < 3) {
 			rom_addr += ROM_BLOCK_SIZE;
 		} else if (i == 3) {
@@ -516,7 +516,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		//                 2   1400*
 		//                 3   1600*
 		//                 4   A000
-		//                 5   C000
+		//                 5   D000
 		//
 		//   * = redirected to 8000
 		// 
@@ -528,7 +528,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		//                 8   8400
 		//                 9   8600
 		//                 10  A000
-		//                 11  C000
+		//                 11  D000
 		if (i < 3) {
 			rom_addr += ROM_BLOCK_SIZE;
 		} else if (i == 3) {

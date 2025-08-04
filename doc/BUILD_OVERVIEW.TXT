@@ -1,3 +1,8 @@
+Preparations:
+	Derive key from function:
+		Encryptor_DecryptionWrapperFragment
+
+
 Module 1 (integrity):
 	Functions:
 		Integrity_MACOwner_IsBad
@@ -5,7 +10,7 @@ Module 1 (integrity):
 		Integrity_ROMTest_IsBad
 		Integrity_ROMTest_IsGood
 	
-	Encrypt and create decryption wrappers (key=0xEC46):
+	Encrypt and create decryption wrappers:
 		Integrity_MACOwner_IsBad
 		Integrity_MACOwner_IsGood
 		Integrity_ROMTest_IsBad
@@ -44,7 +49,7 @@ Module 3 (main):
 		DetectEmulatorA
 		DetectEmulatorB
 	
-	Encrypt and create decryption wrappers (key=0x170B4, prefix=DSProt_):
+	Encrypt and create decryption wrappers (prefix=DSProt_):
 		DetectFlashcartA
 		DetectFlashcartB
 		DetectEmulatorA
@@ -86,11 +91,11 @@ Module 5 (core tests):
 		ROMTest_IsBad
 		ROMTest_IsGood
 	
-	Encrypt and create decryption wrappers (key=0x110DA):
+	Encrypt and create decryption wrappers:
 		ROMTest_IsBad
 		ROMTest_IsGood
 	
-	Encrypt and create decryption wrappers (key=0x10E4A):
+	Encrypt and create decryption wrappers:
 		MACOwner_IsBad
 		MACOwner_IsGood
 	
