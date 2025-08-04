@@ -375,9 +375,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		//                 0   1000*
 		//                 1   1200*
 		//                 2   1400*
-		//                 3   A000
-		//                 4   D000
-		//                 5   E000
+		//                 3   1600*
+		//                 4   A000
+		//                 5   D000
 		//
 		//   * = redirected to 8000
 		// 
@@ -387,9 +387,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		//                 6   8000
 		//                 7   8200
 		//                 8   8400
-		//                 9   A000
-		//                 10  D000
-		//                 11  E000
+		//                 9   8600
+		//                 10  A000
+		//                 11  D000
 		if (i < 3) {
 			rom_addr += ROM_BLOCK_SIZE;
 		} else if (i == 3) {
