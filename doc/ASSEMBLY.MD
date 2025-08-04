@@ -58,7 +58,7 @@ RunEncrypted_ROMTest_IsBad:
 	.word  0x2B4            ; Function size
 	.word  0                ; Storage space
 	.word  Encryptor_DecryptionWrapperFragment
-	arm_func_end RunEncrypted_ROMUtil_CRC32
+	arm_func_end RunEncrypted_ROMTest_IsBad
 ```
 
 (Data obfuscation as described in [ENCODING.MD](./ENCODING.MD) has been removed for clarity)
