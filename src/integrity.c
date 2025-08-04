@@ -40,7 +40,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_TRUE;
 	
 	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_TRUE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_TRUE;
 	
@@ -74,7 +74,7 @@ u32 Integrity_MACOwner_IsGood(void) {
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_FALSE;
 	
 	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_FALSE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_FALSE;
 	
@@ -108,7 +108,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_TRUE;
 	
 	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_TRUE;
+	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY * PRIME_TRUE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_TRUE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_TRUE;
 	
@@ -142,7 +142,7 @@ u32 Integrity_ROMTest_IsGood(void) {
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY * PRIME_FALSE;
 	
 	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xD] != 0xc0) return PRIME_INTEGRITY * PRIME_FALSE;
+	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY * PRIME_FALSE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY * PRIME_FALSE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY * PRIME_FALSE;
 	
