@@ -115,39 +115,39 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 
 
 u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) { /* ov123_0225FF30 */
-    u32    expanded_key[4];
+	u32    expanded_key[4];
 	u32    literal_obfs_offset;
-    u32    new_key;
-    u32    size;
-    void*  func_addr;
-    
-    literal_obfs_offset = (u32)&BSS + ENC_VAL_1;
-    
-    func_addr = obfs_func_addr;
-    
-    obfs_size = obfs_size - literal_obfs_offset;
-    size = obfs_size;
-    
-    obfs_key = obfs_key - literal_obfs_offset + ((u32)func_addr >> 20);
-    new_key = obfs_key;
-    
- 	expanded_key[0] = new_key;
-    expanded_key[0] = size ^ expanded_key[0];
-    
-    expanded_key[1] = new_key >> 24;
+	u32    new_key;
+	u32    size;
+	void*  func_addr;
+	
+	literal_obfs_offset = (u32)&BSS + ENC_VAL_1;
+	
+	func_addr = obfs_func_addr;
+	
+	obfs_size = obfs_size - literal_obfs_offset;
+	size = obfs_size;
+	
+	obfs_key = obfs_key - literal_obfs_offset + ((u32)func_addr >> 20);
+	new_key = obfs_key;
+	
+	expanded_key[0] = new_key;
+	expanded_key[0] = size ^ expanded_key[0];
+	
+	expanded_key[1] = new_key >> 24;
 	expanded_key[1] |= new_key << 8;
-    expanded_key[1] = size ^ (u32)expanded_key[1];
-    
-    expanded_key[2] = new_key >> 16;
-    expanded_key[2] |= new_key << 16;
-    expanded_key[2] = size ^ (u32)expanded_key[2];
-    
-    expanded_key[3] = new_key >> 8;
-    expanded_key[3] |= new_key << 24;
-    expanded_key[3] = size ^ (u32)expanded_key[3];
-    
-    func_addr -= ENC_VAL_1;
-    
+	expanded_key[1] = size ^ (u32)expanded_key[1];
+	
+	expanded_key[2] = new_key >> 16;
+	expanded_key[2] |= new_key << 16;
+	expanded_key[2] = size ^ (u32)expanded_key[2];
+	
+	expanded_key[3] = new_key >> 8;
+	expanded_key[3] |= new_key << 24;
+	expanded_key[3] = size ^ (u32)expanded_key[3];
+	
+	func_addr -= ENC_VAL_1;
+	
 	RC4_InitAndEncryptInstructions(&expanded_key[0], func_addr, func_addr, size);
 	clearDataAndInstructionCache(func_addr, size);
 	
