@@ -24,6 +24,7 @@ static int categorizeOpCode(unsigned int opcode) {
 
 void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
 	ctx->xor_val = ENC_XOR_START;
+	ctx->prev_opcode = 0;
 }
 
 void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
@@ -40,7 +41,6 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 			case 2:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands += ENC_VAL_2;
-				rc4->x += ins->opcode;
 				break;
 			
 			case 3:
@@ -62,28 +62,22 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				rc4->x = c;
 				
 				d = d;
-				rc4->x = ((uint32_t)rc4->x - d) & 0xff;
 				
 				ins->opcode = d;
 				ins->operands = (c << 16) | (b << 8) | a;
 				break;
 		}
+		
+		ins->opcode ^= ctx->prev_opcode;
+		ctx->prev_opcode = ins->opcode;
+		
+		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xff;
 	}
 }
 
 
 void Encode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
-	switch (categorizeOpCode(encoded_instruction->opcode)) {
-		case 0:
-		case 1:
-		case 2:
-			// Not possible
-			break;
-		
-		case 3:
-			reloc->r_addend += ENC_VAL_1 + 8;
-			break;
-	}
+	reloc->r_addend += ENC_VAL_1 + 8;
 }
 
 
@@ -93,11 +87,16 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 		ctx->xor_val ^= ins->raw - (ins->raw >> 8);
 	} else {
 		uint8_t a, b, c, d, tmp;
+		
+		int curr_opcode = ins->opcode;
+		ins->opcode ^= ctx->prev_opcode;
+		ctx->prev_opcode = curr_opcode;
+		
 		int optype = categorizeOpCode(ins->opcode);
 		switch (optype) {
 			case 1:
+				ins->opcode ^= 1;
 			case 3:
-				rc4->x += ins->opcode;
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands -= ENC_VAL_2;
 				break;
@@ -122,7 +121,6 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				rc4->x = tmp;
 				
 				d = d;
-				rc4->x = ((uint32_t)rc4->x - d) & 0xff;
 				
 				if (optype == 2) {
 					d ^= ENC_OPCODE_1;
@@ -132,20 +130,12 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				ins->operands = (c << 16) | (b << 8) | a;
 				break;
 		}
+		
+		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xff;
 	}
 }
 
 
 void Decode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
-	switch (categorizeOpCode(encoded_instruction->opcode)) {
-		case 0:
-		case 1:
-		case 3:
-			// Not possible
-			break;
-		
-		case 2:
-			reloc->r_addend -= ENC_VAL_1 + 8;
-			break;
-	}
+	reloc->r_addend -= ENC_VAL_1 + 8;
 }

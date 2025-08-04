@@ -6,6 +6,7 @@
 #include "elf.h"
 #include "instruction.h"
 #include "rc4.h"
+#include "keydata.h"
 
 enum {
 	ENC_ENCODE,
@@ -29,12 +30,13 @@ typedef struct {
 	char*     decoder_name;
 	char**    children;
 	char*     garbage;
-	uint32_t  key;
+	KeyData   key_data;
 	int       verbose;
 } EncodingTask;
 
 typedef struct {
 	uint32_t  xor_val;
+	int       prev_opcode;
 } Encoding_Ctx;
 
 void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task);
