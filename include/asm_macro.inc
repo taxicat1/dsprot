@@ -21,27 +21,42 @@
 	.public BSS
 	.public Encryptor_DecryptionWrapperFragment
 
-	.macro run_encrypted_func func, length, key
-	; Obfuscated: copy `pc` into `ip`, then add +0x1C and +0x14 for total +0x30.
-	; `pc + 0x30` from the first line is the line with `Encryptor_DecryptionWrapperFragment + ENC_VAL_1`.
-	; Subtract `ENC_VAL_1` (0x1000) from that, store it on the stack.
-	; Then set `ip` back to `pc`, which now points at the start of the data structure.
-	; Finally pop the address to `Encryptor_DecryptionWrapperFragment` off the stack onto `pc` to jump.
-	orr    ip, pc, pc
-	ands   ip, ip, ip
-	moveq  ip, #0
-	addne  ip, ip, #0x1C
-	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #ENC_VAL_1
-	stmfd  sp!, {ip}
-	orr    ip, pc, pc
-	ldmfd  sp!, {pc}
-	.word  BSS + 0x1                  ; Storage space
-	.word  BSS + \key + ENC_VAL_1     ; Encryption key
-	.word  \func + ENC_VAL_1          ; Function address
-	.word  BSS + \length + ENC_VAL_1  ; Length
-	.word  0                          ; Storage space
-	.word  Encryptor_DecryptionWrapperFragment + ENC_VAL_1
+	.macro run_encrypted_func func, length, key, hashed_instructions
+	orr      ip, pc, pc                 ; Copy `pc` out
+	ands     ip, ip, ip                 ; Checking if `pc` was zero (??)
+	moveq    ip, #0                     ; 
+	addne    ip, ip, #0x68              ; Prepare to load from `pc[0x68+0x14]` (wrapper fragment size + address, packed as 6+26 bits)
+	ldr      ip, [ip, #0x14]            ; 
+	sub      ip, ip, #0                 ; Useless subtraction?
+	stmfd    sp!, {r0, r1, r2, r3, r4}  ; Push
+	mov      r1, ip, lsr #26            ; Shifting right by 26 to extract upper 6 bits (function size to hash)
+	eor      r3, r3, r3                 ; Clearing `r3` to use as hash accumulator
+	mov      ip, ip, lsl #6             ; Shifting `ip` up and down by 6 to clear the upper 6 bits (leaving address)
+	mov      ip, ip, lsr #6             ; 
+	mov      r0, ip                     ; Moving function address to `r0` so we can increment it
+hash_loop_\@:                           ; 
+	ldr      r2, [r0]                   ; Load instruction from `r0`
+	mov      r4, r2, lsr #24            ; Checking its opcode, shift by 24 to extract upper byte
+	cmp      r4, #0xEA                  ; Compare opcode to EA and EB, which are branches (possible relocations)
+	cmpne    r4, #0xEB                  ; 
+	eorne    r3, r3, r2, ror #17        ; If not a branch, add to hash
+	addne    r3, r3, r2, ror #28        ; hash = ((hash ^ (ins >>> 17)) + (ins >>> 28)) ^ (ins >>> i)
+	eorne    r3, r3, r2, ror r1         ; 
+	subs     r1, r1, #1                 ; Decrement size
+	add      r0, r0, #4                 ; Increment address
+	bne      hash_loop_\@               ; Continue hash loop until remaining size is 0
+	streq    r3, [pc, #0x14]            ; After hashing, we have derived the key. Store it in the pool
+	ldmeqfd  sp!, {r0, r1, r2, r3, r4}  ; Pop
+	ldmnefd  sp!, {r5, r6, r7, r8, sb}  ; Incorrect pop, ruining registers if hash loop is skipped (tamper detection?)
+	stmeqdb  sp!, {ip}                  ; Stash address of decryption wrapper fragment onto stack
+	orr      ip, pc, pc                 ; Re-get `pc`, which now points to the data structure in the pool
+	ldmeqia  sp!, {pc}                  ; Pop decryption wrapper fragment address off stack to `pc`
+	.word BSS + 1
+	.word BSS + 3
+	.word \func + ENC_VAL_1
+	.word BSS + \length + ENC_VAL_1
+	.word 0x00000000
+	.word Encryptor_DecryptionWrapperFragment + (\hashed_instructions << 26)
 	.endm
 
 

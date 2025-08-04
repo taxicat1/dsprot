@@ -15,8 +15,8 @@ void* DetectFlashcartB(void* param1, void* param2);
 void* DetectEmulatorA(void* param1, void* param2);
 void* DetectEmulatorB(void* param1, void* param2);
 
-#define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
-#define DSP_OBFS_OFFSET        (0x100)
+#define DSP_EXPECTED_CHECKSUM  (0x0786385F)
+#define DSP_OBFS_OFFSET        (0x200)
 
 typedef u32 (*DSProt_Task)(DSProt_Ctx*);
 
@@ -68,10 +68,10 @@ void* DetectFlashcartA(void* param1, void* param2) {
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)task_func;
-		i = 9;
+		i = 28;
 		func_data_checksum = 0;
 		do {
-			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
+			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 			func_data_ptr++;
 		} while (--i);
 		
@@ -160,10 +160,10 @@ void* DetectFlashcartB(void* param1, void* param2) {
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)task_func;
-		i = 9;
+		i = 28;
 		func_data_checksum = 0;
 		do {
-			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
+			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 			func_data_ptr++;
 		} while (--i);
 		
@@ -252,10 +252,10 @@ void* DetectEmulatorA(void* param1, void* param2) {
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)task_func;
-		i = 9;
+		i = 28;
 		func_data_checksum = 0;
 		do {
-			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
+			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 			func_data_ptr++;
 		} while (--i);
 		
@@ -344,10 +344,10 @@ void* DetectEmulatorB(void* param1, void* param2) {
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)task_func;
-		i = 9;
+		i = 28;
 		func_data_checksum = 0;
 		do {
-			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
+			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 			func_data_ptr++;
 		} while (--i);
 		

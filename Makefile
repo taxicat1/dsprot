@@ -21,6 +21,7 @@ TOOL_DIR   :=  ./tools
 $(shell mkdir -p $(BUILD_DIR))
 
 ELFCODER_DIR  :=  $(TOOL_DIR)/elfcoder
+DEVKEY_DIR    :=  $(TOOL_DIR)/devkey
 FIXDEP_DIR    :=  $(TOOL_DIR)/fixdep
 MW_DIR        :=  $(TOOL_DIR)/mw
 
@@ -29,6 +30,7 @@ MWCCARM   :=  $(MW_DIR)/mwccarm.exe
 MWASMARM  :=  $(MW_DIR)/mwasmarm.exe
 MWLDARM   :=  $(MW_DIR)/mwldarm.exe
 ELFCODER  :=  $(ELFCODER_DIR)/build/elfcoder$(EXE)
+DEVKEY    :=  $(DEVKEY_DIR)/build/devkey$(EXE)
 FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 
 # C / ASM compilation parameters
@@ -80,6 +82,7 @@ clean:
 
 tools:
 	$(MAKE) -C $(ELFCODER_DIR)
+	$(MAKE) -C $(DEVKEY_DIR)
 	$(MAKE) -C $(FIXDEP_DIR)
 
 dsprot:
@@ -89,6 +92,11 @@ dsprot:
 # Library output
 $(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
 	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
+
+
+# Encryption key
+$(BUILD_DIR)/key.bin: $(BUILD_DIR)/encryptor.o $(DEVKEY)
+	$(DEVKEY) -i $(BUILD_DIR)/encryptor.o -f Encryptor_DecryptionWrapperFragment -o $(BUILD_DIR)/key.bin
 
 
 # Integrity module
@@ -108,9 +116,9 @@ $(BUILD_DIR)/integrity_decrypter.o: $(BUILD_DIR)/integrity_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/integrity_decrypter.s -o $(BUILD_DIR)/integrity_decrypter.o
 
 $(BUILD_DIR)/integrity_encrypted.o \
-$(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ELFCODER)
+$(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(BUILD_DIR)/key.bin $(ELFCODER)
 	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k ec46 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -K $(BUILD_DIR)/key.bin -f \
 		Integrity_MACOwner_IsBad   \
 		Integrity_MACOwner_IsGood  \
 		Integrity_ROMTest_IsBad    \
@@ -134,7 +142,8 @@ $(BUILD_DIR)/rc4_decoder.s: $(BUILD_DIR)/rc4.o $(ELFCODER)
 		RC4_DecryptInstructions         \
 		RC4_InitAndEncryptInstructions  \
 		RC4_InitAndDecryptInstructions  \
-		RC4_Byte
+		RC4_Byte                        \
+		RC4_CategorizeInstruction
 
 $(BUILD_DIR)/rc4.o: $(SRC_DIR)/rc4.c
 	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rc4.c -o $(BUILD_DIR)/rc4.o
@@ -163,9 +172,9 @@ $(BUILD_DIR)/dsprot_main_decrypter.o: $(BUILD_DIR)/dsprot_main_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/dsprot_main_decrypter.s -o $(BUILD_DIR)/dsprot_main_decrypter.o
 
 $(BUILD_DIR)/dsprot_main_encrypted.o \
-$(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
+$(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/key.bin $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 170b4 -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -K $(BUILD_DIR)/key.bin -p DSProt_ -f \
 		DetectFlashcartA     \
 		DetectEmulatorA      \
 		DetectFlashcartB     \
@@ -227,16 +236,16 @@ $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 	$(WINE) $(MWASMARM) $(ASM_PARAM) $(BUILD_DIR)/rom_test_decrypter.s -o $(BUILD_DIR)/rom_test_decrypter.o
 
 $(BUILD_DIR)/mac_owner_encrypted.o \
-$(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
+$(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/key.bin $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k 10e4a -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -K $(BUILD_DIR)/key.bin -f \
 		MACOwner_IsBad   \
 		MACOwner_IsGood
 
 $(BUILD_DIR)/rom_test_encrypted.o \
-$(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(ELFCODER)
+$(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/key.bin $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k 110da -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -K $(BUILD_DIR)/key.bin -f \
 		ROMTest_IsBad   \
 		ROMTest_IsGood
 

@@ -41,7 +41,7 @@ u32 Integrity_MACOwner_IsBad(DSProt_Ctx* __unused) {
 	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY_1 * PRIME_TRUE;
+	if (addr[offset+0xC] != 0x68) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY_1 * PRIME_TRUE;
@@ -77,7 +77,7 @@ u32 Integrity_MACOwner_IsGood(DSProt_Ctx* __unused) {
 	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY_2 * PRIME_FALSE;
+	if (addr[offset+0xC] != 0x68) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY_2 * PRIME_FALSE;
@@ -113,7 +113,7 @@ u32 Integrity_ROMTest_IsBad(DSProt_Ctx* __unused) {
 	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY_1 * PRIME_TRUE;
+	if (addr[offset+0xC] != 0x68) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY_1 * PRIME_TRUE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY_1 * PRIME_TRUE;
@@ -149,7 +149,7 @@ u32 Integrity_ROMTest_IsGood(DSProt_Ctx* __unused) {
 	if (addr[offset+0xA] != 0xA0) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xB] != 0x03) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	
-	if (addr[offset+0xC] != 0x1C) return PRIME_INTEGRITY_2 * PRIME_FALSE;
+	if (addr[offset+0xC] != 0x68) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xD] != 0xC0) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xE] != 0x8C) return PRIME_INTEGRITY_2 * PRIME_FALSE;
 	if (addr[offset+0xF] != 0x12) return PRIME_INTEGRITY_2 * PRIME_FALSE;

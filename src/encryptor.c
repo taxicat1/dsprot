@@ -88,9 +88,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 }
 
 
-void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
+void* Encryptor_DecryptFunction(u32 key, void* obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
-	u32    key;
 	u32    size;
 	void*  func_addr;
 	u32    rc4_dec;
@@ -98,9 +97,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 	rc4_dec = Proxy_RC4_InitAndDecryptInstructions;
 	rc4_dec -= ENC_VAL_1;
 	
-	key  = obfs_key;
 	size = obfs_size;
-	key  -= (u32)&BSS + ENC_VAL_1;
 	size -= (u32)&BSS + ENC_VAL_1;
 	
 	expanded_key[0] = key ^ size;
@@ -119,97 +116,45 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 }
 
 
-// This function sucks. https://decomp.me/scratch/VeHlh
-// 
-// This *should* be identical to `Encryptor_DecryptFunction` with the extra step
-// of modifying the key, and calling the encryption function instead of decryption.
-// But for some reason, all the instructions are in a totally different order.
-// Something very stupid is happening.
-// I suspect there is some sort of obfuscation that is being partially 
-// optimized out, leaving behind only strange register patterns.
-u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
-#ifdef NONMATCHING
-	
+u32 Encryptor_EncryptFunction(u32 key, void* obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
-	u32    key;
 	u32    size;
 	void*  func_addr;
 	u32    rc4_enc;
+	u32    bss_addr;
+	
+	bss_addr = (u32)&BSS;
 	
 	rc4_enc = Proxy_RC4_InitAndEncryptInstructions;
 	rc4_enc -= ENC_VAL_1;
 	
+	size = obfs_size;
+	size -= bss_addr + ENC_VAL_1;
+	
+	// MUST be like this to match
+	expanded_key[0] = key;
+	expanded_key[0] ^= size;
+	
+	expanded_key[1] = key >> 24;
+	expanded_key[1] |= key << 8;
+	expanded_key[1] = size ^ expanded_key[1];
+	
+	expanded_key[2] = key >> 16;
+	expanded_key[2] |= key << 16;
+	expanded_key[2] = size ^ expanded_key[2];
+	
+	expanded_key[3] = key >> 8;
+	expanded_key[3] |= key << 24;
+	expanded_key[3] = size ^ expanded_key[3];
+	
 	func_addr = obfs_func_addr;
 	func_addr -= ENC_VAL_1;
-	
-	key = obfs_key;
-	key -= (u32)&BSS + ENC_VAL_1;
-	key += (u32)obfs_func_addr & 0xFFFF;
-	
-	size = obfs_size;
-	size -= (u32)&BSS + ENC_VAL_1;
-	
-	expanded_key[0] = key ^ size;
-	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
-	expanded_key[2] = ((key << 16) | (key >> 16)) ^ size;
-	expanded_key[3] = ((key << 24) | (key >>  8)) ^ size;
 	
 	((FuncType_RC4_InitAndEncryptInstructions)rc4_enc)(&expanded_key[0], func_addr, func_addr, size);
 	
 	clearDataAndInstructionCache();
 	
-	return key + ((u32)&BSS + ENC_VAL_1);
-	
-#else /* NONMATCHING */
-	
-	// push {r4, r5, r6, lr}
-	asm {
-		sub  sp, sp, #16
-		ldr  r3, =BSS
-		mov  r4, r0
-		add  r5, r3, #ENC_VAL_1
-		ldr  lr, =BSS
-		ldr  ip, =0x0000FFFF
-		mov  r3, r2
-		add  r6, lr, #ENC_VAL_1
-		ldr  r0, =Proxy_RC4_InitAndEncryptInstructions
-		mov  r2, r1
-		ldr  lr, [r0]
-		sub  r4, r4, r5
-		and  r0, r1, ip
-		add  r4, r4, r0
-		mov  ip, r4, lsr #24
-		mov  r1, r4, lsr #16
-		mov  r0, r4, lsr #8
-		sub  r3, r3, r6
-		orr  ip, ip, r4, lsl #8
-		eor  ip, r3, ip
-		str  ip, [sp, #4]
-		orr  r1, r1, r4, lsl #16
-		eor  ip, r4, r3
-		eor  r1, r3, r1
-		orr  r0, r0, r4, lsl #24
-		str  ip, [sp]
-		eor  ip, r3, r0
-		str  ip, [sp, #12]
-		sub  r2, r2, #ENC_VAL_1
-		str  r1, [sp, #8]
-		add  r0, sp, #0
-		mov  r1, r2
-		sub  ip, lr, #ENC_VAL_1
-		blx  ip
-	}
-	// Inlined
-	clearDataAndInstructionCache();
-	asm {
-		ldr  r0, =BSS
-		add  r0, r0, #ENC_VAL_1
-		add  r0, r4, r0
-		add  sp, sp, #16
-	}
-	// pop  {r4, r5, r6, pc}
-	
-#endif /* NONMATCHING */
+	return (u32)&BSS + ENC_VAL_1 + ((u32)obfs_func_addr & 0xFFFF) + key;
 }
 
 

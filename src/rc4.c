@@ -47,7 +47,7 @@ typedef u32 (*FuncType_RC4_CategorizeInstruction)(u32);
 typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
 
 
-static u32 RC4_CategorizeInstruction(u32 instruction) {
+u32 RC4_CategorizeInstruction(u32 instruction) {
 	u8 upper_byte;
 	
 	upper_byte = (instruction >> 24) & 0xFF;
@@ -150,8 +150,12 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8*                src_bytes;
 	u8*                dst_bytes;
 	u32                rc4_byte_addr;
+	u8                 prev_opcode;
 	FuncType_RC4_Byte  rc4_byte;
-	u32                upper, lower;
+	u32                upper;
+	u32                lower;
+	
+	prev_opcode = 0x00;
 	
 	if (size & 3) {
 		return -1;
@@ -165,16 +169,16 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
 			case 1:
+				// Error correction (this case should never be run)
+				src_bytes[idx+3] ^= ENC_OPCODE_1;
+				// Fall through
 			case 2:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
 				
 				upper = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
 				lower = (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
 				
-				ctx->x += upper >> 24;
-				
-				*(u32*)(dst + idx) = upper | lower;
-				
+				*(u32*)(dst_bytes + idx) = upper | lower;
 				break;
 			
 			case 3:
@@ -206,15 +210,16 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				ins_byte ^= rand_byte;
 				ctx->x = ins_byte;
 				dst_bytes[idx+2] = ins_byte;
-				
-				// Fourth byte (temporary assignment is required to match)
-				ins_byte = src_bytes[idx+3];
-				dst_bytes[idx+3] = ins_byte;
-				
-				// Update `x`
-				ctx->x -= ins_byte;
 				break;
 		}
+		
+		// Fourth byte decoded separately
+		dst_bytes[idx+3] = src_bytes[idx+3] ^ prev_opcode;
+		
+		prev_opcode = dst_bytes[idx+3];
+		
+		// Update `x`
+		ctx->x -= prev_opcode;
 	}
 	
 	return 0;
@@ -223,6 +228,8 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u32                idx;
+	u8                 curr_opcode;
+	u8                 prev_opcode;
 	u32                ins_word;
 	u32                rand_byte;
 	u32                rc4_byte_addr;
@@ -231,20 +238,28 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8*                src_bytes;
 	u8*                dst_bytes;
 	
+	prev_opcode = 0x00;
+	
 	if (size & 3) {
 		return -1;
 	}
 	
 	src_bytes = (u8*)src;
 	dst_bytes = (u8*)dst;
-
+	
 	for (idx = 0; idx < size; idx += 4) {
+		curr_opcode = src_bytes[idx+3];
+		src_bytes[idx+3] = curr_opcode ^ prev_opcode;
+		prev_opcode = curr_opcode;
+		
 		ins_word = *(u32*)(src_bytes + idx);
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
 			case 1:
+				// Error correction (this case should never run)
+				src_bytes[idx+3] ^= ENC_OPCODE_1;
+				// Fall through
 			case 3:
-				ctx->x += ins_word >> 24; 
 				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
 				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 				
@@ -255,17 +270,16 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				rc4_byte_addr -= ENC_VAL_1;
 				
 				// First byte
-				// Required to match: randomly using `ins_word` here instead of `ins_byte`
-				ins_word = src_bytes[idx];
+				ins_byte = src_bytes[idx];
 				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-				ctx->x = ins_word;
-				dst_bytes[idx] = ins_byte ^ rand_byte; // This extra write here is required to match as well
-				dst_bytes[idx] = ins_word ^ rand_byte;
+				ctx->x = ins_byte;
+				dst_bytes[idx] = ins_byte ^ rand_byte;
 				
 				// Second byte
 				ins_byte = src_bytes[idx+1];
 				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-				ctx->x = ins_byte;
+				// Random cast required to match
+				ctx->x = (u8)ins_byte;
 				dst_bytes[idx+1] = ins_byte ^ rand_byte;
 				
 				// Third byte
@@ -275,13 +289,8 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				dst_bytes[idx+2] = ins_byte ^ rand_byte;
 				
 				// Fourth byte
-				dst_bytes[idx+3] = src_bytes[idx+3];
-				
-				// Update `x`
-				ctx->x -= src_bytes[idx+3];
-				
-				// Error correction (this case should never be run)
-				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
+				// Error correction (this case should never run)
+				dst_bytes[idx+3] = src_bytes[idx+3] ^ ENC_OPCODE_1;
 				break;
 			
 			default:
@@ -298,7 +307,8 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				// Second byte
 				ins_byte = src_bytes[idx+1];
 				rand_byte = rc4_byte(ctx);
-				ctx->x = ins_byte;
+				// Random cast required to match
+				ctx->x = (u8)ins_byte;
 				dst_bytes[idx+1] = ins_byte ^ rand_byte;
 				
 				// Third byte
@@ -307,13 +317,14 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				ctx->x = ins_byte;
 				dst_bytes[idx+2] = ins_byte ^ rand_byte;
 				
-				// Update `x`
-				ctx->x -= src_bytes[idx+3];
-				
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
 				break;
 		}
+		
+		// Update `x`
+		// Random cast required to match
+		ctx->x -= (u32)prev_opcode;
 	}
 	
 	return 0;
