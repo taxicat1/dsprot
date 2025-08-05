@@ -14,15 +14,16 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx);
 
 
 u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
-	u32   crcs[16];
 	u8    rom_buf[ROM_BLOCK_SIZE];
+	u32   crcs[20];
+	u16   lock_id;
 	u32   rom_addr;
 	u32   rom_addr_offset;
-	u16   lock_id;
 	int   i;
 	void* buf_ptr;
 	
 	// These must be declared in reverse order outside of their blocks to match
+	u8  tmp_buf_3[8];
 	u8  tmp_buf_2[8];
 	u8  tmp_buf_1[8];
 	
@@ -36,10 +37,6 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	
 	for (i = 0; i < 6; i++) {
 		do {
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
 			// This is executing an obfuscated manual cartridge ROM read.
 			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 			//
@@ -59,6 +56,11 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			u32         output;
 			int         i;
 			u8          device_size;
+			
+			
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// `device_size` is checked from the rom header and used to offset the address
 			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
@@ -304,6 +306,105 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		//                ----------
 		//                 14  2C000
 		//                 15  2D000
+		rom_addr += 0x1000;
+	}
+	
+	rom_addr -= 0x1D000;
+    
+    for (; i < 10; i++) {
+		do {
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
+			
+			// Third round of manual cartridge reading.
+			// It is exactly the same as the above block, but now it sends a malformed read command:
+			// Instead of the expected B7XXXXXXXX000000, it sends B7XXXXXXXX110000
+			
+			u32         register_base_1;
+			REGType8v*  vnull;
+			REGType8v*  register_base_2;
+			s32         card_ctrl_cmd;
+			u32         card_ctrl_13;
+			u32         addr_mask;
+			s32         addr_offset;
+			u16         ext_mem_register_val_original;
+			u32         reading_addr;
+			u32         output;
+			int         i;
+			
+			vnull = (REGType8v*)NULL;
+			
+			register_base_1 = 1;
+			register_base_1 <<= 26;
+			
+			register_base_2 = (REGType8v*)HW_REG_BASE;
+			
+			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
+			
+			card_ctrl_13 = 5;
+			
+			addr_mask = 0x204 - card_ctrl_13;
+			addr_offset = addr & addr_mask;
+			
+			card_ctrl_13 += ((REGType8v*)register_base_1)[0x4000] & 1;
+			card_ctrl_13 <<= 18;
+			card_ctrl_13 -= 13;
+			card_ctrl_13 <<= 5;
+			
+			card_ctrl_cmd = ((*(vs32*)card_ctrl_13) & ~0x07000000) | 0xA1000000;
+			
+			addr_offset = 0 - addr_offset;
+			
+			while (((REGType32v*)register_base_1)[0x1A4/4] & 0x80000000) { }
+			
+			((REGType8v*)register_base_1)[0x1A1] = 0x80;
+			
+			for (i = 0; i < 8; i++) {
+				tmp_buf_3[i] = (vnull + HW_REG_BASE)[0x1A8+i];
+			}
+			
+			reading_addr = addr + addr_offset;
+			while (addr_offset < num_bytes) {
+				
+				register_base_2[0x1A8] = 0xB7;
+				register_base_2[0x1A9] = reading_addr >> 24;
+				register_base_2[0x1AA] = reading_addr >> 16;
+				register_base_2[0x1AB] = reading_addr >> 8;
+				register_base_2[0x1AC] = reading_addr;
+				register_base_2[0x1AD] = 0x11;
+				register_base_2[0x1AE] = 0x00;
+				register_base_2[0x1AF] = 0x00;
+				
+				((REGType32v*)register_base_1)[0x1A4/4] = card_ctrl_cmd;
+				
+				do {
+					if (((REGType32v*)register_base_1)[0x1A4/4] & 0x800000) {
+						output = ((REGType32v*)(register_base_1 + 0x100000))[4];
+						if (addr_offset >= 0 && addr_offset < num_bytes) {
+							*(u32*)(dest + addr_offset) = output;
+						}
+						
+						addr_offset += 4;
+					}
+				} while (((REGType32v*)register_base_1)[0x1A4/4] & 0x80000000);
+				
+				reading_addr += 0x200;
+			}
+			
+			for (i = 0; i < 8; i++) {
+				(vnull + HW_REG_BASE)[0x1A8+i] = tmp_buf_3[i];
+			}
+			
+			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
+		} while (0);
+		
+		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		
+		CARDi_ReadRom(-1, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		crcs[i+10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		
 		rom_addr += 0x1000;
 	}
 	
@@ -351,20 +452,27 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		return PRIME_TRUE * PRIME_ROM_TEST_1;
 	}
 	
+	if (!(crcs[16] == crcs[18] && crcs[17] == crcs[19])) {
+		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
+		ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
+		return PRIME_TRUE * PRIME_ROM_TEST_1;
+	}
+	
 	return PRIME_FALSE * PRIME_ROM_TEST_1;
 }
 
 
 u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
-	u32   crcs[16];
 	u8    rom_buf[ROM_BLOCK_SIZE];
+	u32   crcs[20];
+	u16   lock_id;
 	u32   rom_addr;
 	u32   rom_addr_offset;
-	u16   lock_id;
 	int   i;
 	void* buf_ptr;
 	
 	// These must be declared in reverse order outside of their blocks to match
+	u8  tmp_buf_3[8];
 	u8  tmp_buf_2[8];
 	u8  tmp_buf_1[8];
 	
@@ -378,10 +486,6 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	
 	for (i = 0; i < 6; i++) {
 		do {
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
 			// This is executing an obfuscated manual cartridge ROM read.
 			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 			//
@@ -401,6 +505,11 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			u32         output;
 			int         i;
 			u8          device_size;
+			
+			
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// `device_size` is checked from the rom header and used to offset the address
 			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
@@ -548,7 +657,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but with out the ROM header check
+			// It is exactly the same as the above block, but without the ROM header check
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
@@ -649,6 +758,105 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		rom_addr += 0x1000;
 	}
 	
+	rom_addr -= 0x1D000;
+    
+    for (; i < 10; i++) {
+		do {
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
+			
+			// Third round of manual cartridge reading.
+			// It is exactly the same as the above block, but now it sends a malformed read command:
+			// Instead of the expected B7XXXXXXXX000000, it sends B7XXXXXXXX110000
+			
+			u32         register_base_1;
+			REGType8v*  vnull;
+			REGType8v*  register_base_2;
+			s32         card_ctrl_cmd;
+			u32         card_ctrl_13;
+			u32         addr_mask;
+			s32         addr_offset;
+			u16         ext_mem_register_val_original;
+			u32         reading_addr;
+			u32         output;
+			int         i;
+			
+			vnull = (REGType8v*)NULL;
+			
+			register_base_1 = 1;
+			register_base_1 <<= 26;
+			
+			register_base_2 = (REGType8v*)HW_REG_BASE;
+			
+			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
+			
+			card_ctrl_13 = 5;
+			
+			addr_mask = 0x204 - card_ctrl_13;
+			addr_offset = addr & addr_mask;
+			
+			card_ctrl_13 += ((REGType8v*)register_base_1)[0x4000] & 1;
+			card_ctrl_13 <<= 18;
+			card_ctrl_13 -= 13;
+			card_ctrl_13 <<= 5;
+			
+			card_ctrl_cmd = ((*(vs32*)card_ctrl_13) & ~0x07000000) | 0xA1000000;
+			
+			addr_offset = 0 - addr_offset;
+			
+			while (((REGType32v*)register_base_1)[0x1A4/4] & 0x80000000) { }
+			
+			((REGType8v*)register_base_1)[0x1A1] = 0x80;
+			
+			for (i = 0; i < 8; i++) {
+				tmp_buf_3[i] = (vnull + HW_REG_BASE)[0x1A8+i];
+			}
+			
+			reading_addr = addr + addr_offset;
+			while (addr_offset < num_bytes) {
+				
+				register_base_2[0x1A8] = 0xB7;
+				register_base_2[0x1A9] = reading_addr >> 24;
+				register_base_2[0x1AA] = reading_addr >> 16;
+				register_base_2[0x1AB] = reading_addr >> 8;
+				register_base_2[0x1AC] = reading_addr;
+				register_base_2[0x1AD] = 0x11;
+				register_base_2[0x1AE] = 0x00;
+				register_base_2[0x1AF] = 0x00;
+				
+				((REGType32v*)register_base_1)[0x1A4/4] = card_ctrl_cmd;
+				
+				do {
+					if (((REGType32v*)register_base_1)[0x1A4/4] & 0x800000) {
+						output = ((REGType32v*)(register_base_1 + 0x100000))[4];
+						if (addr_offset >= 0 && addr_offset < num_bytes) {
+							*(u32*)(dest + addr_offset) = output;
+						}
+						
+						addr_offset += 4;
+					}
+				} while (((REGType32v*)register_base_1)[0x1A4/4] & 0x80000000);
+				
+				reading_addr += 0x200;
+			}
+			
+			for (i = 0; i < 8; i++) {
+				(vnull + HW_REG_BASE)[0x1A8+i] = tmp_buf_3[i];
+			}
+			
+			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
+		} while (0);
+		
+		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		
+		CARDi_ReadRom(-1, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		crcs[i+10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		
+		rom_addr += 0x1000;
+	}
+	
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
 	
@@ -688,6 +896,12 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	}
 	
 	if (!(crcs[12] == crcs[14] && crcs[13] == crcs[15])) {
+		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
+		ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
+		return PRIME_FALSE * PRIME_ROM_TEST_2;
+	}
+	
+	if (!(crcs[16] == crcs[18] && crcs[17] == crcs[19])) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
 		ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
 		return PRIME_FALSE * PRIME_ROM_TEST_2;
