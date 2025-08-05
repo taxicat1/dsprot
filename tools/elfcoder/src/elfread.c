@@ -145,6 +145,7 @@ static int keyedEncodeInstructions(ElfFile* elf, int start_addr, int size, Encod
 	
 	// Finding last executed instruction (ignoring data at the end of the routine)
 	// Looking for bx / pop opcodes, or what they get encoded into
+	// Must partially decode the opcodes by XORing with previous instruction's opcode
 	int target_opcode_1;
 	int target_opcode_2;
 	
@@ -152,13 +153,25 @@ static int keyedEncodeInstructions(ElfFile* elf, int start_addr, int size, Encod
 	target_opcode_2 = 0xE1;
 	
 	int last_idx = num_ins - 1;
-	while (ins_buffer[last_idx].opcode != target_opcode_1 && ins_buffer[last_idx].opcode != target_opcode_2) {
+	int prev_idx = last_idx - 1;
+	int ins_opcode = ins_buffer[last_idx].opcode;
+	if (task->encoding_type == ENC_DECODE) {
+		ins_opcode ^= ins_buffer[prev_idx].opcode;
+	}
+	
+	while (ins_opcode != target_opcode_1 && ins_opcode != target_opcode_2) {
 		last_idx--;
+		prev_idx--;
 		
 		if (last_idx < 0) {
 			// Could not find target, probably wrong encoding direction specified
 			free(ins_buffer);
 			return 0;
+		}
+		
+		ins_opcode = ins_buffer[last_idx].opcode;
+		if (task->encoding_type == ENC_DECODE) {
+			ins_opcode ^= ins_buffer[prev_idx].opcode;
 		}
 	}
 	
@@ -167,7 +180,7 @@ static int keyedEncodeInstructions(ElfFile* elf, int start_addr, int size, Encod
 	
 	RC4_Ctx* rc4 = malloc(sizeof(RC4_Ctx));
 	uint8_t rc4key[RC4_KEY_SIZE];
-	createRC4Key(task->key + start_addr, encoded_size, rc4key);
+	createRC4Key(task->key_data.key, encoded_size, rc4key);
 	RC4_Init(rc4, rc4key);
 	
 	for (int i = 0; i < encoded_instructions; i++) {
@@ -207,10 +220,14 @@ static int unkeyedEncodeInstructions(ElfFile* elf, int start_addr, int size, Enc
 	// Finding last executed instruction (ignoring data at the end of the routine)
 	// Looking for bx / pop
 	uint32_t target_bxlr = 0xE12FFF1E;
-	uint32_t target_pop = 0xE8BD8000 >> 15;
+	uint32_t target_pop = 0x08BD8000;
+	uint32_t target_pop_mask = 0x0FFF8000;
 	
 	int last_idx = num_ins - 1;
-	while (ins_buffer[last_idx].raw != target_bxlr && (ins_buffer[last_idx].raw >> 15) != target_pop) {
+	while (
+		ins_buffer[last_idx].raw != target_bxlr && 
+		(ins_buffer[last_idx].raw & target_pop_mask) != target_pop
+	) {
 		last_idx--;
 		
 		if (last_idx < 0) {
@@ -309,7 +326,7 @@ static int encodeSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name
 	int encoded_bytes = encodeInstructions(elf, start_addr, symbol->st_size, task);
 	
 	if (encoded_bytes != 0) {
-		ASMWriter_SetSymbolMetadata(asmw, symbol_name, encoded_bytes, start_addr);
+		ASMWriter_SetSymbolSize(asmw, symbol_name, encoded_bytes);
 		
 		if (task->verbose) {
 			printf("%s: found @ %04x in %s\n",
@@ -317,13 +334,13 @@ static int encodeSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name
 			
 			if (task->encoding_type == ENC_DECODE) {
 				if (task->key_mode == MODE_KEYED) {
-					printf(INDENT "Decoded +%x (key = %04x)\n", encoded_bytes, task->key + start_addr);
+					printf(INDENT "Decoded +%x (key = %04x)\n", encoded_bytes, task->key_data.key);
 				} else {
 					printf(INDENT "Decoded +%x\n", encoded_bytes);
 				}
 			} else {
 				if (task->key_mode == MODE_KEYED) {
-					printf(INDENT "Encoded +%x (key = %04x)\n", encoded_bytes, task->key + start_addr);
+					printf(INDENT "Encoded +%x (key = %04x)\n", encoded_bytes, task->key_data.key);
 				} else {
 					printf(INDENT "Encoded +%x\n", encoded_bytes);
 				}

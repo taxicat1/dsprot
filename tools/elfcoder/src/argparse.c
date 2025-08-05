@@ -4,13 +4,7 @@
 #include <errno.h>
 
 #include "encoder.h"
-
-
-static int parseKey(const char* key_text, uint32_t* out_key) {
-	char* outptr;
-	*out_key = strtoul(key_text, &outptr, 16);
-	return (*outptr == '\0') && (errno != ERANGE);
-}
+#include "keydata.h"
 
 
 static int isValidIdentifier(const char* str) {
@@ -46,7 +40,7 @@ static void printDescription(void) {
 	printf(
 		"Encode or decode ARM ELF files, with or without a key.                          \n"
 		"If encoding, output an assembly file that will decode them.                     \n"
-		"For DS Protect version 2.01 Instant.                                            \n"
+		"For DS Protect version 2.03 Instant.                                            \n"
 	);
 }
 
@@ -58,7 +52,7 @@ static void printUsage(const char* self_name) {
 		"  -e, --encode                               Encode the input files.            \n"
 		"  -d, --decode                               Decode the input files.            \n"
 		"  -f, --functions [func1, [func2, [ ... ]]]  List of functions to encode/decode.\n"
-		"  -k, --key [key]                            Optional encryption key.           \n"
+		"  -K, --keyfile [file]                       Optional encryption key file.      \n"
 		"  -p, --prefix [prefix = RunEncrypted_]      Prefix for decryption wrappers.    \n"
 		"  -g  --garbage [symbol]                     Optional added garbage reference.  \n"
 		"  -v, --verbose                              Print encoding progress.           \n",
@@ -88,7 +82,7 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 	task->symbols         = NULL;
 	task->wrapper_prefix  = NULL;
 	task->garbage         = NULL;
-	task->key             = 0;
+	task->key_data        = (KeyData){ 0, 0 };
 	task->verbose         = 0;
 	
 	int arg_idx = 0;
@@ -173,16 +167,9 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 				
 				await_state = AWAIT_SYMBOL;
 			
-			} else if (argCompare(curr_arg, 'k', "--key")) {
+			} else if (argCompare(curr_arg, 'K', "--keyfile")) {
 				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no key provided\n", curr_arg);
-					return 1;
-				}
-				
-				uint32_t key;
-				int valid = parseKey(next_arg, &key);
-				if (!valid) {
-					printf("Error: could not parse key: %s\n", next_arg);
+					printf("Error: %s but no key file provided\n", curr_arg);
 					return 1;
 				}
 				
@@ -191,8 +178,13 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 					return 1;
 				}
 				
+				int error = KeyData_Read(&task->key_data, next_arg);
+				if (error) {
+					printf("Error: could not parse key file: %s\n", next_arg);
+					return 1;
+				}
+				
 				task->key_mode = MODE_KEYED;
-				task->key = key;
 				arg_idx++;
 			
 			} else if (argCompare(curr_arg, 'p', "--prefix")) {
