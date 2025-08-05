@@ -1,12 +1,17 @@
+Preparations:
+	Derive key from function:
+		Encryptor_DecryptionWrapperFragment
+
+
 Module 1 (main):
 	Functions:
 		Crash
 		DetectAll
 	
-	Encrypt and create decryption wrappers (key=0x39F6, prefix=DSProt_):
+	Encrypt and create decryption wrappers (prefix=DSProt_):
 		Crash
 	
-	Encrypt and create decryption wrappers (key=0x3AB6, prefix=DSProt_):
+	Encrypt and create decryption wrappers (prefix=DSProt_):
 		DetectAll
 	
 	Encode and create decoder function:
@@ -23,7 +28,7 @@ Module 2 (integrity):
 		Integrity_MACOwner_IsBad
 		Integrity_ROMTest_IsBad
 	
-	Encrypt and create decryption wrappers (key=0x10F22):
+	Encrypt and create decryption wrappers:
 		Integrity_MACOwner_IsBad
 		Integrity_ROMTest_IsBad
 	
@@ -84,3 +89,4 @@ Module 5 (RC4):
 		RC4_InitAndEncryptInstructions
 		RC4_InitAndDecryptInstructions
 		RC4_Byte
+		RC4_CategorizeInstruction

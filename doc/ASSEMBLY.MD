@@ -16,7 +16,7 @@ Encryptor_DecryptionWrapperFragment:
 	str    lr, [r10]
 	ldr    ip, [ip]
 	ldmib  r10, {r0-r2}
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x3200
 	blx    ip                                    ; Run function decryption routine
 	mov    ip, r0
 	ldmia  sp!, {r0-r3}
@@ -25,7 +25,7 @@ Encryptor_DecryptionWrapperFragment:
 	stmdb  sp!, {r4}
 	ldr    ip, [ip]
 	mov    r4, r0
-	sub    ip, ip, #0x2100
+	sub    ip, ip, #0x3200
 	ldmib  r10, {r0-r2}
 	blx    ip                                    ; Run function re-encryption routine
 	str    r0, [r10, #0x4]
@@ -43,21 +43,41 @@ Second, the "head" function that sets up the `ip` register before calling the un
 ```asm
 	arm_func_start RunEncrypted_ROMTest_IsBad
 RunEncrypted_ROMTest_IsBad:
-	orr    ip, pc, pc
-	ands   ip, ip, ip
-	moveq  ip, #0
-	addne  ip, ip, #0x1C
-	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #0x2100
-	stmfd  sp!, {ip}        ; Setting up jump to Encryptor_DecryptionWrapperFragment
-	orr    ip, pc, pc       ; Loading data structure below into `ip`
-	ldmfd  sp!, {pc}
-	.word  BSS + 0x1        ; Storage space
-	.word  0x1654C          ; Encryption key
-	.word  ROMTest_IsBad    ; Function to decrypt-run-encrypt
-	.word  0x2B4            ; Function size
-	.word  0                ; Storage space
-	.word  Encryptor_DecryptionWrapperFragment
+	orr      ip, pc, pc
+	ands     ip, ip, ip
+	moveq    ip, #0
+	addne    ip, ip, #0x68
+	ldr      ip, [ip, #0x14]
+	sub      ip, ip, #0
+	stmfd    sp!, {r0, r1, r2, r3, r4}
+	mov      r1, ip, lsr #26
+	eor      r3, r3, r3
+	mov      ip, ip, lsl #6
+	mov      ip, ip, lsr #6
+	mov      r0, ip
+hash_loop:                              ; Hash `Encryptor_DecryptionWrapperFragment`
+	ldr      r2, [r0]
+	mov      r4, r2, lsr #24
+	cmp      r4, #0xEA
+	cmpne    r4, #0xEB
+	eorne    r3, r3, r2, ror #17
+	addne    r3, r3, r2, ror #28
+	eorne    r3, r3, r2, ror r1
+	subs     r1, r1, #1
+	add      r0, r0, #4
+	bne      hash_loop
+	streq    r3, [pc, #0x14]           ; Store resulting hash in data structure
+	ldmeqfd  sp!, {r0, r1, r2, r3, r4}
+	ldmnefd  sp!, {r5, r6, r7, r8, sb}
+	stmeqdb  sp!, {ip}
+	orr      ip, pc, pc                ; Set `ip` to point at data structure
+	ldmeqia  sp!, {pc}                 ; Call `Encryptor_DecryptionWrapperFragment`
+	.word BSS + 1                      ; Dummy storage space
+	.word BSS + 3                      ; Dummy storage space 
+	.word ROMtest_IsBad                ; Function to decrypt-run-encrypt
+	.word 0x540                        ; Function size
+	.word 0                            ; Dummy storage space
+	.word Encryptor_DecryptionWrapperFragment + 0x68000000
 	arm_func_end RunEncrypted_ROMTest_IsBad
 ```
 
@@ -88,9 +108,10 @@ NitroStaticInit:
 	.word RC4_Init,                        0x84   ; (Function address, size) data pairs
 	.word RC4_EncryptInstructions,         0x118
 	.word RC4_DecryptInstructions,         0x184
-	.word RC4_InitAndEncryptInstructions,  0x58
-	.word RC4_InitAndDecryptInstructions,  0x58
+	.word RC4_InitAndEncryptInstructions,  0x74
+	.word RC4_InitAndDecryptInstructions,  0x74
 	.word RC4_Byte,                        0x58
+	.word RC4_CategorizeInstruction,       0x3C
 	.word 0, 0                                    ; End-of-data (0, 0)
 	arm_func_end NitroStaticInit
 ```
@@ -112,15 +133,15 @@ Crash:
 	orrs   r10, r10, r10
 	eorne  lr,  lr,  lr
 	subs   r10, r10, #8
-	ldr    r9, =memClear+0x2100
+	ldr    r9, =memClear+0x3200
 	mov    r0, sp
-	sub    r9, r9, #0x2100
+	sub    r9, r9, #0x3200
 	mov    r1, #0x100
 	blx    r9
-	ldr    lr, =OS_Terminate+0x2100
+	ldr    lr, =OS_Terminate+0x3200
 	mov    r0, r10
 	mov    r1, #0x1000
-	sub    lr, lr, #0x2100
+	sub    lr, lr, #0x3200
 	bx     r9
 	arm_func_end Crash
 ```
