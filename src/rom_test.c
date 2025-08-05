@@ -405,6 +405,18 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		CARDi_ReadRom(-1, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
+		// Final two loops are executed:
+		//
+		// Manual read:    i   addr
+		//                ----------
+		//                 16  11000 
+		//                 17  12000
+		// 
+		// 
+		// CARDi_ReadRom:  i   addr
+		//                ----------
+		//                 18  11000
+		//                 19  22000
 		rom_addr += 0x1000;
 	}
 	
@@ -424,6 +436,8 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	//   5 == 11
 	//   12 == 14
 	//   13 == 15
+	//   16 == 18
+	//   17 == 19
 	//   6 != 7 and 6 != 8
 	
 	for (i = 0; i < 3; i++) {
@@ -854,6 +868,18 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		CARDi_ReadRom(-1, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
+		// Final two loops are executed:
+		//
+		// Manual read:    i   addr
+		//                ----------
+		//                 16  11000 
+		//                 17  12000
+		// 
+		// 
+		// CARDi_ReadRom:  i   addr
+		//                ----------
+		//                 18  11000
+		//                 19  22000
 		rom_addr += 0x1000;
 	}
 	
@@ -873,6 +899,8 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	//   5 == 11
 	//   12 == 14
 	//   13 == 15
+	//   16 == 18
+	//   17 == 19
 	//   6 != 7 and 6 != 8
 	
 	for (i = 0; i < 3; i++) {
