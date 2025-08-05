@@ -9,12 +9,12 @@ DS Protect has two methods of antipiracy detection:
 2. ROM read check. It will conduct sixteen reads of the cartridge ROM, performing eight with a manual read (writing to I/O registers), and eight with the SDK's `CARDi_ReadRom`.
 	
 	The manual reads will read these pages:
-	- `0x1000 - 0x11FF`
-	- `0x1200 - 0x13FF`
-	- `0x1400 - 0x15FF`
-	- `0x1600 - 0x17FF`
-	- `0xA000 - 0xA1FF`
-	- `0xD000 - 0xD1FF`
+	- `ROM_SIZE + 0x1000 - ROM_SIZE + 0x11FF`
+	- `ROM_SIZE + 0x1200 - ROM_SIZE + 0x13FF`
+	- `ROM_SIZE + 0x1400 - ROM_SIZE + 0x15FF`
+	- `ROM_SIZE + 0x1600 - ROM_SIZE + 0x17FF`
+	- `ROM_SIZE + 0xA000 - ROM_SIZE + 0xA1FF`
+	- `ROM_SIZE + 0xD000 - ROM_SIZE + 0xD1FF`
 	- `0x2C000 - 0x2C1FF`
 	- `0x2D000 - 0x2D1FF`
 	
