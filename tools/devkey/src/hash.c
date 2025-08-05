@@ -3,10 +3,16 @@
 #include "hash.h"
 
 
+static inline uint32_t ror(uint32_t x, unsigned int amt) {
+	amt %= 32;
+	return ( x >> amt) | (x << (32 - amt));
+}
+
 void Hash_Instructions(uint32_t* instructions, int num, KeyData* out) {
 	uint32_t hash = 0;
 	
-	for (int i = num; i >= 0; i--) {
+	int i = num;
+	do {
 		uint32_t ins = *instructions++;
 		
 		switch (ins >> 24) {
@@ -15,12 +21,12 @@ void Hash_Instructions(uint32_t* instructions, int num, KeyData* out) {
 				break;
 			
 			default:
-				hash ^= (ins >> 17) | (ins << (32-17));
-				hash += (ins >> 28) | (ins << (32-28));
-				hash ^= (ins >>  i) | (ins << (32- i));
+				hash ^= ror(ins, 17);
+				hash += ror(ins, 28);
+				hash ^= ror(ins, i);
 				break;
 		}
-	}
+	} while (--i);
 	
 	out->key = hash;
 	out->hashed_instructions = num;
