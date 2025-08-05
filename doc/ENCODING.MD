@@ -225,20 +225,50 @@ The authors have made two bizarre modifications:
 
 The key size is always 128 bits.
 
-### Key generation
+### Key derivation
 
-The 128-bit RC4 key is derived from a 32-bit seed key, together with the size in bytes to be encrypted. This seed key is derived on-the-fly by computing a checksum of another function, `Encryptor_DecryptionWrapperFragment` AKA the "body" of the decryption wrapper. The correct value for this seed key is `0xFA8FD0EA`.
+The 128-bit RC4 key is derived from a 32-bit checksum, together with the size in bytes to be encrypted. This checksum is derived on-the-fly from another function, `Encryptor_DecryptionWrapperFragment` AKA the "body" of the decryption wrapper.
 
-Four 32-bit values are generated as such:
+This algorithm is used to compute the checksum:
 
 ```
-expanded_key[0] := seed_key ⊕ size
-expanded_key[1] := (seed_key <<< 8) ⊕ size
-expanded_key[2] := (seed_key <<< 16) ⊕ size
-expanded_key[3] := (seed_key <<< 24) ⊕ size
+break input into an array of 32-bit little-endian words (ARM instructions)
+
+checksum := 0
+word_idx := 0
+
+for i := number of words down to 0:
+	word := input[word_idx]
+	
+	if the most significant byte of word is not 0xEA or 0xEB:
+		checksum := checksum ⊕ (word >>> 17)
+		checksum := checksum + (word >>> 28)
+		checksum := checksum ⊕ (word >>> i)
+	end if
+	
+	word_idx := word_idx + 1
+
+end for
+
+output checksum
 ```
 
-Where `⊕` represents exclusive-or and `<<<` represents a 32-bit bitwise left rotation.
+Where `⊕` represents 32-bit exclusive-or, `+` represents addition modulo 2^32, and `>>>` represents a 32-bit bitwise right rotation.
+
+Note that last operation in the update loop; it is a rotation based on the iterator value. This value starts at the total number of instructions, and is equal to 1 on the final instruction. This is opposite the input processing order, which begins with the first word and ends with the last.
+
+The included tool `devkey` is able to hash functions to this specification. The correct checksum value for this version is `0x89EDE4EA`.
+
+To generate the RC4 key, four 32-bit values are generated as such, using the generated checksum and size of the target function:
+
+```
+expanded_key[0] := checksum ⊕ size
+expanded_key[1] := (checksum <<< 8) ⊕ size
+expanded_key[2] := (checksum <<< 16) ⊕ size
+expanded_key[3] := (checksum <<< 24) ⊕ size
+```
+
+Where `<<<` represents a 32-bit bitwise left rotation.
 
 The expanded key buffer is then treated as a little-endian array of 16 bytes, which makes up the resulting 128-bit key.
 
