@@ -40,7 +40,7 @@ static void printDescription(void) {
 	printf(
 		"Encode or decode ARM ELF files, with or without a key.                          \n"
 		"If encoding, output an assembly file that will decode them.                     \n"
-		"For DS Protect version 2.03 Instant.                                            \n"
+		"For DS Protect version 2.05 Instant.                                            \n"
 	);
 }
 

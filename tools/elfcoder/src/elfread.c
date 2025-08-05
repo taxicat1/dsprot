@@ -171,7 +171,7 @@ static int keyedEncodeInstructions(ElfFile* elf, int start_addr, int size, Encod
 		
 		ins_opcode = ins_buffer[last_idx].opcode;
 		if (task->encoding_type == ENC_DECODE) {
-			ins_opcode ^= ins_buffer[prev_idx].opcode;
+			ins_opcode -= ins_buffer[prev_idx].opcode;
 		}
 	}
 	
