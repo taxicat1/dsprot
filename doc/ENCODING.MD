@@ -7,7 +7,7 @@ Frequently throughout the library, values and references are obfuscated until th
 For literal values, the value is obfuscated as:
 
 ```c
-value + &BSS + 0x3200
+value + &BSS + 0x2200
 ```
 
 where `&BSS` is the address of the start of the `.bss` region of library (where uninitialized data is stored). This obfuscation is likely intended to make values, such as a size of 140 bytes, appear to actually be addresses which point to some unknown location.
@@ -15,7 +15,7 @@ where `&BSS` is the address of the start of the `.bss` region of library (where 
 For references, the value is obfuscated as:
 
 ```c
-reference + 0x3200
+reference + 0x2200
 ```
 
 This is likely simply to obscure the actual value of the reference.
@@ -103,9 +103,9 @@ For a **type-2** instruction:
 
 - The most significant byte of the instruction is exclusive-ored by `0x01`.
 
-- The three least significant bytes are incremented by `0xC82`.
+- The three least significant bytes are incremented by `0x882`.
 
-- A relocation for this instruction has its addend incremented by `0x3200` (and subtraction by 8 removed).
+- A relocation for this instruction has its addend incremented by `0x2200` (and subtraction by 8 removed).
 
 For a **type-1** instruction:
 
@@ -119,7 +119,7 @@ For a **type-3** instruction:
 
 - The entire encoding procedure for a type-0 instruction is performed.
 
-After the instruction has been encoded according to its type, the most significant byte is encoded by exclusive-oring it with `prev_opcode`. Afterwards, `prev_opcode` is updated to be this newly encoded byte.
+After the instruction has been encoded according to its type, the most significant byte is encoded by incrementing it by `prev_opcode`. Afterwards, `prev_opcode` is updated to be this newly encoded byte.
 
 Subsequently, `RC4.x` is updated by subtracting `prev_opcode` from it.
 
@@ -127,7 +127,7 @@ This process leaves type-0 and type-1 instructions as they are, meanwhile type-2
 
 Decoding is simply performing the operations in reverse:
 
-Prior to categorizing the instruction, the most significant byte is updated by exclusive-oring it with `prev_opcode`. Then, `prev_opcode` is updated to be the byte of the instruction *before* it was updated by exclusive-oring.
+Prior to categorizing the instruction, the most significant byte is updated by decrementing it by `prev_opcode`. Then, `prev_opcode` is updated to be the byte of the instruction *before* it was updated.
 
 For a **type-0** instruction:
 
@@ -149,7 +149,7 @@ For a **type-3** instruction:
 
 - The most significant byte of the instruction is exclusive-ored by `0x01`.
 
-- The three least significant bytes are decremented by `0xC82`.
+- The three least significant bytes are decremented by `0x882`.
 
 For a **type-1** instruction:
 
@@ -167,11 +167,11 @@ Subsequently, `RC4.x` is updated by subtracting `prev_opcode` from it.
 
 ### Encoding to instructions vs relocations
 
-Note the association between the two values `0x3200` and `0xC82`. When encoding, the addition of `0x3200` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x3200` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x3200` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0xC82` to the instruction.
+Note the association between the two values `0x2200` and `0x882`. When encoding, the addition of `0x2200` may be applied to the instruction directly, or to the relocation for that instruction. When the relocation is encoded this way and then applied to the instruction, the offset of `0x2200` bytes is converted into a offset of *instructions*, effectively dividing it by 4. ARM branches, like the ARM PC, are also always offset by 2: a branch of 0 (`EB000000`) is a jump forward by 8 bytes or 2 instructions (`bl #8`). So, when an addition of `0x2200` is applied from the relocation into the instruction, it is divided by 4 and then incremented by 2, resulting in an addition of `0x882` to the instruction.
 
-Therefore, if the encoding procedure added `0x3200` to the *relocation*, the decoding procedure needs to subtract `0xC82` from the instruction.
+Therefore, if the encoding procedure added `0x2200` to the *relocation*, the decoding procedure needs to subtract `0x882` from the instruction.
 
-Meanwhile, if the encoding procedure added `0x3200` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x3200` from the instruction.
+Meanwhile, if the encoding procedure added `0x2200` to the *instruction*, the decoding procedure needs to (obviously) subtract `0x2200` from the instruction.
 
 ### Encoding and linking
 
@@ -195,13 +195,13 @@ E12FFF1E    bx  lr
 The resulting encrypted instructions might then be (depending upon key and function size):
 
 ```
-EA000C82    b   4112    R_ARM_PC24:  bar+0x3200
+EA000882    b   4112    R_ARM_PC24:  bar+0x2200
 E1A3B7E2    <undefined instruction>
 ```
 
-Where, as discussed in the previous section, incrementing the relocation by `0x3200` will increment the instruction by `0xC82`.
+Where, as discussed in the previous section, incrementing the relocation by `0x2200` will increment the instruction by `0x882`.
 
-Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0xC82`.
+Therefore, after the reference is linked and the relocation is applied, the branch destination can still be correctly decoded by subtracting `0x882`.
 
 In hindsight this is obvious: in order to be able to encode, then link, then decode, the encoding/decoding procedure must be associative with linking. Linking uses addition modulo 2^24, and therefore encoding must also use addition modulo 2^24.
 
