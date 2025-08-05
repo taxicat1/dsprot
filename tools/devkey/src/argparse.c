@@ -38,7 +38,7 @@ static int isValidIdentifier(const char* str) {
 static void printDescription(void) {
 	printf(
 		"Derive a key file from a function.                                              \n"
-		"For DS Protect version 2.03.                                                    \n"
+		"For DS Protect version 2.05.                                                    \n"
 	);
 }
 

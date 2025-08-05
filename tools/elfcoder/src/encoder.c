@@ -68,7 +68,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				break;
 		}
 		
-		ins->opcode ^= ctx->prev_opcode;
+		ins->opcode += ctx->prev_opcode;
 		ctx->prev_opcode = ins->opcode;
 		
 		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xff;
@@ -89,7 +89,7 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 		uint8_t a, b, c, d, tmp;
 		
 		int curr_opcode = ins->opcode;
-		ins->opcode ^= ctx->prev_opcode;
+		ins->opcode -= ctx->prev_opcode;
 		ctx->prev_opcode = curr_opcode;
 		
 		int optype = categorizeOpCode(ins->opcode);
