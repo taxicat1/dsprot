@@ -25,7 +25,7 @@
 	orr      ip, pc, pc                 ; Copy `pc` out
 	ands     ip, ip, ip                 ; Checking if `pc` was zero (??)
 	moveq    ip, #0                     ; 
-	addne    ip, ip, #0x68              ; Prepare to load from `pc[0x68+0x14]` (wrapper fragment size + address, packed as 6+26 bits)
+	addne    ip, ip, #0x8C              ; Prepare to load from `pc[0x8C+0x14]` (wrapper fragment size + address, packed as 6+26 bits)
 	ldr      ip, [ip, #0x14]            ; 
 	sub      ip, ip, #0                 ; Useless subtraction?
 	stmfd    sp!, {r0, r1, r2, r3, r4}  ; Push
@@ -45,12 +45,21 @@ hash_loop_\@:                           ;
 	subs     r1, r1, #1                 ; Decrement size
 	add      r0, r0, #4                 ; Increment address
 	bne      hash_loop_\@               ; Continue hash loop until remaining size is 0
-	streq    r3, [pc, #0x14]            ; After hashing, we have derived the key. Store it in the pool
-	ldmeqfd  sp!, {r0, r1, r2, r3, r4}  ; Pop
-	ldmnefd  sp!, {r5, r6, r7, r8, sb}  ; Incorrect pop, ruining registers if hash loop is skipped (tamper detection?)
-	stmeqdb  sp!, {ip}                  ; Stash address of decryption wrapper fragment onto stack
+	mov      r0, #0x02000000            ; Create addresses 0x02000800 and 0x04004000
+	orr      r1, r0, #0x800             ; 
+	mov      r0, #0x04000000            ; 
+	orr      r0, r0, #0x4000            ; 
+	ldr      r0, [r0]                   ; Read value from 0x04004000 (should always be zero)
+	ands     r0, r0, #1                 ; If LSB is set, will clobber stuff
+	orrne    r1, r1, #0x4000            ; If not set, update other address to 0x02004800
+	cmp      ip, r1,                    ; Comparing `ip` (Encryptor_DecryptionWrapperFragment) to other address
+	strge    r3, [pc, #0x18]            ; If address is higher, save the proper decryption key to pool
+	movlt    ip, lr                     ; Else, Return to `lr` instead of running Encryptor_DecryptionWrapperFragment (why?)
+	ldmgefd  sp!, {r0, r1, r2, r3, r4}  ; Correct pop if address is higher
+	ldmltfd  sp!, {r5, r6, r7, r8, sb}  ; Incorrect pop, ruining registers if address is lower
+	stmgedb  sp!, {ip}                  ; Stash address of decryption wrapper fragment onto stack
 	orr      ip, pc, pc                 ; Re-get `pc`, which now points to the data structure in the pool
-	ldmeqia  sp!, {pc}                  ; Pop decryption wrapper fragment address off stack to `pc`
+	ldmia    sp!, {pc}                  ; Pop decryption wrapper fragment address off stack to `pc
 	.word BSS + 1
 	.word BSS + 3
 	.word \func + ENC_VAL_1

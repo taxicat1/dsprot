@@ -5,8 +5,8 @@
 #define PRIME_FALSE        (241)
 
 #define PRIME_DSPROT_MAIN   (53)
-#define PRIME_INTEGRITY    (197)
-#define PRIME_MAC_OWNER    (193)
-#define PRIME_ROM_TEST     (191)
+#define PRIME_INTEGRITY    (173)
+#define PRIME_MAC_OWNER    (191)
+#define PRIME_ROM_TEST     (181)
 
 #endif

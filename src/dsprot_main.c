@@ -13,7 +13,7 @@
 void* DetectAll(void* callback, void* param1, void* param2);
 
 
-#define DSP_EXPECTED_CHECKSUM  (0x0786385F)
+#define DSP_EXPECTED_CHECKSUM  (0x9F75A8D6)
 
 typedef u32 (*U32Func)(u32);
 typedef void* (*CallbackFunc)(void*, void*);
@@ -43,7 +43,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)queued_func;
-		i = 28;
+		i = 37;
 		func_data_checksum = 0;
 		do {
 			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
