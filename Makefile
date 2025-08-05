@@ -77,6 +77,7 @@ all:
 
 clean:
 	$(MAKE) -C $(ELFCODER_DIR) clean
+	$(MAKE) -C $(DEVKEY_DIR) clean
 	$(MAKE) -C $(FIXDEP_DIR) clean
 	$(RM) $(BUILD_DIR)/*
 
