@@ -275,13 +275,13 @@ The expanded key buffer is then treated as a little-endian array of 16 bytes, wh
 For example, a size of `0x8C` would create the key:
 
 ```
-66 D0 8F FA 76 EA D0 8F 03 FA EA D0 5C 8F FA EA
+66 E4 ED 89 05 EA E4 ED 61 89 EA E4 68 ED 89 EA
 ```
 
 This key would then produce the RC4 keystream (ignoring outside updates to `x`):
 
 ```
-3C 99 D2 9F 03 BE 37 67 A8 AD FE 4B 3E E4 29 93 CC 81 A3 66 5C 10 9A 46 FA EA 12 DD 83 E7 48 6D ...
+DD 9C 85 E6 F0 07 D1 9C 16 E1 29 A5 F7 0E 4F B4 14 AF 00 95 F1 E3 BA 3E 7C F5 A7 B2 1C 89 30 5D ...
 ```
 
 Although there is a procedure to generate a new key and store it into the encryption wrapper data structure, this key is never used.
