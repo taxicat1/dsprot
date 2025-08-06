@@ -62,7 +62,7 @@ The detection functions take two parameters as arguments, each of type `void*`, 
 
 ## Obfuscation
 
-The code has multiple layers of obfuscation present. Many of the core functions are written in convoluted ways intended to deter reverse engineering, and/or encrypted and accessible only through special decryption wrappers. Decryption wrappers will decrypt the function, run it with the specified arguments, re-encrypt the function (with a new key), and return. This is designed such that the raw code of the function spends as little time in RAM as possible.
+The code has multiple layers of obfuscation present. Many of the core functions are written in convoluted ways intended to deter reverse engineering, and/or encrypted and accessible only through special decryption wrappers. Decryption wrappers will decrypt the function, run it with the specified arguments, re-encrypt the function, and return. This is designed such that the raw code of the function spends as little time in RAM as possible.
 
 Other functions are encoded using an unkeyed encoding scheme. These functions are decoded upon calling the initializer function (`DSProt_DecodeFunctions`), and remain decoded for as long as they remain in RAM. This is seemingly designed to deter reading dumps of the ROM.
 
