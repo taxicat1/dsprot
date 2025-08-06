@@ -131,15 +131,15 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	obfs_key = obfs_key - literal_obfs_offset + ((u32)func_addr >> 20);
 	new_key = obfs_key;
 	
- 	expanded_key[0] = new_key;
-    expanded_key[1] = new_key;
-    expanded_key[2] = new_key;
-    expanded_key[3] = new_key;
-    
-    expanded_key[0] = ((expanded_key[0] <<  0) | (expanded_key[1] >> 32)) ^ size;
+	expanded_key[0] = new_key;
+	expanded_key[1] = new_key;
+	expanded_key[2] = new_key;
+	expanded_key[3] = new_key;
+	
+	expanded_key[0] = ((expanded_key[0] <<  0) | (expanded_key[1] >> 32)) ^ size;
 	expanded_key[1] = ((expanded_key[1] <<  8) | (expanded_key[1] >> 24)) ^ size;
 	expanded_key[2] = ((expanded_key[2] << 16) | (expanded_key[2] >> 16)) ^ size;
-    expanded_key[3] = ((expanded_key[3] << 24) | (expanded_key[3] >>  8)) ^ size;
+	expanded_key[3] = ((expanded_key[3] << 24) | (expanded_key[3] >>  8)) ^ size;
 	
 	func_addr -= ENC_VAL_1;
 	
