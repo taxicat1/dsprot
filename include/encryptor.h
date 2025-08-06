@@ -15,11 +15,11 @@ void Encryptor_EndRange(u32* addr);
 // Encryption range macros
 #define ENCRYPTION_START(enc_key) \
 	asm {                              \
-	    stmfd  sp!, {r0};              \
-	    mov    r0, #12;                \
-	    add    r0, r0, pc;             \
+	    stmfd  sp!, {r0-r3};           \
+	    mov    r1, #12;                \
+	    add    r0, r1, pc;             \
 	    bl     Encryptor_StartRange;   \
-	    ldmia  sp!, {r0};              \
+	    ldmia  sp!, {r0-r3};           \
 	    b      @_encstart ## enc_key;  \
 	    dcd    0xEB000000 + enc_key;   \
 	@_encstart ## enc_key:             \

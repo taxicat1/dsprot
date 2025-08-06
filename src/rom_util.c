@@ -31,7 +31,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	ENCRYPTION_START(0x70C2);
+	ENCRYPTION_START(0x5FDF);
 	
 	card_cmd = (REGType8v*)(register_base_1 + 0x1A8);
 	
@@ -106,12 +106,11 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Write original value back to to external memory control register
 	((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/sizeof(u16)] = ext_mem_register_val_original;
 	
-	ENCRYPTION_END(0x70C2);
+	ENCRYPTION_END(0x5FDF);
 	
 	CARD_UnlockRom(lock_id);
 	
-	// BUG: OS_ReleaseLockID() is supposed to be called here and never is
-	//OS_ReleaseLockID(lock_id);
+	OS_ReleaseLockID(lock_id);
 }
 
 
@@ -120,7 +119,7 @@ u32 ROMUtil_CRC32(void* buf, u32 size) {
 	u32  crc;
 	u8*  byteptr;
 	
-	ENCRYPTION_START(0x476E);
+	ENCRYPTION_START(0x0D2C);
 	
 	byteptr = (u8*)buf;
 	crc = 0xFFFFFFFF;
@@ -142,7 +141,7 @@ u32 ROMUtil_CRC32(void* buf, u32 size) {
 	}
 	crc = ~crc;
 	
-	ENCRYPTION_END(0x476E);
+	ENCRYPTION_END(0x0D2C);
 	
 	return crc;
 }

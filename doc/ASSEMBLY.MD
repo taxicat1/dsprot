@@ -6,11 +6,11 @@ The ranges declarations take the form:
 
 ```asm
     ; ENCRYPTION_START(enc_key)
-    push   {r0}
-    mov    r0, #12
-    add    r0, r0, pc
+    push   {r0-r3}
+    mov    r1, #12
+    add    r0, r1, pc
     bl     Encryptor_StartRange
-    pop    {r0}
+    pop    {r0-r3}
     b      +8
     .word  0xEB000000 + enc_key
 ```
