@@ -1,19 +1,17 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is version 2.01, as it appears in these games (but likely several more):
-- Golden Sun: Dark Dawn (US) as overlay 334
-- Kirby Mass Attack (US and Japan) as overlay 28
-- Cars 2 (US) as overlay 2
-- Super Kaseki Horide (Japan) as overlay 15
-- Harry Potter and the Deathly Hallows - Part 2 (US) as overlay 2
-- Jewels of the Ages (US) as overlay 0
-- Murder In Venice (US and EU) as overlay 8
-- The Smurfs (US) as overlay 0
-- Yu-Gi-Oh! 5D's World Championship 2011: Over the Nexus (US) as overlay 47
-- Phineas and Ferb: Across the 2nd Dimension (US) as overlay 1
-- Puyo Puyo!! 20th Anniversary (Japan) as overlay 15
-- Shin Megami Tensei - Devil Survivor 2 (US and Japan) as overlay 6
-- Harvest Moon DS: The Tale Of Two Towns (US) as overlay 5
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is version 2.03, as it appears in these games (but likely several more):
+- Fossil Fighters: Champions (US) as overlay 15
+- Solatorobo: The Red Hunter (US) as overlay 4
+- Professor Layton and the Last Specter (US) as overlay 3
+- Pucca: Power Up (US) as overlay 0
+- Metal Max 2 - Reloaded (Japan) as overlay 0
+- Beyblade: Metal Masters (US) as overlay 0
+- Cooking Mama World: Outdoor Adventures (EU) as overlay 0
+- Ore-Sama Kingdom (Japan) as overlay 0
+- Maplestory DS (Japan) as overlay 107
+
+(Plus several other Japan-exclusive titles)
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it.
 
