@@ -141,92 +141,34 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 }
 
 
-// This function sucks. https://decomp.me/scratch/D8nhP
-// 
-// This *should* be identical to `Encryptor_DecryptFunction` with the extra step
-// of modifying the key, and calling the encryption function instead of decryption.
-// But for some reason, all the instructions are in a totally different order.
-// Something very stupid is happening.
-// I suspect there is some sort of obfuscation that is being partially 
-// optimized out, leaving behind only strange register patterns.
 u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
-#ifdef NONMATCHING
-	
 	u32    expanded_key[4];
 	u32    key;
 	u32    size;
 	void*  func_addr;
+	u32    bss_addr;
+	
+	bss_addr = (u32)&BSS;
 	
 	func_addr = obfs_func_addr;
+	func_addr -= ENC_VAL_1;
 	
 	key = obfs_key;
-	key -= (u32)&BSS + ENC_VAL_1;;
-	key += (u32)func_addr & 0x0000FFFF;
+	key -= (u32)&BSS + ENC_VAL_1;
+	key += (u32)obfs_func_addr & 0x0000FFFF;
 	
 	size = obfs_size;
-	size -= (u32)&BSS + ENC_VAL_1;;
+	size -= bss_addr + ENC_VAL_1;
 	
 	expanded_key[0] = key ^ size;
 	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
 	expanded_key[2] = ((key << 16) | (key >> 16)) ^ size;
 	expanded_key[3] = ((key << 24) | (key >>  8)) ^ size;
 	
-	func_addr -= ENC_VAL_1;
-	
 	RC4_InitAndEncryptInstructions(&expanded_key[0], func_addr, func_addr, size);
 	clearDataAndInstructionCache();
 	
 	return key + ((u32)&BSS + ENC_VAL_1);
-	
-#else /* NONMATCHING */
-	
-	// push {r3, r4, r5, lr}
-	asm {
-		sub  sp, sp, #16
-		ldr  r3, =BSS
-		ldr  ip, =0x0000FFFF
-		mov  r4, r0
-		add  r0, r3, #ENC_VAL_1
-		ldr  r5, =BSS
-		sub  r4, r4, r0
-		and  r0, r1, ip
-		add  r4, r4, r0
-		mov  r3, r2
-		mov  r2, r1
-		add  r5, r5, #ENC_VAL_1
-		mov  ip, r4, lsr #24
-		mov  r1, r4, lsr #16
-		mov  r0, r4, lsr #8
-		sub  r3, r3, r5
-		orr  r1, r1, r4, lsl #16
-		eor  r5, r4, r3
-		eor  lr, r3, r1
-		sub  r2, r2, #ENC_VAL_1
-		orr  ip, ip, r4, lsl #8
-		str  r5, [sp]
-		eor  r5, r3, ip
-		orr  r0, r0, r4, lsl #24
-		eor  ip, r3, r0
-		add  r0, sp, #0
-		mov  r1, r2
-		str  r5, [sp, #4]
-		str  lr, [sp, #8]
-		str  ip, [sp, #12]
-		bl   RC4_InitAndEncryptInstructions
-	}
-	// Inlined
-	clearDataAndInstructionCache();
-	asm {
-		ldr  r0, =BSS
-		add  r0, r0, #0x1000
-		add  r0, r4, r0
-		add  sp, sp, #0x10
-	}
-	// pop {r3, r4, r5, pc}
-	// .word BSS
-	// .word 0x0000FFFF
-	
-#endif /* NONMATCHING */
 }
 
 
