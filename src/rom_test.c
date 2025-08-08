@@ -206,7 +206,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but with out the ROM header check
+			// It is exactly the same as the above block, but without the ROM header check
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
@@ -548,7 +548,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but with out the ROM header check
+			// It is exactly the same as the above block, but without the ROM header check
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
