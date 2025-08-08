@@ -1,5 +1,6 @@
 #include "rom_util.h"
 
+#include "keys.h"
 #include "encryptor.h"
 #include "io_reg.h"
 
@@ -28,7 +29,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	ENCRYPTION_START(0x37EE);
+	ENCRYPTION_START(KEY_ROM_UTIL_READ_1);
 	
 	// Alias for register base (0x04000000)
 	register_base_1 = 1;
@@ -121,7 +122,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Write original value back to to external memory control register
 	((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/sizeof(u16)] = ext_mem_register_val_original;
 	
-	ENCRYPTION_END(0x37EE);
+	ENCRYPTION_END(KEY_ROM_UTIL_READ_1);
 	
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
@@ -133,7 +134,7 @@ u32 ROMUtil_CRC32(void* buf, u32 size) {
 	u32  crc;
 	u8*  byteptr;
 	
-	ENCRYPTION_START(0x0C13);
+	ENCRYPTION_START(KEY_ROM_UTIL_CRC_1);
 	
 	byteptr = (u8*)buf;
 	crc = 0xFFFFFFFF;
@@ -155,7 +156,7 @@ u32 ROMUtil_CRC32(void* buf, u32 size) {
 	}
 	crc = ~crc;
 	
-	ENCRYPTION_END(0x0C13);
+	ENCRYPTION_END(KEY_ROM_UTIL_CRC_1);
 	
 	return crc;
 }
