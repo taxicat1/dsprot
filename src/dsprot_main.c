@@ -1,6 +1,7 @@
 /* No dedicated header */
 
 #include "types.h"
+#include "keys.h"
 
 #include "encryptor.h"
 #include "rom_test.h"
@@ -43,7 +44,7 @@ u32 __DSProt_DetectFlashcart(u32 callback_addr) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x5514);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_1);
 	
 	callback_addr ^= DSP_OBFS_OFFSET;
 	
@@ -58,7 +59,7 @@ u32 __DSProt_DetectFlashcart(u32 callback_addr) {
 		((VoidFunc)callback_addr)();
 	}
 	
-	ENCRYPTION_END(0x5514);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
 	return result;
 }
@@ -85,7 +86,7 @@ u32 __DSProt_DetectNotFlashcart(u32 callback_addr) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x3304);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_2);
 	
 	callback_addr ^= DSP_OBFS_OFFSET;
 	
@@ -100,7 +101,7 @@ u32 __DSProt_DetectNotFlashcart(u32 callback_addr) {
 		((VoidFunc)callback_addr)();
 	}
 	
-	ENCRYPTION_END(0x3304);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
 	return result;
 }
@@ -127,7 +128,7 @@ u32 __DSProt_DetectEmulator(u32 callback_addr) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x350E);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_3);
 	
 	callback_addr ^= DSP_OBFS_OFFSET;
 	
@@ -142,7 +143,7 @@ u32 __DSProt_DetectEmulator(u32 callback_addr) {
 		((VoidFunc)callback_addr)();
 	}
 	
-	ENCRYPTION_END(0x350E);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
 	return result;
 }
@@ -169,7 +170,7 @@ u32 __DSProt_DetectNotEmulator(u32 callback_addr) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x2E8E);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_4);
 	
 	callback_addr ^= DSP_OBFS_OFFSET;
 	
@@ -184,7 +185,7 @@ u32 __DSProt_DetectNotEmulator(u32 callback_addr) {
 		((VoidFunc)callback_addr)();
 	}
 	
-	ENCRYPTION_END(0x2E8E);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
 	return result;
 }
@@ -211,7 +212,7 @@ u32 __DSProt_DetectDummy(u32 callback_addr) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x09A1);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_5);
 	
 	callback_addr ^= DSP_OBFS_OFFSET;
 	
@@ -226,7 +227,7 @@ u32 __DSProt_DetectDummy(u32 callback_addr) {
 		((VoidFunc)callback_addr)();
 	}
 	
-	ENCRYPTION_END(0x09A1);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
 	return result;
 }
@@ -253,7 +254,7 @@ u32 __DSProt_DetectNotDummy(u32 callback_addr) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x0E5E);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_6);
 	
 	callback_addr ^= DSP_OBFS_OFFSET;
 	
@@ -268,7 +269,7 @@ u32 __DSProt_DetectNotDummy(u32 callback_addr) {
 		((VoidFunc)callback_addr)();
 	}
 	
-	ENCRYPTION_END(0x0E5E);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
 	return result;
 }
