@@ -1,6 +1,7 @@
 /* No dedicated header */
 
 #include "types.h"
+#include "keys.h"
 
 #include "encryptor.h"
 #include "rom_test.h"
@@ -43,7 +44,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x4EF9);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_1);
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
@@ -56,7 +57,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x4EF9);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
 	return result;
 }
@@ -83,7 +84,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x292E);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_2);
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
@@ -96,7 +97,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x292E);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
 	return result;
 }
@@ -123,7 +124,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x1186);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_3);
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
@@ -136,7 +137,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x1186);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
 	return result;
 }
@@ -163,7 +164,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x1CC4);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_4);
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
@@ -176,7 +177,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x1CC4);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
 	return result;
 }
@@ -203,7 +204,7 @@ u32 DSProt_DetectDummy(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x72A8);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_5);
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
@@ -216,7 +217,7 @@ u32 DSProt_DetectDummy(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x72A8);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
 	return result;
 }
@@ -243,7 +244,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	ENCRYPTION_START(0x7CD4);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_6);
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
@@ -256,7 +257,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x7CD4);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
 	return result;
 }
