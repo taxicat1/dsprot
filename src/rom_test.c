@@ -5,7 +5,7 @@
 #include "crash.h"
 #include "io_reg.h"
 
-// Functions to be encrypted (cannot be called directly)
+// Function to be encrypted (cannot be called directly)
 u32 ROMTest_IsBad(void);
 
 #define ROM_BLOCK_SIZE  (0x200)
@@ -206,7 +206,7 @@ u32 ROMTest_IsBad(void) {
 			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but with out the ROM header check
+			// It is exactly the same as the above block, but without the ROM header check
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
