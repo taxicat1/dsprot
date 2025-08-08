@@ -114,7 +114,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 }
 
 
-u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) { /* ov123_0225FF30 */
+u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    literal_obfs_offset;
 	u32    new_key;
