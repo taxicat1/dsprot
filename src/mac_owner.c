@@ -4,7 +4,7 @@
 #include "failure_codes.h"
 #include "encoding_constants.h"
 
-// Function to be encrypted (cannot be called directly)
+// Functions to be encrypted (cannot be called directly)
 u32 MACOwner_IsBad(DSProt_Ctx* ctx);
 u32 MACOwner_IsGood(DSProt_Ctx* ctx);
 
