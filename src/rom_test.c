@@ -16,7 +16,7 @@ u32 ROMTest_IsBad(void) {
 	u8   rom_buf[ROM_BLOCK_SIZE];
 	u16  lock_id;
 	u32  rom_addr;
-	u32  ret;
+	u32  mul;
 	int  i;
 	
 	rom_addr = 0x1000;
@@ -42,16 +42,16 @@ u32 ROMTest_IsBad(void) {
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
-			ret = PRIME_TRUE;
+			mul = PRIME_TRUE;
 			// Likely must be a goto here
 			goto EXIT;
 		}
 	}
 	
 	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
-		ret = PRIME_TRUE;
+		mul = PRIME_TRUE;
 	} else {
-		ret = PRIME_FALSE;
+		mul = PRIME_FALSE;
 	}
 	
 EXIT:
@@ -59,7 +59,7 @@ EXIT:
 		((u32*)&rom_buf[0])[i] = i;
 	}
 	
-	return ret * PRIME_ROM_TEST_1;
+	return mul * PRIME_ROM_TEST_1;
 }
 
 
@@ -69,7 +69,7 @@ u32 ROMTest_IsGood(void) {
 	u8   rom_buf[ROM_BLOCK_SIZE];
 	u16  lock_id;
 	u32  rom_addr;
-	u32  ret;
+	u32  mul;
 	int  i;
 	
 	rom_addr = 0x1000;
@@ -95,16 +95,16 @@ u32 ROMTest_IsGood(void) {
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
-			ret = PRIME_FALSE;
+			mul = PRIME_FALSE;
 			// Likely must be a goto here
 			goto EXIT;
 		}
 	}
 	
 	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
-		ret = PRIME_FALSE;
+		mul = PRIME_FALSE;
 	} else {
-		ret = PRIME_TRUE;
+		mul = PRIME_TRUE;
 	}
 	
 EXIT:
@@ -112,5 +112,5 @@ EXIT:
 		((u32*)&rom_buf[0])[i] = i;
 	}
 	
-	return ret * PRIME_ROM_TEST_2;
+	return mul * PRIME_ROM_TEST_2;
 }
