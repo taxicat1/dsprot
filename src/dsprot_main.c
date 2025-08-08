@@ -53,7 +53,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		result = 0;
 	}
 	
-	if (callback != 0 && result != 0) {
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
@@ -93,7 +93,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		result = 1;
 	}
 	
-	if (callback != 0 && result != 0) {
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
@@ -133,7 +133,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 		result = 0;
 	}
 	
-	if (callback != 0 && result != 0) {
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
@@ -173,7 +173,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		result = 1;
 	}
 	
-	if (callback != 0 && result != 0) {
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
@@ -213,7 +213,7 @@ u32 DSProt_DetectDummy(void* callback) {
 		result = 0;
 	}
 	
-	if (callback != 0 && result != 0) {
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
@@ -253,7 +253,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		result = 1;
 	}
 	
-	if (callback != 0 && result != 0) {
+	if (callback != NULL && result != 0) {
 		((VoidFunc)callback)();
 	}
 	
