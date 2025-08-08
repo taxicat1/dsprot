@@ -5,7 +5,7 @@
 #include "crash.h"
 #include "io_reg.h"
 
-// Functions to be encrypted (cannot be called directly)
+// Function to be encrypted (cannot be called directly)
 u32 ROMTest_IsBad(void);
 
 #define ROM_BLOCK_SIZE  (0x200)
