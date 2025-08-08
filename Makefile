@@ -70,7 +70,7 @@ LIBRARY_FILES := \
 
 
 .PHONY: all clean tools dsprot
-.DELETE_ON_ERROR : 
+.DELETE_ON_ERROR: 
 
 all:
 	$(MAKE) tools
