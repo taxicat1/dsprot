@@ -86,9 +86,13 @@ LIBRARY_FILES_PKHG := \
 	$(BUILD_DIR)/rc4_encoded.o                                  \
 	$(BUILD_DIR)/rc4_decoder.o
 
+# Encryption keys
+KEY_DSPROT_MAIN := 6AB2
+KEY_INTEGRITY   := 9785
+KEY_CORE_TESTS  := 0982
 
 .PHONY: all pokeheartgold-compatible clean tools dsprot dsprot-pokeheartgold
-.DELETE_ON_ERROR : 
+.DELETE_ON_ERROR: 
 
 all:
 	$(MAKE) tools
@@ -145,7 +149,7 @@ $(BUILD_DIR)/dsprot_main_decrypter.o: $(BUILD_DIR)/dsprot_main_decrypter.s
 $(BUILD_DIR)/dsprot_main_encrypted.o \
 $(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k 6ab2 -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k $(KEY_DSPROT_MAIN) -p DSProt_ -f \
 		DetectFlashcart     \
 		DetectNotFlashcart  \
 		DetectEmulator      \
@@ -179,7 +183,7 @@ $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.o: $(BUILD_DIR)/dsprot_main_pok
 $(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o \
 $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s: $(BUILD_DIR)/dsprot_main_pokeheartgold.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main_pokeheartgold.o $(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o -o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s -k 6ab2 -p ov123 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_pokeheartgold_encrypted.o -o $(BUILD_DIR)/dsprot_main_pokeheartgold_decrypter.s -k $(KEY_DSPROT_MAIN) -p ov123 -f \
 		_0225F430  \
 		_0225F4A8  \
 		_0225F520  \
@@ -217,7 +221,7 @@ $(BUILD_DIR)/integrity_decrypter.o: $(BUILD_DIR)/integrity_decrypter.s
 $(BUILD_DIR)/integrity_encrypted.o \
 $(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ELFCODER)
 	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k 9785 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -k $(KEY_INTEGRITY) -f \
 		Integrity_MACOwner_IsBad   \
 		Integrity_MACOwner_IsGood  \
 		Integrity_ROMTest_IsBad    \
@@ -275,21 +279,21 @@ $(BUILD_DIR)/rom_test_decrypter.o: $(BUILD_DIR)/rom_test_decrypter.s
 $(BUILD_DIR)/mac_owner_encrypted.o \
 $(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k 0982 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k $(KEY_CORE_TESTS) -f \
 		MACOwner_IsBad  \
 		MACOwner_IsGood
 
 $(BUILD_DIR)/rom_util_encrypted.o \
 $(BUILD_DIR)/rom_util_decrypter.s: $(BUILD_DIR)/rom_util.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k 0982 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_util_encrypted.o -o $(BUILD_DIR)/rom_util_decrypter.s -k $(KEY_CORE_TESTS) -f \
 		ROMUtil_Read   \
 		ROMUtil_CRC32
 
 $(BUILD_DIR)/rom_test_encrypted.o \
 $(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k 0982 -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -k $(KEY_CORE_TESTS) -f \
 		ROMTest_IsBad   \
 		ROMTest_IsGood
 
