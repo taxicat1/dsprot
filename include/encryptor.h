@@ -15,7 +15,7 @@ void Encryptor_EndRange(u32* addr);
 #define ENCRYPTION_START(enc_key) \
 	asm {                              \
 	    stmfd  sp!, {r0-r7};           \
-	    mov    r0, 6;                  \
+	    mov    r0, #6;                 \
 	    add    r0, pc, r0, lsl #1;     \
 	    bl     Encryptor_StartRange;   \
 	    ldmia  sp!, {r0-r7};           \
