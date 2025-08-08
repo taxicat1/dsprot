@@ -1,6 +1,7 @@
 /* No dedicated header */
 
 #include "types.h"
+#include "keys.h"
 
 #include "encryptor.h"
 #include "rom_test.h"
@@ -36,7 +37,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	
 	func_result_sum = 0;
 	
-	ENCRYPTION_START(0x6981);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_1);
 	
 	for (i = 0; func_queue[i] != 0; i++) {
 		func_queue[i] -= DSP_OBFS_OFFSET;
@@ -57,7 +58,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x6981);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
 	return result;
 }
@@ -77,7 +78,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	
 	func_result_sum = 0;
 	
-	ENCRYPTION_START(0x61AE);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_2);
 	
 	for (i = 0; func_queue[i] != 0; i++) {
 		func_queue[i] -= DSP_OBFS_OFFSET;
@@ -98,7 +99,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x61AE);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
 	return result;
 }
@@ -118,7 +119,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 	
 	func_result_sum = 0;
 	
-	ENCRYPTION_START(0x2578);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_3);
 	
 	for (i = 0; func_queue[i] != 0; i++) {
 		func_queue[i] -= DSP_OBFS_OFFSET;
@@ -139,7 +140,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x2578);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
 	return result;
 }
@@ -159,7 +160,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	
 	func_result_sum = 0;
 	
-	ENCRYPTION_START(0x275E);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_4);
 	
 	for (i = 0; func_queue[i] != 0; i++) {
 		func_queue[i] -= DSP_OBFS_OFFSET;
@@ -180,7 +181,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x275E);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
 	return result;
 }
@@ -200,7 +201,7 @@ u32 DSProt_DetectDummy(void* callback) {
 	
 	func_result_sum = 0;
 	
-	ENCRYPTION_START(0x0351);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_5);
 	
 	for (i = 0; func_queue[i] != 0; i++) {
 		func_queue[i] -= DSP_OBFS_OFFSET;
@@ -223,7 +224,7 @@ u32 DSProt_DetectDummy(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x0351);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
 	return result;
 }
@@ -243,7 +244,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	
 	func_result_sum = 0;
 	
-	ENCRYPTION_START(0x2E37);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_6);
 	
 	for (i = 0; func_queue[i] != 0; i++) {
 		func_queue[i] -= DSP_OBFS_OFFSET;
@@ -264,7 +265,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x2E37);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
 	return result;
 }
