@@ -1,5 +1,6 @@
 #include "rom_test.h"
 
+#include "keys.h"
 #include "encryptor.h"
 #include "rom_util.h"
 
@@ -29,7 +30,7 @@ u32 ROMTest_IsBad(void) {
 		}
 	}
 	
-	ENCRYPTION_START(0x350E);
+	ENCRYPTION_START(KEY_ROM_TEST_1);
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
@@ -48,7 +49,7 @@ EXIT:
 		rom_buf[i] = 0;
 	}
 	
-	ENCRYPTION_END(0x350E);
+	ENCRYPTION_END(KEY_ROM_TEST_1);
 	
 	return ret;
 }
