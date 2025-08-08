@@ -1,6 +1,7 @@
 /* No dedicated header */
 
 #include "types.h"
+#include "keys.h"
 
 #include "encryptor.h"
 #include "integrity.h"
@@ -30,7 +31,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	u32   i;
 	s32   compare_sum;
 	
-	ENCRYPTION_START(0x53EF);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_1);
 	
 	func_queue[0] = (u32)&ROMTest_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_ROMTest_IsBad + DSP_OBFS_OFFSET;
@@ -55,7 +56,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x53EF);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
 	return compare_sum;
 }
@@ -68,7 +69,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	u32   i;
 	s32   compare_sum;
 	
-	ENCRYPTION_START(0x1D7A);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_2);
 	
 	func_queue[0] = (u32)&ROMTest_IsGood + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_ROMTest_IsGood + DSP_OBFS_OFFSET;
@@ -93,7 +94,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x1D7A);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
 	return compare_sum;
 }
@@ -106,7 +107,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 	u32   i;
 	s32   compare_sum;
 	
-	ENCRYPTION_START(0x58A8);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_3);
 	
 	func_queue[0] = (u32)&MACOwner_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_MACOwner_IsBad + DSP_OBFS_OFFSET;
@@ -131,7 +132,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x58A8);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
 	return compare_sum;
 }
@@ -144,7 +145,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	u32   i;
 	s32   compare_sum;
 	
-	ENCRYPTION_START(0x129E);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_4);
 	
 	func_queue[0] = (u32)&MACOwner_IsGood + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_MACOwner_IsGood + DSP_OBFS_OFFSET;
@@ -169,7 +170,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x129E);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
 	return compare_sum;
 }
@@ -182,7 +183,7 @@ u32 DSProt_DetectDummy(void* callback) {
 	u32   i;
 	s32   compare_sum;
 	
-	ENCRYPTION_START(0x496B);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_5);
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
 	func_queue[0] = 0;
@@ -206,7 +207,7 @@ u32 DSProt_DetectDummy(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x496B);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
 	return compare_sum;
 }
@@ -219,7 +220,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	u32   i;
 	s32   compare_sum;
 	
-	ENCRYPTION_START(0x4165);
+	ENCRYPTION_START(KEY_DSPROT_MAIN_6);
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
 	func_queue[0] = 0;
@@ -243,7 +244,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		((VoidFunc)callback)();
 	}
 	
-	ENCRYPTION_END(0x4165);
+	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
 	return compare_sum;
 }

@@ -1,5 +1,6 @@
 #include "mac_owner.h"
 
+#include "keys.h"
 #include "encryptor.h"
 
 static const u8 bad_mac_addr[6] = {
@@ -18,7 +19,7 @@ u32 MACOwner_IsBad(void) {
 	
 	OS_GetMacAddress(&mac_addr[0]);
 	
-	ENCRYPTION_START(0x0F57);
+	ENCRYPTION_START(KEY_MAC_OWNER_1);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
@@ -26,11 +27,11 @@ u32 MACOwner_IsBad(void) {
 		}
 	}
 	
-	ENCRYPTION_END(0x0F57);
+	ENCRYPTION_END(KEY_MAC_OWNER_1);
 	
 	OS_GetOwnerInfo(&owner_info);
 	
-	ENCRYPTION_START(0x0D8B);
+	ENCRYPTION_START(KEY_MAC_OWNER_2);
 	
 	if (
 		i == MAC_ADDR_SIZE && 
@@ -52,7 +53,7 @@ u32 MACOwner_IsBad(void) {
 	ret = 1;
 	
 EXIT:
-	ENCRYPTION_END(0x0D8B);
+	ENCRYPTION_END(KEY_MAC_OWNER_2);
 	
 	return ret;
 }
@@ -66,7 +67,7 @@ u32 MACOwner_IsGood(void) {
 	
 	OS_GetMacAddress(&mac_addr[0]);
 	
-	ENCRYPTION_START(0x0314);
+	ENCRYPTION_START(KEY_MAC_OWNER_3);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (bad_mac_addr[i] != (mac_addr[i] ^ 0xFF)) {
@@ -74,11 +75,11 @@ u32 MACOwner_IsGood(void) {
 		}
 	}
 	
-	ENCRYPTION_END(0x0314);
+	ENCRYPTION_END(KEY_MAC_OWNER_3);
 	
 	OS_GetOwnerInfo(&owner_info);
 	
-	ENCRYPTION_START(0x7EF6);
+	ENCRYPTION_START(KEY_MAC_OWNER_4);
 	
 	if (
 		i == MAC_ADDR_SIZE && 
@@ -100,7 +101,7 @@ u32 MACOwner_IsGood(void) {
 	ret = 0;
 	
 EXIT:
-	ENCRYPTION_END(0x7EF6);
+	ENCRYPTION_END(KEY_MAC_OWNER_4);
 	
 	return ret;
 }

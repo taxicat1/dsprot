@@ -1,5 +1,6 @@
 #include "integrity.h"
 
+#include "keys.h"
 #include "encryptor.h"
 #include "mac_owner.h"
 #include "rom_test.h"
@@ -11,7 +12,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 	u32  ret;
 	u8*  addr;
 	
-	ENCRYPTION_START(0x6506);
+	ENCRYPTION_START(KEY_INTEGRITY_1);
 	
 	addr = (u8*)MACOwner_IsBad - INTEGRITY_OBFS_OFFSET;
 	ret = (u32)addr + 1;
@@ -40,7 +41,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 		ret = (u32)addr ^ (u32)addr;
 	}
 	
-	ENCRYPTION_END(0x6506);
+	ENCRYPTION_END(KEY_INTEGRITY_1);
 	
 	return ret;
 }
@@ -50,7 +51,7 @@ u32 Integrity_MACOwner_IsGood(void) {
 	u32  ret;
 	u8*  addr;
 	
-	ENCRYPTION_START(0x7566);
+	ENCRYPTION_START(KEY_INTEGRITY_2);
 	
 	addr = (u8*)MACOwner_IsGood - INTEGRITY_OBFS_OFFSET;
 	// x ^ x == 0, but must be like this to match
@@ -79,7 +80,7 @@ u32 Integrity_MACOwner_IsGood(void) {
 		ret = (u32)addr + 1;
 	}
 	
-	ENCRYPTION_END(0x7566);
+	ENCRYPTION_END(KEY_INTEGRITY_2);
 	
 	return ret;
 }
@@ -89,7 +90,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 	u32  ret;
 	u8*  addr;
 	
-	ENCRYPTION_START(0x38AD);
+	ENCRYPTION_START(KEY_INTEGRITY_3);
 	
 	addr = (u8*)ROMTest_IsBad - INTEGRITY_OBFS_OFFSET;
 	ret = (u32)addr + 1;
@@ -120,7 +121,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 		ret = (u32)addr ^ (u32)addr;
 	}
 	
-	ENCRYPTION_END(0x38AD);
+	ENCRYPTION_END(KEY_INTEGRITY_3);
 	
 	return ret;
 }
@@ -130,7 +131,7 @@ u32 Integrity_ROMTest_IsGood(void) {
 	u32  ret;
 	u8*  addr;
 	
-	ENCRYPTION_START(0x1F1A);
+	ENCRYPTION_START(KEY_INTEGRITY_4);
 	
 	addr = (u8*)ROMTest_IsGood - INTEGRITY_OBFS_OFFSET;
 	// x ^ x == 0, but must be like this to match
@@ -161,7 +162,7 @@ u32 Integrity_ROMTest_IsGood(void) {
 		ret = (u32)addr + 1;
 	}
 	
-	ENCRYPTION_END(0x1F1A);
+	ENCRYPTION_END(KEY_INTEGRITY_4);
 	
 	return ret;
 }
