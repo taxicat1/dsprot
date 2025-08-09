@@ -2,6 +2,8 @@
 
 This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.05 (unconfirmed), as it appears in the game Layton Kyouju to Saigo no Jikan Ryokou / Professor Layton and the Unwound Future (Japan) as overlay 10.
 
+This is likely the only released game to use this version.
+
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: Surōn to Makuhēru no Nazo no Sutōrī will repeatedly quit from the game back to the title screen.
 
 The existence, mechanics, and effects of DS Protect have been documented as early as 2009 ([link](https://gbatemp.net/threads/seeking-help-for-anti-piracy-protection-removal.134683/post-1768816), [link](https://sourceforge.net/p/desmume/bugs/979/), [link](https://opentrackers.org/scenerules.org/html/2010_NDSr.html)).
