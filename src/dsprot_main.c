@@ -27,15 +27,15 @@ typedef u32 (*ArgFunc)(void*);
 
 // This was likely not originally an inline, but an inline is able to match here nicely
 static inline u32 executeFunctionQueue(u32* func_queue_ptr) {
-	u32 func_checksum;
+	u32 func_ret_total;
 	
-	func_checksum = PRIME_DSPROT_MAIN * PRIME_TRUE * PRIME_FALSE;
+	func_ret_total = PRIME_DSPROT_MAIN * PRIME_TRUE * PRIME_FALSE;
 	do {
-		func_checksum += ((U32Func)(*func_queue_ptr - ENC_VAL_1 - DSP_OBFS_OFFSET))();
+		func_ret_total += ((U32Func)(*func_queue_ptr - ENC_VAL_1 - DSP_OBFS_OFFSET))();
 		func_queue_ptr++;
 	} while(*func_queue_ptr != 0);
 	
-	return func_checksum;
+	return func_ret_total;
 }
 
 
