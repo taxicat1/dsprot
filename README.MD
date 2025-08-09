@@ -28,4 +28,3 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 ## TODO
 
 - Verify it actually works with Wine.
-- Decompile the last function (`Encryptor_EncryptFunction` @ https://decomp.me/scratch/VeHlh).
