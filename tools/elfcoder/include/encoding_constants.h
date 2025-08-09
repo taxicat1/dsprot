@@ -9,5 +9,6 @@
 
 #define ENC_BYTE_A  (0x56)
 #define ENC_BYTE_B  (0x65)
+#define ENC_BYTE_C  (0x56)
 
 #endif

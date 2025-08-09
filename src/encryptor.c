@@ -72,7 +72,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) { /* ov123_0225FD98 */
 				default:
 					a = ((u8*)addr)[0] ^ ENC_BYTE_A;
 					b = ((u8*)addr)[1] ^ ENC_BYTE_B;
-					c = ((u8*)addr)[2] ^ ENC_BYTE_A;
+					c = ((u8*)addr)[2] ^ ENC_BYTE_C;
 					d = ((u8*)addr)[3] ^ ENC_OPCODE_2;
 					*(u32*)addr = a | (b << 8) | (c << 16) | (d << 24);
 					break;
