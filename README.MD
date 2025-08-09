@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.07 (unconfirmed), as it appears in the game Buraddo obu Bahamūto / Blood of Bahamut (Japan) as overlay 2.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is likely version 1.06, as it appears in the game Buraddo obu Bahamūto / Blood of Bahamut (Japan) as overlay 2.
 
 This library is designed to detect if a DS game is running on an emulator or flashcart. What happens after it detects that is up to the game that is integrating it: \<it is unknown what Blood of Bahamut does\>.
 

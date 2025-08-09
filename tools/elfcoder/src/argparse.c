@@ -37,7 +37,7 @@ static int isValidIdentifier(const char* str) {
 static void printDescription(void) {
 	printf(
 		"Encode or decode ARM ELF files using built-in keys.                             \n"
-		"For DS Protect version 1.07.                                                    \n"
+		"For DS Protect version 1.06.                                                    \n"
 	);
 }
 
