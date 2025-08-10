@@ -74,6 +74,7 @@ KEY_CORE_TESTS  := C20D
 
 .PHONY: all clean tools dsprot
 .DELETE_ON_ERROR: 
+.NOTPARALLEL: 
 
 all:
 	$(MAKE) tools
