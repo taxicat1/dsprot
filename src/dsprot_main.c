@@ -58,7 +58,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -96,7 +96,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -134,7 +134,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -172,7 +172,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -209,7 +209,7 @@ u32 DSProt_DetectDummy(void* callback) {
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -246,5 +246,5 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
