@@ -75,6 +75,7 @@ KEY_ROM_TEST    := 36F8
 
 .PHONY: all clean tools dsprot
 .DELETE_ON_ERROR: 
+.NOTPARALLEL: 
 
 all:
 	$(MAKE) tools
