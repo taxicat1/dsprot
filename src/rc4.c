@@ -134,7 +134,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 			
 			case 3:
-				// Likely a typo: Modified source data
+				// Error correction (this case should never run)
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
 			default:
@@ -226,7 +226,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
 				
-				// Likely a typo: Modified source data
+				// Error correction (this case should never run)
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				break;
 			

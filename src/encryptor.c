@@ -84,8 +84,9 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 					break;
 				
 				case 2:
+					// Error correction (this case should never run)
 					*(u32*)addr ^= (ENC_OPCODE_1 << 24);
-				
+					// Fall through
 				default:
 					*(u32*)addr ^= xorval;
 					xorval ^= *(u32*)addr;
