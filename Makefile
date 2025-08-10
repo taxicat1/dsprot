@@ -73,6 +73,7 @@ KEY_ROM_TEST    := 110DA
 
 .PHONY: all clean tools dsprot
 .DELETE_ON_ERROR: 
+.NOTPARALLEL: 
 
 all:
 	$(MAKE) tools
