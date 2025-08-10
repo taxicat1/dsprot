@@ -28,9 +28,9 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	u32   result;
+	BOOL  result;
 	
-	result = 0;
+	result = FALSE;
 	
 	func_queue[0] = (u32)&ROMTest_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
@@ -49,18 +49,18 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
-		result = 1;
+		result = TRUE;
 	} else if (func_result_sum == 0) {
-		result = 0;
+		result = FALSE;
 	}
 	
-	if (callback != NULL && result != 0) {
+	if (callback != NULL && result) {
 		((VoidFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
-	return result;
+	return (u32)result;
 }
 
 
@@ -69,9 +69,9 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	u32   result;
+	BOOL  result;
 	
-	result = 0;
+	result = FALSE;
 	
 	func_queue[0] = (u32)&ROMTest_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
@@ -90,18 +90,18 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
-		result = 0;
+		result = FALSE;
 	} else if (func_result_sum == 0) {
-		result = 1;
+		result = TRUE;
 	}
 	
-	if (callback != NULL && result != 0) {
+	if (callback != NULL && result) {
 		((VoidFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
-	return result;
+	return (u32)result;
 }
 
 
@@ -110,9 +110,9 @@ u32 DSProt_DetectEmulator(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	u32   result;
+	BOOL  result;
 	
-	result = 0;
+	result = FALSE;
 	
 	func_queue[0] = (u32)&MACOwner_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
@@ -131,18 +131,18 @@ u32 DSProt_DetectEmulator(void* callback) {
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
-		result = 1;
+		result = TRUE;
 	} else if (func_result_sum == 0) {
-		result = 0;
+		result = FALSE;
 	}
 	
-	if (callback != NULL && result != 0) {
+	if (callback != NULL && result) {
 		((VoidFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
-	return result;
+	return (u32)result;
 }
 
 
@@ -151,9 +151,9 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	u32   result;
+	BOOL  result;
 	
-	result = 0;
+	result = FALSE;
 	
 	func_queue[0] = (u32)&MACOwner_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
@@ -172,18 +172,18 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
-		result = 0;
+		result = FALSE;
 	} else if (func_result_sum == 0) {
-		result = 1;
+		result = TRUE;
 	}
 	
-	if (callback != NULL && result != 0) {
+	if (callback != NULL && result) {
 		((VoidFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
-	return result;
+	return (u32)result;
 }
 
 
@@ -192,9 +192,9 @@ u32 DSProt_DetectDummy(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	u32   result;
+	BOOL  result;
 	
-	result = 0;
+	result = FALSE;
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
 	func_queue[0] = 0;
@@ -211,22 +211,20 @@ u32 DSProt_DetectDummy(void* callback) {
 		func_result_sum <<= 1;
 	}
 	
-	
-	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
-		result = 1;
+		result = TRUE;
 	} else if (func_result_sum == 0) {
-		result = 0;
+		result = FALSE;
 	}
 	
-	if (callback != NULL && result != 0) {
+	if (callback != NULL && result) {
 		((VoidFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
-	return result;
+	return (u32)result;
 }
 
 
@@ -235,9 +233,9 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	BOOL  func_result;
 	s32   func_result_sum;
 	u32   i;
-	u32   result;
+	BOOL  result;
 	
-	result = 0;
+	result = FALSE;
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
 	func_queue[0] = 0;
@@ -256,16 +254,16 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	
 	func_result_sum >>= 1;
 	if (func_result_sum) {
-		result = 0;
+		result = FALSE;
 	} else if (func_result_sum == 0) {
-		result = 1;
+		result = TRUE;
 	}
 	
-	if (callback != NULL && result != 0) {
+	if (callback != NULL && result) {
 		((VoidFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
-	return result;
+	return (u32)result;
 }
