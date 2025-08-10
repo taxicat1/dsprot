@@ -55,7 +55,8 @@ LIBRARY_FILES := \
 
 
 .PHONY: all clean tools dsprot
-.DELETE_ON_ERROR : 
+.DELETE_ON_ERROR: 
+.NOTPARALLEL: 
 
 all:
 	$(MAKE) tools
