@@ -10,11 +10,10 @@ The existence, mechanics, and effects of DS Protect have been documented as earl
 
 Supposedly, at least 500 DS titles use DS Protect in some form.
 
-For instructions to build the library, and integrate it into [pokeheartgold](https://github.com/pret/pokeheartgold/) and match the official ROM, see [BUILD.MD](./BUILD.MD).
+For instructions to build the library, see [BUILD.MD](./BUILD.MD).
 
 For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONALITY.MD) (also [ENCODING.MD](./doc/ENCODING.MD) and [ASSEMBLY.MD](./doc/ASSEMBLY.MD)).
 
 ## TODO
 
 - Verify it actually works with Wine.
-- pokeheartgold-specific build can be removed if pokeheartgold is updated.

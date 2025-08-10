@@ -7,7 +7,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes);
 u32 ROMUtil_CRC32(void* buf, u32 size);
 
 
-void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
+void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 	//
@@ -131,7 +131,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) { /* ov123_02260238 */
 }
 
 
-u32 ROMUtil_CRC32(void* buf, u32 size) { /* ov123_022603BC */
+u32 ROMUtil_CRC32(void* buf, u32 size) {
 	int  i;
 	u32  crc;
 	u32  poly;

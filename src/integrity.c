@@ -13,7 +13,7 @@ u32 Integrity_ROMTest_IsGood(void);
 #define INTEGRITY_OBFS_OFFSET  (0x1000)
 
 
-u32 Integrity_MACOwner_IsBad(void) { /* ov123_0225F74C */
+u32 Integrity_MACOwner_IsBad(void) {
 	u32  base;
 	u8*  bytes;
 	u32  offset;
@@ -50,7 +50,7 @@ u32 Integrity_MACOwner_IsBad(void) { /* ov123_0225F74C */
 }
 
 
-u32 Integrity_MACOwner_IsGood(void) { /* ov123_0225F824 */
+u32 Integrity_MACOwner_IsGood(void) {
 	u32  base;
 	u32  ret;
 	u32  offset;
@@ -87,7 +87,7 @@ u32 Integrity_MACOwner_IsGood(void) { /* ov123_0225F824 */
 }
 
 
-u32 Integrity_ROMTest_IsBad(void) { /* ov123_0225F938 */
+u32 Integrity_ROMTest_IsBad(void) {
 	u32  base;
 	u8*  bytes;
 	u32  offset;
@@ -124,7 +124,7 @@ u32 Integrity_ROMTest_IsBad(void) { /* ov123_0225F938 */
 }
 
 
-u32 Integrity_ROMTest_IsGood(void) { /* ov123_0225FA10 */
+u32 Integrity_ROMTest_IsGood(void) {
 	u32  base;
 	u32  ret;
 	u32  offset;
