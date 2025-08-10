@@ -75,6 +75,7 @@ KEY_ROM_TEST    := 1636C
 
 .PHONY: all clean tools dsprot
 .DELETE_ON_ERROR: 
+.NOTPARALLEL: 
 
 all:
 	$(MAKE) tools
