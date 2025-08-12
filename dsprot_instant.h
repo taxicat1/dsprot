@@ -15,7 +15,7 @@ extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
 #define DSP_EXPECTED_CHECKSUM  (0x0786385F)
 
 
-static inline void* DSProt_DetectInstant(void* callback, void* param1, void* param2) {
+static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void* param2) {
 	u32*  func_data_ptr;
 	u32   func_data_checksum;
 	u32   i;

@@ -30,6 +30,6 @@ The exported functions are:
 - `void* DSProt_DetectAll(void* callback, void* param1, void* param2);`
 
 Plus an inline function within the header:
-- `inline void* DSProt_DetectInstant(void* callback, void* param1, void* param2);`
+- `inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void* param2);`
 
 See [FUNCTIONALITY.MD](./doc/FUNCTIONALITY.MD) for more details on using these functions.
