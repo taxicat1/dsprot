@@ -26,7 +26,7 @@ The built library file `dsprot_instant.a` and provided header file `dsprot_insta
 `dsprot_instant.a` will need to be included in the proper location in the project's `main.lsf`.
 
 The exported functions are:
-- `u32 DSProt_Crash(u32 __unused1, u32 __unused2)`
+- `void* DSProt_Crash(u32 __unused1, u32 __unused2)`
 - `void* DSProt_DetectAll(void* callback, void* param1, void* param2);`
 
 Plus an inline function within the header:
