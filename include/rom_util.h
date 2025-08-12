@@ -9,7 +9,7 @@
 extern s32 OS_GetLockID(void);
 extern void CARD_LockRom(u16 lock_id);
 extern void CARD_UnlockRom(u16 lock_id);
-extern void OS_ReleaseLockID(u16 lock_id);
+//extern void OS_ReleaseLockID(u16 lock_id);
 
 void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes);
 u32 ROMUtil_CRC32(void* buf, u32 size);
