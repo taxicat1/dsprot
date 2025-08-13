@@ -10,7 +10,7 @@ For literal values, the value is obfuscated as:
 value + &BSS + 0x2200
 ```
 
-where `&BSS` is the address of the start of the `.bss` region of library (where uninitialized data is stored). This obfuscation is likely intended to make values, such as a size of 140 bytes, appear to actually be addresses which point to some unknown location.
+where `&BSS` is an address in the `.bss` region of library (where uninitialized data is stored). This obfuscation is likely intended to make values, such as a size of 140 bytes, appear to actually be addresses which point to some unknown location.
 
 For references, the value is obfuscated as:
 
