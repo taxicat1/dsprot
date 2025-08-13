@@ -30,7 +30,7 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	do {
 		*s_start++ = x;
 		x += y;
-	} while(s_start < s_end);
+	} while (s_start < s_end);
 	
 	// Modification to RC4: i = 255 -> 0, instead of 0 -> 255
 	for (i = 255; i >= 0; i--) {
@@ -92,7 +92,7 @@ u32 RC4_InitSBox(u8* sbox) {
 	do {
 		*sbox_start++ = x ^ 0xFFFFFFFF;
 		x += y;
-	} while(sbox_start < sbox_end);
+	} while (sbox_start < sbox_end);
 	
 	return 0;
 }
