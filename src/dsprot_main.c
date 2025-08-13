@@ -97,7 +97,7 @@ void* DetectFlashcartA(void* param1, void* param2) {
 		} else {
 			func_ret_total += func_ret;
 		}
-	} while(*++func_queue_ptr != 0);
+	} while (*++func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_FALSE)) {
@@ -189,7 +189,7 @@ void* DetectFlashcartB(void* param1, void* param2) {
 		} else {
 			func_ret_total += func_ret;
 		}
-	} while(*++func_queue_ptr != 0);
+	} while (*++func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_TRUE)) {
@@ -281,7 +281,7 @@ void* DetectEmulatorA(void* param1, void* param2) {
 		} else {
 			func_ret_total += func_ret;
 		}
-	} while(*++func_queue_ptr != 0);
+	} while (*++func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_FALSE)) {
@@ -373,7 +373,7 @@ void* DetectEmulatorB(void* param1, void* param2) {
 		} else {
 			func_ret_total += func_ret;
 		}
-	} while(*++func_queue_ptr != 0);
+	} while (*++func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_TRUE)) {
