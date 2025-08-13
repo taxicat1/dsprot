@@ -72,6 +72,7 @@ KEY_CORE_TESTS  := C7EA
 
 .PHONY: all clean tools dsprot
 .DELETE_ON_ERROR: 
+.NOTPARALLEL: 
 
 all:
 	$(MAKE) tools
