@@ -33,7 +33,7 @@ static inline u32 executeFunctionQueue(u32* func_queue_ptr) {
 	do {
 		func_ret_total += ((U32Func)(*func_queue_ptr - ENC_VAL_1 - DSP_OBFS_OFFSET))();
 		func_queue_ptr++;
-	} while(*func_queue_ptr != 0);
+	} while (*func_queue_ptr != 0);
 	
 	return func_ret_total;
 }
