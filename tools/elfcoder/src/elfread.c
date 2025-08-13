@@ -165,6 +165,7 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTa
 		
 		if (last_idx < 0) {
 			// Could not find target, probably wrong encoding direction specified
+			free(ins_buffer);
 			return 0;
 		}
 	}
