@@ -39,7 +39,7 @@ static int symbolStringCompare(ElfFile* elf, int str_idx, const char* target_sym
 		if (diff != 0) {
 			return diff;
 		}
-	} while(*target_symbol++ != '\0');
+	} while (*target_symbol++ != '\0');
 	
 	return 0;
 }
