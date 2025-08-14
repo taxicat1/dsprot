@@ -150,7 +150,7 @@ u32 Encryptor_EncryptFunction(u32 key, void* obfs_func_addr, u32 obfs_size) {
 	
 	clearDataAndInstructionCache();
 	
-	return (u32)&BSS + ENC_VAL_1 + ((u32)obfs_func_addr & 0xFFFF) + key;
+	return (u32)&BSS + ENC_VAL_1 + ((u32)obfs_func_addr & 0x0000FFFF) + key;
 }
 
 
