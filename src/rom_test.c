@@ -63,7 +63,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			// `device_size` is checked from the rom header and used to offset the address.
 			// This field is `x` for the size of the ROM as `128KB << x`
 			// 128KB = 2^17, hence the addition of 17 before shifting
-			// Therefore, this increases the address by the size of the declared ROM.
+			// Therefore, this increases the address by the size of the ROM.
 			// The ROM should mirror when this happens.
 			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
 			addr += (1 << (device_size + 17));
@@ -409,7 +409,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			// `device_size` is checked from the rom header and used to offset the address.
 			// This field is `x` for the size of the ROM as `128KB << x`
 			// 128KB = 2^17, hence the addition of 17 before shifting
-			// Therefore, this increases the address by the size of the declared ROM.
+			// Therefore, this increases the address by the size of the ROM.
 			// The ROM should mirror when this happens.
 			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
 			addr += (1 << (device_size + 17));
