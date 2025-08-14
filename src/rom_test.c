@@ -60,7 +60,11 @@ u32 ROMTest_IsBad(void) {
 			u32   addr      = rom_addr;
 			s32   num_bytes = ROM_BLOCK_SIZE;
 			
-			// `device_size` is checked from the rom header and used to offset the address
+			// `device_size` is checked from the ROM header and used to offset the address.
+			// This field is `x` for the size of the ROM as `128KB << x`
+			// 128KB = 2^17, hence the addition of 17 before shifting
+			// Therefore, this increases the address by the size of the ROM.
+			// The ROM should mirror when this happens.
 			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
 			addr += (1 << (device_size + 17));
 			
@@ -206,7 +210,7 @@ u32 ROMTest_IsBad(void) {
 			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but without the ROM header check
+			// It is exactly the same as the above block, but without adding the total size of the ROM
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
