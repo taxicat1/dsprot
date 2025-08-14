@@ -60,7 +60,7 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | BT5J | TOEIC Test Super Coach at DS | Japan | Overlay 0 |
 | BTAJ | Lina no Atelier - Strahl no Renkinjutsushi | Japan | Overlay 0 |
 | BTGJ | Tennis no Ouji-sama - Motto Gakuensai no Ouji-sama - More Sweet Edition | Japan | Overlay 0 |
-| BWCJ | Minna no Conveni | Japan | Static region | |
+| BWCJ | Minna no Conveni | Japan | Static region |
 | BWWJ | WiZmans World | Japan | Overlay 2 |
 | BYNJ | Yamakawa Shuppansha Kanshuu - Shousetsu Nihonshi B - Shin Sougou Training Plus | Japan | Overlay 0 |
 | BYSJ | Yamakawa Shuppansha Kanshuu - Shousetsu Sekaishi B - Shin Sougou Training Plus | Japan | Overlay 0 |
