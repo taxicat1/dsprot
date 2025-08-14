@@ -58,7 +58,7 @@ u32 ROMTest_IsBad(void) {
 			int         i;
 			u8          device_size;
 			
-			// `device_size` is checked from the rom header and used to offset the address.
+			// `device_size` is checked from the ROM header and used to offset the address.
 			// This field is `x` for the size of the ROM as `128KB << x`
 			// 128KB = 2^17, hence the addition of 17 before shifting
 			// Therefore, this increases the address by the size of the ROM.
