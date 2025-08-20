@@ -86,7 +86,7 @@ For a **type-3** instruction:
 
 Note that, after encoding, a type-2 instruction becomes a type-3 instruction, and vice versa. This is due to flipping the branch link bit, which will change the instruction from a `b` to a `bl` and vice versa.
 
-Type-0 and type-1 instructions will both remain so after encoding. This is fine for type-0 instructions, as their encoding procedure is its own inverse. However, type-1 instructions will not decode properly; and this may be intentional or an oversight as the upper byte of `0xFA` / `0xFB` would never appear in typical ARM instructions, nor appear as a result of encoding any typical ARM instructions.
+Type-0 and type-1 instructions will both remain so after encoding. This is fine for type-0 instructions, as their encoding procedure is its own inverse. However, type-1 instructions will not decode properly; this may be intentional or an oversight.
 
 Decoding applies the reverse procedure based on the new instruction type:
 
