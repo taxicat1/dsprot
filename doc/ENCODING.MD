@@ -36,7 +36,7 @@ The included tool `elfcoder` is capable of both encoding and decoding, keyed and
 
 ### Background
 
-ARM instructions are 32 bits wide. This version of the library does not support Thumb.
+ARM instructions are 32 bits wide. The library will not work if compiled in Thumb.
 
 When encrypting and decrypting, the most significant byte is treated separately from the three least-significant bytes, which are treated together as a single 24-bit unsigned integer.
 
@@ -50,7 +50,7 @@ Would have a most significant byte of `0xE0`, and three least-significant bytes 
 
 The following instruction classification system, shared by both keyed and unkeyed encoding, will determine the exact nature of encoding the instruction will receive. The classification is based on the most significant byte of the instruction:
 
-- If the most significant byte is `0xFA` or `0xFB`, it is a **type-1 instruction**. No valid instructions will match this.
+- If the most significant byte is `0xFA` or `0xFB`, it is a **type-1 instruction**. This will match `blx` immediate instructions, of which there are none, but the linker may convert some `bl` instructions at link time.
 
 - If the least significant nybble of the most significant byte is `0xB`, it is a **type-2 instruction**. This will match all branch and link (`bl`) instructions.
 
