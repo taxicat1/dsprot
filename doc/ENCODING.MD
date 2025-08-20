@@ -6,7 +6,7 @@ The included tool `elfcoder` is capable of both encrypting and decrypting to thi
 
 ### Background
 
-ARM instructions are 32 bits wide. This version of the library does not support Thumb.
+ARM instructions are 32 bits wide. The library will not work if compiled in Thumb.
 
 The range of instructions to be encrypted is demarcated using specific macros, like so:
 
