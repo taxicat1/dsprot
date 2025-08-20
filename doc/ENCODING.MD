@@ -36,7 +36,7 @@ The included tool `elfcoder` is capable of both encoding and decoding, keyed and
 
 ### Background
 
-ARM instructions are 32 bits wide. This version of the library does not support Thumb.
+ARM instructions are 32 bits wide. The library will not work if compiled in Thumb.
 
 When encoding and decoding, the most significant byte is treated separately from the three least-significant bytes, which are treated together as a single 24-bit unsigned integer.
 
