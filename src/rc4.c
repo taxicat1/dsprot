@@ -178,7 +178,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 			
 			case 3:
-				// Error correction (this case should never be run)
+				// Link bit
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
 			default:
@@ -280,7 +280,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				// Update `x`
 				ctx->x -= src_bytes[idx+3];
 				
-				// Error correction (this case should never be run)
+				// Link bit
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				break;
 			
