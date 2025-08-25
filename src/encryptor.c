@@ -95,7 +95,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 					break;
 				
 				case 2:
-					// Error correction (this case should never run)
+					// Link bit
 					*(u32*)addr ^= (ENC_OPCODE_1 << 24);
 					// Fall through
 				default:
