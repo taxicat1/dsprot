@@ -168,7 +168,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
 			case 1:
-				// Error correction (this case should never be run)
+				// Error correction (this case should never run)
 				src_bytes[idx+3] ^= ENC_OPCODE_1;
 				// Fall through
 			case 2:
@@ -181,7 +181,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 			
 			case 3:
-				// Error correction (this case should never be run)
+				// Link bit
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
 			default:
@@ -287,8 +287,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				ctx->x = ins_byte;
 				dst_bytes[idx+2] = ins_byte ^ rand_byte;
 				
-				// Fourth byte
-				// Error correction (this case should never run)
+				// Fourth byte + link bit
 				dst_bytes[idx+3] = src_bytes[idx+3] ^ ENC_OPCODE_1;
 				break;
 			
