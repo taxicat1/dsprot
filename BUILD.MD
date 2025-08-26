@@ -26,12 +26,12 @@ The built library file `dsprot.a` and provided header file `dsprot.h` may be use
 `dsprot.a` will need to be included in the proper location in the project's `main.lsf`.
 
 The exported functions are:
-- `u32 DSProt_DetectFlashcart(void* callback, void* param);`
-- `u32 DSProt_DetectNotFlashcart(void* callback, void* param);`
-- `u32 DSProt_DetectEmulator(void* callback, void* param);`
-- `u32 DSProt_DetectNotEmulator(void* callback, void* param);`
-- `u32 DSProt_DetectDummy(void* callback, void* param);`
-- `u32 DSProt_DetectNotDummy(void* callback, void* param);`
+- `u32 DSProt_DetectFlashcart(void* callback, void* param, u32 __unused);`
+- `u32 DSProt_DetectNotFlashcart(void* callback, void* param, u32 __unused);`
+- `u32 DSProt_DetectEmulator(void* callback, void* param, u32 __unused);`
+- `u32 DSProt_DetectNotEmulator(void* callback, void* param, u32 __unused);`
+- `u32 DSProt_DetectDummy(void* callback, void* param, u32 __unused);`
+- `u32 DSProt_DetectNotDummy(void* callback, void* param, u32 __unused);`
 
 Additionally, inline functions are provided by the header that emulate the old DS Protect callback API (many games will use these):
 - `u32 DSProt_DetectFlashcart_Old(void* callback);`
