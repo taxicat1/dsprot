@@ -89,6 +89,13 @@ static int ElfFile_Init(ElfFile* elf, char* fname) {
 }
 
 
+static void ElfFile_Destroy(ElfFile* elf) {
+	if (elf->fhandle != NULL) {
+		fclose(elf->fhandle);
+	}
+}
+
+
 static int doHashInstructions(ElfFile* elf, uint32_t start_addr, int size, KeyData* out_key) {
 	int num_ins = size / 4;
 	fseek(elf->fhandle, start_addr, SEEK_SET);
@@ -166,22 +173,26 @@ static int processElf(ElfFile* elf, char* target_symbol, KeyData* out_key) {
 
 int Elf_DeriveKey(FuncHashTask* task) {
 	ElfFile elf;
-	int error = ElfFile_Init(&elf, task->input_fname);
-	if (error) {
-		return error;
+	int ret_code = 0;
+	
+	ret_code += ElfFile_Init(&elf, task->input_fname);
+	if (ret_code) {
+		goto EXIT;
 	}
 	
 	KeyData key;
 	
-	error = processElf(&elf, task->target_symbol, &key);
-	if (error) {
-		return error;
+	ret_code += processElf(&elf, task->target_symbol, &key);
+	if (ret_code) {
+		goto EXIT;
 	}
 	
-	error = KeyData_Write(&key, task->output_fname);
-	if (error) {
-		return error;
+	ret_code += KeyData_Write(&key, task->output_fname);
+	if (ret_code) {
+		goto EXIT;
 	}
 	
-	return 0;
+EXIT:
+	ElfFile_Destroy(&elf);
+	return ret_code;
 }
