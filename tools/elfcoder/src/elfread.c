@@ -130,6 +130,13 @@ static int ElfFile_Init(ElfFile* elf, char* fname) {
 }
 
 
+static void ElfFile_Destroy(ElfFile* elf) {
+	if (elf->fhandle != NULL) {
+		fclose(elf->fhandle);
+	}
+}
+
+
 static void createRC4Key(uint32_t key_ins, uint8_t* outkey) {
 	outkey[0] = outkey[4] = outkey[8]  = outkey[12] = key_ins & 0xff;
 	outkey[1] = outkey[5] = outkey[9]  = outkey[13] = (key_ins >> 8) & 0xff;
@@ -420,36 +427,37 @@ static int processElfs(ElfFile* elfs, EncodingTask* task) {
 
 
 int Elf_EncodeSymbols(EncodingTask* task) {
+	int ret_code = 0;
+	
 	int num_inputs = 0;
 	while (task->inputs[num_inputs] != NULL) {
 		num_inputs++;
 	}
 	
 	if (num_inputs == 0) {
-		return 0;
+		return ret_code;
 	}
 	
 	ElfFile* elfs = calloc(num_inputs + 1, sizeof(ElfFile));
 	for (int elf_idx = 0; elf_idx < num_inputs; elf_idx++) {
-		int error = ElfFile_Init(&elfs[elf_idx], task->inputs[elf_idx]);
+		ret_code += ElfFile_Init(&elfs[elf_idx], task->inputs[elf_idx]);
 		
 #if 0
 		// This just.. doesn't work. fstat() doesn't work.
 		// Whatever, just don't input the same file multiple times
-		if (!error) {
+		if (!ret_code) {
 			for (int other_elf_idx = 0; other_elf_idx < elf_idx; other_elf_idx++) {
 				if (isSameFile(elfs[elf_idx].fhandle, elfs[other_elf_idx].fhandle)) {
 					printf("Error: duplicate input file: %s\n", elfs[elf_idx].fname);
-					error = 1;
+					ret_code += 1;
 					break;
 				}
 			}
 		}
 #endif
 		
-		if (error) {
-			free(elfs);
-			return 1;
+		if (ret_code) {
+			goto EXIT;
 		}
 	}
 	
@@ -457,8 +465,12 @@ int Elf_EncodeSymbols(EncodingTask* task) {
 	elfs[num_inputs].fhandle = NULL;
 	
 	// Process all
-	int ret_code = processElfs(elfs, task);
+	ret_code += processElfs(elfs, task);
 	
+EXIT:
+	for (int elf_idx = 0; elf_idx < num_inputs; elf_idx++) {
+		ElfFile_Destroy(&elfs[elf_idx]);
+	}
 	free(elfs);
 	
 	return ret_code;
