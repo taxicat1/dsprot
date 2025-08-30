@@ -45,6 +45,7 @@ void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
 	ctx->xor_val = ENC_XOR_START;
 }
 
+
 void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	int optype = categorizeOpCode(ins->opcode);
 	
