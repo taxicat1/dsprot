@@ -27,6 +27,7 @@ void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
 	ctx->prev_opcode = 0;
 }
 
+
 void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	int optype = categorizeOpCode(ins->opcode);
 	
@@ -76,7 +77,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 }
 
 
-void Encode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
+void Encode_Relocation(Elf32_Rela* reloc) {
 	reloc->r_addend += ENC_VAL_1 + 8;
 }
 
@@ -136,6 +137,6 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 }
 
 
-void Decode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
+void Decode_Relocation(Elf32_Rela* reloc) {
 	reloc->r_addend -= ENC_VAL_1 + 8;
 }
