@@ -3,13 +3,20 @@
 #include "keys.h"
 #include "encryptor.h"
 
-static const u8 bad_mac_addr[6] = {
-	// 00:09:BF:00:00:31 after bit flipping
-	0xFF, 0xF6, 0x40, 0xFF, 0xFF, 0xCE
-};
+#define MAC_ADDR_SIZE  (6)
 
-#define MAC_ADDR_SIZE    (6)
 #define MAC_ADDR_OFFSET  (2)
+
+#define ENC_MAC_ADDR_BYTE  (0xFF)
+
+static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
+	0x00 ^ ENC_MAC_ADDR_BYTE,
+	0x09 ^ ENC_MAC_ADDR_BYTE,
+	0xBF ^ ENC_MAC_ADDR_BYTE,
+	0x00 ^ ENC_MAC_ADDR_BYTE,
+	0x00 ^ ENC_MAC_ADDR_BYTE,
+	0x31 ^ ENC_MAC_ADDR_BYTE
+};
 
 
 u32 MACOwner_IsBad(void) {
@@ -24,7 +31,7 @@ u32 MACOwner_IsBad(void) {
 	ENCRYPTION_START(KEY_MAC_OWNER_1);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET+i] ^ 0xFF)) {
+		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET+i] ^ ENC_MAC_ADDR_BYTE)) {
 			break;
 		}
 	}
@@ -73,7 +80,7 @@ u32 MACOwner_IsGood(void) {
 	ENCRYPTION_START(KEY_MAC_OWNER_3);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET+i] ^ 0xFF)) {
+		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET+i] ^ ENC_MAC_ADDR_BYTE)) {
 			break;
 		}
 	}
