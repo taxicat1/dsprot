@@ -27,6 +27,7 @@ void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
 	ctx->prev_opcode = 0;
 }
 
+
 void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	int optype = categorizeOpCode(ins->opcode);
 	
