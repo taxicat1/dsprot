@@ -76,7 +76,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 }
 
 
-void Encode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
+void Encode_Relocation(Elf32_Rela* reloc) {
 	reloc->r_addend += ENC_VAL_1 + 8;
 }
 
@@ -136,6 +136,6 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 }
 
 
-void Decode_Relocation(const Instruction* encoded_instruction, Elf32_Rela* reloc) {
+void Decode_Relocation(Elf32_Rela* reloc) {
 	reloc->r_addend -= ENC_VAL_1 + 8;
 }
