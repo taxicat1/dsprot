@@ -18,7 +18,6 @@ typedef struct {
 } ElfFile;
 
 
-
 static void getSectionHeaderByIdx(ElfFile* elf, int idx, Elf32_Shdr* out_section_header) {
 	fseek(elf->fhandle, elf->ex_header.e_shoff + (idx * elf->ex_header.e_shentsize), SEEK_SET);
 	fread(out_section_header, sizeof(Elf32_Shdr), 1, elf->fhandle);
@@ -48,8 +47,8 @@ static int symbolStringCompare(ElfFile* elf, int str_idx, const char* target_sym
 static int ElfFile_Init(ElfFile* elf, char* fname) {
 	elf->fname = fname;
 	
-	// Open file
-	elf->fhandle = fopen(elf->fname, "rb+");
+	// Open file (read only)
+	elf->fhandle = fopen(elf->fname, "rb");
 	if (elf->fhandle == NULL) {
 		printf("Error: could not open input file: %s\n", elf->fname);
 		return 1;
@@ -96,54 +95,62 @@ static void ElfFile_Destroy(ElfFile* elf) {
 }
 
 
-static int doHashInstructions(ElfFile* elf, uint32_t start_addr, int size, KeyData* out_key) {
+static void doHashInstructions(ElfFile* elf, uint32_t start_addr, int size, KeyData* out_key) {
 	int num_ins = size / 4;
 	fseek(elf->fhandle, start_addr, SEEK_SET);
 	uint32_t* ins_buffer = malloc(size);
 	fread(ins_buffer, sizeof(uint32_t), num_ins, elf->fhandle);
+	Hash_Instructions(ins_buffer, num_ins, out_key);
+	free(ins_buffer);
+}
+
+
+static int getInstructionSize(ElfFile* elf, const Elf32_Sym* symbol) {
+	int start = symbol->st_value;
+	int end = start + symbol->st_size;
 	
-	int target_opcode_1;
-	int target_opcode_2;
+	int symbol_tbl_len = elf->symtbl_header.sh_size / elf->symtbl_header.sh_entsize;
 	
-	target_opcode_1 = 0xE8;
-	target_opcode_2 = 0xE1;
-	
-	int last_idx = num_ins - 1;
-	while (
-		(ins_buffer[last_idx] >> 24) != target_opcode_1 &&
-		(ins_buffer[last_idx] >> 24) != target_opcode_2
-	) {
-		last_idx--;
+	// Searching for a data mapping symbol before the end of this symbol
+	for (int symbol_tbl_idx = 0; symbol_tbl_idx < symbol_tbl_len; symbol_tbl_idx++) {
+		Elf32_Sym mapping_symbol;
+		getSymbolByIdx(elf, symbol_tbl_idx, &mapping_symbol);
 		
-		if (last_idx < 0) {
-			// Could not find target
-			free(ins_buffer);
-			return 1;
+		// Mapping symbol must be in the same region
+		if (mapping_symbol.st_shndx != symbol->st_shndx) {
+			continue;
+		}
+		
+		// Check name is "$d"
+		if (symbolStringCompare(elf, mapping_symbol.st_name, "$d") != 0) {
+			continue;
+		}
+		
+		// Check that the location resides between start and end
+		if (mapping_symbol.st_value >= start && mapping_symbol.st_value <= end) {
+			// Move the end back to the start of this symbol
+			end = mapping_symbol.st_value;
 		}
 	}
 	
-	num_ins = last_idx + 1;
-	Hash_Instructions(ins_buffer, num_ins, out_key);
-	free(ins_buffer);
-	return 0;
+	return end - start;
 }
 
 
 static int hashSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name, KeyData* out_key) {
-	int ret = 0;
-	
 	Elf32_Shdr text_header;
 	getSectionHeaderByIdx(elf, symbol->st_shndx, &text_header);
 	int start_addr = text_header.sh_offset + symbol->st_value;
+	int size = getInstructionSize(elf, symbol);
 	
-	// Hash instructions of this function
-	int error = doHashInstructions(elf, start_addr, symbol->st_size, out_key);
-	if (error) {
+	if (size != 0) {
+		// Hash instructions of this function
+		doHashInstructions(elf, start_addr, size, out_key);
+		return 0;
+	} else {
 		printf("%s (@ %04x): failed: could not find instruction range\n", symbol_name, symbol->st_value);
-		return error;
+		return 1;
 	}
-	
-	return 0;
 }
 
 
