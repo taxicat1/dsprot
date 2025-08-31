@@ -1,6 +1,5 @@
 #include "bss.h"
 #include "garbage.h"
-#include "callback.h"
 
 u8 BSS[4];
 
