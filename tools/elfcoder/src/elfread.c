@@ -214,6 +214,7 @@ static void encodeRelocations(
 	}
 }
 
+
 static int getInstructionSize(ElfFile* elf, const Elf32_Sym* symbol) {
 	int start = symbol->st_value;
 	int end = start + symbol->st_size;
@@ -244,6 +245,7 @@ static int getInstructionSize(ElfFile* elf, const Elf32_Sym* symbol) {
 	
 	return end - start;
 }
+
 
 static int encodeSymbol(ElfFile* elf, const Elf32_Sym* symbol, char* symbol_name, ASMWriter_Ctx* asmw, EncodingTask* task) {
 	int ret = 0;
