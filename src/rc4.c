@@ -236,7 +236,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	src_bytes = (u8*)src;
 	dst_bytes = (u8*)dst;
-
+	
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
 		
