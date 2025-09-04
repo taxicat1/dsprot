@@ -24,9 +24,7 @@ Booleans, rather than use `0` or `1`, instead obsfuscate the value using differe
 
 ## Function encoding and encrypting
 
-Used extensively by the library is the following function encoding scheme. It is designed to not fully scramble the instructions into apparent random noise, but rather to distort them into other, valid instructions such that a reverse engineer may not even realize they were encoded.
-
-There are two types of function encoding: unkeyed and keyed (encryption).
+Used extensively by the library is the following function encoding scheme. There are two types of function encoding: unkeyed and keyed (encryption).
 
 Unkeyed encoding is decoded using a static initializer, which is run automatically as soon as the overlay is loaded. Therefore, for almost all of the time the library is loaded into RAM, the unkeyed encoding is already removed.
 
