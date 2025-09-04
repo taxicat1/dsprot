@@ -1,6 +1,6 @@
 # Function encoding
 
-Used extensively by the library is the following instruction encryption scheme. It is designed to not fully scramble the instructions into apparent random noise, but rather to distort them into other, valid instructions such that a reverse engineer may not even realize they were encoded.
+Used extensively by the library is the following instruction encryption scheme.
 
 The included tool `elfcoder` is capable of both encrypting and decrypting to this specification.
 
