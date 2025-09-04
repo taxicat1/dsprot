@@ -22,12 +22,14 @@ $(shell mkdir -p $(BUILD_DIR))
 
 ELFCODER_DIR  :=  $(TOOL_DIR)/elfcoder
 FIXDEP_DIR    :=  $(TOOL_DIR)/fixdep
-MW_DIR        :=  $(TOOL_DIR)/mw
+MWCCARM_DIR   ?=  $(TOOL_DIR)/mwccarm
+
+MW_VER := dsi/1.2
 
 # Tools
-MWCCARM   :=  $(MW_DIR)/mwccarm.exe
-MWASMARM  :=  $(MW_DIR)/mwasmarm.exe
-MWLDARM   :=  $(MW_DIR)/mwldarm.exe
+MWCCARM   :=  $(MWCCARM_DIR)/$(MW_VER)/mwccarm.exe
+MWASMARM  :=  $(MWCCARM_DIR)/$(MW_VER)/mwasmarm.exe
+MWLDARM   :=  $(MWCCARM_DIR)/$(MW_VER)/mwldarm.exe
 ELFCODER  :=  $(ELFCODER_DIR)/build/elfcoder$(EXE)
 FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 
@@ -72,7 +74,7 @@ KEY_DSPROT_MAIN := 50B7
 KEY_INTEGRITY   := 0BCB
 KEY_CORE_TESTS  := C826
 
-.PHONY: all clean tools dsprot
+.PHONY: all clean tools dsprot install
 .DELETE_ON_ERROR: 
 .NOTPARALLEL: 
 
@@ -83,7 +85,7 @@ all:
 clean:
 	$(MAKE) -C $(ELFCODER_DIR) clean
 	$(MAKE) -C $(FIXDEP_DIR) clean
-	$(RM) $(BUILD_DIR)/*
+	$(RM) -r $(BUILD_DIR)
 
 tools:
 	$(MAKE) -C $(ELFCODER_DIR)
@@ -91,6 +93,16 @@ tools:
 
 dsprot:
 	$(MAKE) $(BUILD_DIR)/$(LIBRARY_NAME)
+
+ifeq ($(INSTALL_DIR),)
+install:
+	$(error Nowhere to install. Specify INSTALL_DIR)
+else
+install:
+	$(MAKE) all
+	$(shell mkdir -p $(INSTALL_DIR)/lib/)
+	cp $(BUILD_DIR)/$(LIBRARY_NAME) $(INSTALL_DIR)/lib/
+endif
 
 
 # Library output
