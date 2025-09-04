@@ -1,5 +1,5 @@
 **/build/**
-license.dat
+tools/mwccarm/**
 *.exe
 *.dll
 *.o
