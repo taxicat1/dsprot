@@ -94,7 +94,7 @@ $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.s
 # C compilation
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $< -o $@
-	$(FIXDEP) $(BUILD_DIR)/$*.d
+	$(FIXDEP) $(@:.o=.d)
 
 
 # Library output
