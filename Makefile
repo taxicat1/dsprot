@@ -86,24 +86,23 @@ install:
 endif
 
 
+# Assembly assembling
+$(BUILD_DIR)/%.o: $(BUILD_DIR)/%.s
+	$(WINE) $(MWASMARM) $(ASM_PARAM) $< -o $@
+
+
+# C compilation
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $< -o $@
+	$(FIXDEP) $(BUILD_DIR)/$*.d
+
+
 # Library output
 $(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
 	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
 
 
-# RC4 module
-$(BUILD_DIR)/rc4.o: $(SRC_DIR)/rc4.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rc4.c -o $(BUILD_DIR)/rc4.o
-	$(FIXDEP) $(BUILD_DIR)/rc4.d
-
-
-# Encryptor module
-$(BUILD_DIR)/encryptor.o: $(SRC_DIR)/encryptor.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/encryptor.c -o $(BUILD_DIR)/encryptor.o
-	$(FIXDEP) $(BUILD_DIR)/encryptor.d
-
-
-# Core tests module: MAC/Owner, ROM utilities, ROM tests
+# Core tests module: MAC/Owner, ROM utilities, ROM tests function encoding
 $(BUILD_DIR)/mac_owner_encrypted.o: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
 	$(ELFCODER) $(ELFCODER_PARAM) -i $(BUILD_DIR)/mac_owner_encrypted.o
@@ -116,27 +115,11 @@ $(BUILD_DIR)/rom_test_encrypted.o: $(BUILD_DIR)/rom_test.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
 	$(ELFCODER) $(ELFCODER_PARAM) -i $(BUILD_DIR)/rom_test_encrypted.o
 
-$(BUILD_DIR)/mac_owner.o: $(SRC_DIR)/mac_owner.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/mac_owner.c -o $(BUILD_DIR)/mac_owner.o
-	$(FIXDEP) $(BUILD_DIR)/mac_owner.d
 
-$(BUILD_DIR)/rom_util.o: $(SRC_DIR)/rom_util.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rom_util.c -o $(BUILD_DIR)/rom_util.o
-	$(FIXDEP) $(BUILD_DIR)/rom_util.d
-
-$(BUILD_DIR)/rom_test.o: $(SRC_DIR)/rom_test.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/rom_test.c -o $(BUILD_DIR)/rom_test.o
-	$(FIXDEP) $(BUILD_DIR)/rom_test.d
-
-
-# Main module
+# Main module function encoding
 $(BUILD_DIR)/dsprot_main_encrypted.o: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
 	$(ELFCODER) $(ELFCODER_PARAM) -i $(BUILD_DIR)/dsprot_main_encrypted.o
-
-$(BUILD_DIR)/dsprot_main.o: $(SRC_DIR)/dsprot_main.c
-	$(WINE) $(MWCCARM) $(CC_PARAM) $(DEP_PARAM) $(SRC_DIR)/dsprot_main.c -o $(BUILD_DIR)/dsprot_main.o
-	$(FIXDEP) $(BUILD_DIR)/dsprot_main.d
 
 
 -include $(DEPS)
