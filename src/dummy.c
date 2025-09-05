@@ -11,6 +11,7 @@ u32 Dummy_IsBad(void) {
 	return PRIME_DUMMY_1 * PRIME_FALSE;
 }
 
+
 u32 Dummy_IsGood(void) {
 	return PRIME_DUMMY_2 * PRIME_TRUE;
 }
