@@ -11,8 +11,8 @@ asm void clearDataAndInstructionCache(register void* start_addr, register u32 nu
 	// This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange.
 	// Both of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
 	
-	add  r1, r1, r0
 	mov  ip, #0
+	add  r1, r1, r0
 	bic  r0, r0, #31
 	
 @1:
