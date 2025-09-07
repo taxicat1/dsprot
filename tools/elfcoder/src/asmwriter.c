@@ -102,17 +102,19 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 		
 		fprintf(output,
 			"\tfunc_table_end\n"
-			"\tarm_func_end NitroStaticInit\n"
-			"\n"
 		);
 		
 		if (asmw->garbage != NULL) {
 			fprintf(output,
-				"\tgarbage_ref %s\n"
-				"\n",
+				"\tgarbage_ref %s\n",
 				asmw->garbage
 			);
 		}
+		
+		fprintf(output,
+			"\tarm_func_end NitroStaticInit\n"
+			"\n"
+		);
 		
 		fprintf(output,
 			"\t.section .sinit, 4\n"
