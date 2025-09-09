@@ -152,7 +152,7 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, uint32_t k
 	int num_ins = size / 4;
 	fseek(elf->fhandle, start_addr, SEEK_SET);
 	Instruction* ins_buffer = malloc(size);
-	fread(ins_buffer, sizeof(Instruction), num_ins, elf->fhandle);
+	Instructions_Read(ins_buffer, num_ins, elf->fhandle);
 	
 	RC4_Ctx rc4;
 	uint8_t rc4key[RC4_KEY_SIZE];
@@ -168,7 +168,7 @@ static int encodeInstructions(ElfFile* elf, int start_addr, int size, uint32_t k
 	}
 	
 	fseek(elf->fhandle, start_addr, SEEK_SET);
-	fwrite(ins_buffer, sizeof(Instruction), num_ins, elf->fhandle);
+	Instructions_Write(ins_buffer, num_ins, elf->fhandle);
 	
 	free(ins_buffer);
 	
