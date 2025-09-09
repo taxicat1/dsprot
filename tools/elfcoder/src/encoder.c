@@ -32,8 +32,10 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	int optype = categorizeOpCode(ins->opcode);
 	
 	if (rc4 == NULL) {
-		uint32_t original = ins->raw;
-		ins->raw ^= ctx->xor_val;
+		uint32_t ins_raw = Instruction_GetFull(ins);
+		uint32_t original = ins_raw;
+		ins_raw ^= ctx->xor_val;
+		Instruction_SetFull(ins, ins_raw);
 		ctx->xor_val ^= original - (original >> 8);
 	} else {
 		uint8_t a, b, c, d;
@@ -84,8 +86,10 @@ void Encode_Relocation(Elf32_Rela* reloc) {
 
 void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	if (rc4 == NULL) {
-		ins->raw ^= ctx->xor_val;
-		ctx->xor_val ^= ins->raw - (ins->raw >> 8);
+		uint32_t ins_raw = Instruction_GetFull(ins);
+		ins_raw ^= ctx->xor_val;
+		Instruction_SetFull(ins, ins_raw);
+		ctx->xor_val ^= ins_raw - (ins_raw >> 8);
 	} else {
 		uint8_t a, b, c, d, tmp;
 		
