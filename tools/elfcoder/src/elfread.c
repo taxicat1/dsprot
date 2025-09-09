@@ -254,6 +254,7 @@ static int tryEncryptRanges(
 	return 0;
 }
 
+
 static void sortRelocsByOffset(Elf32_Rela* relocs, int len) {
 	// Nope, shut up, don't care, I'm doing this
 	for (int i = 0; i < len-1; i++) {
@@ -272,6 +273,7 @@ static void sortRelocsByOffset(Elf32_Rela* relocs, int len) {
 		}
 	}
 }
+
 
 static int tryEncryptSymbol(ElfFile* elf, const Elf32_Sym* symbol, int decryption_symbol_idx, int encryption_symbol_idx, EncodingTask* task) {
 	Elf32_Shdr text_header;
@@ -351,6 +353,7 @@ static int tryEncryptSymbol(ElfFile* elf, const Elf32_Sym* symbol, int decryptio
 	return 0;
 }
 
+
 int getDecryptionAndEncryptionSymbolIdxs(ElfFile* elf, int* out_decryption_symbol_idx, int* out_encryption_symbol_idx, EncodingTask* task) {
 	int symbol_tbl_len = elf->symtbl_header.sh_size / elf->symtbl_header.sh_entsize;
 	
@@ -376,6 +379,7 @@ int getDecryptionAndEncryptionSymbolIdxs(ElfFile* elf, int* out_decryption_symbo
 	
 	return 1;
 }
+
 
 static int processElf(ElfFile* elf, EncodingTask* task) {
 	int symbol_tbl_len = elf->symtbl_header.sh_size / elf->symtbl_header.sh_entsize;
