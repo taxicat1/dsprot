@@ -62,8 +62,10 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 			
 			case 0:
 			case 3:
-				uint32_t original = ins->raw;
-				ins->raw ^= ctx->xor_val;
+				uint32_t ins_raw = Instruction_GetFull(ins);
+				uint32_t original = ins_raw;
+				ins_raw ^= ctx->xor_val;
+				Instruction_SetFull(ins, ins_raw);
 				ctx->xor_val ^= original;
 				ctx->xor_val ^= original >> 8;
 				ctx->xor_val &= 0x00FFFFFF;
@@ -134,9 +136,11 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				ins->opcode ^= ENC_OPCODE_1;
 				// Fall through
 			case 0:
-				ins->raw ^= ctx->xor_val;
-				ctx->xor_val ^= ins->raw;
-				ctx->xor_val ^= ins->raw >> 8;
+				uint32_t ins_raw = Instruction_GetFull(ins);
+				ins_raw ^= ctx->xor_val;
+				Instruction_SetFull(ins, ins_raw);
+				ctx->xor_val ^= ins_raw;
+				ctx->xor_val ^= ins_raw >> 8;
 				ctx->xor_val &= 0x00FFFFFF;
 				break;
 		}
