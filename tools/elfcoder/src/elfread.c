@@ -141,6 +141,7 @@ static void createRC4Key(uint32_t inkey, unsigned int func_size, uint8_t* outkey
 	memcpy(outkey, &k[0], RC4_KEY_SIZE);
 }
 
+
 static void encodeInstructions(ElfFile* elf, int start_addr, int size, EncodingTask* task) {
 	Encoding_Ctx ctx;
 	Encode_Init(&ctx, task);
