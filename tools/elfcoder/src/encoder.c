@@ -26,32 +26,34 @@ static const uint8_t SBox[256] = {
 	0xF1, 0xF0, 0xF3, 0xF2, 0xF5, 0xF4, 0xF7, 0xF6, 0xF9, 0xF8, 0xFB, 0xFA, 0xFD, 0xFC, 0xFF, 0xFE
 };
 
+enum {
+	INS_TYPE_OTHER = 0,
+	INS_TYPE_BLX,
+	INS_TYPE_BL,
+	INS_TYPE_B
+};
+
 
 static int categorizeOpCode(unsigned int opcode) {
 	if ((opcode & 0x0E) == 0x0A) {
 		if ((opcode & 0xF0) == 0xF0) {
-			return 1;
+			return INS_TYPE_BLX;
 		}
 		
 		if (opcode & 0x01) {
-			return 2;
+			return INS_TYPE_BL;
 		} else {
-			return 3;
+			return INS_TYPE_B;
 		}
 	}
 	
-	return 0;
+	return INS_TYPE_OTHER;
 }
 
 
-void Encode_Init(Encoding_Ctx* ctx, EncodingTask* task) {
-	// Futureproofing
-}
-
-
-void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
+void Encode_Instruction(Instruction* ins, RC4_Ctx* rc4) {
 	switch (categorizeOpCode(ins->opcode)) {
-		case 0:
+		case INS_TYPE_OTHER:
 			if (rc4 != NULL) {
 				uint8_t a = RC4_Byte(rc4);
 				uint8_t b = RC4_Byte(rc4);
@@ -67,13 +69,13 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 			}
 			break;
 		
-		case 1:
-		case 2:
+		case INS_TYPE_BLX:
+		case INS_TYPE_BL:
 			ins->opcode ^= ENC_OPCODE_1;
 			ins->operands += ENC_VAL_2;
 			break;
 		
-		case 3:
+		case INS_TYPE_B:
 			ins->opcode ^= ENC_OPCODE_1;
 			ins->operands += ENC_VAL_1;
 			break;
@@ -86,9 +88,9 @@ void Encode_Relocation(Elf32_Rela* reloc) {
 }
 
 
-void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
+void Decode_Instruction(Instruction* ins, RC4_Ctx* rc4) {
 	switch (categorizeOpCode(ins->opcode)) {
-		case 0:
+		case INS_TYPE_OTHER:
 			if (rc4 != NULL) {
 				uint8_t a = RC4_Byte(rc4);
 				uint8_t b = RC4_Byte(rc4);
@@ -104,13 +106,13 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 			}
 			break;
 		
-		case 1:
-		case 2:
+		case INS_TYPE_BLX:
+		case INS_TYPE_BL:
 			ins->opcode ^= ENC_OPCODE_1;
 			ins->operands -= ENC_VAL_1;
 			break;
 		
-		case 3:
+		case INS_TYPE_B:
 			ins->opcode ^= ENC_OPCODE_1;
 			ins->operands -= ENC_VAL_2;
 			break;
