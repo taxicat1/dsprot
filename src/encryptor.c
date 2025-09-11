@@ -37,17 +37,17 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) {
 	
 	if ((upper_byte & 0x0E) == 0x0A) {
 		if ((upper_byte & 0xF0) == 0xF0) {
-			return 1;
+			return INS_TYPE_BLX;
 		}
 		
 		if (upper_byte & 0x01) {
-			return 2;
+			return INS_TYPE_BL;
 		} else {
-			return 3;
+			return INS_TYPE_B;
 		}
 	}
 	
-	return 0;
+	return INS_TYPE_OTHER;
 }
 
 
