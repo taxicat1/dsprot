@@ -37,17 +37,17 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) {
 	
 	if ((upper_byte & 0x0E) == 0x0A) {
 		if ((upper_byte & 0xF0) == 0xF0) {
-			return 1;
+			return INS_TYPE_BLX;
 		}
 		
 		if (upper_byte & 0x01) {
-			return 2;
+			return INS_TYPE_BL;
 		} else {
-			return 3;
+			return INS_TYPE_B;
 		}
 	}
 	
-	return 0;
+	return INS_TYPE_OTHER;
 }
 
 
@@ -76,8 +76,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		
 		for (; addr < end_addr; addr += 4) {
 			switch (Encryptor_CategorizeInstruction(*(u32*)addr)) {
-				case 1:
-				case 3:
+				case INS_TYPE_BLX:
+				case INS_TYPE_B:
 					*(u32*)addr = ((*(u32*)addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
 					              (((*(u32*)addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 					
@@ -85,7 +85,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 					xorval &= 0x00FFFFFF;
 					break;
 				
-				case 2:
+				case INS_TYPE_BL:
 					// Link bit
 					*(u32*)addr ^= (ENC_OPCODE_1 << 24);
 					// Fall through
