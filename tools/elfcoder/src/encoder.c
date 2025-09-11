@@ -4,21 +4,28 @@
 
 #include "encoding_constants.h"
 
+enum {
+	INS_TYPE_OTHER = 0,
+	INS_TYPE_BLX,
+	INS_TYPE_BL,
+	INS_TYPE_B
+};
+
 
 static int categorizeOpCode(unsigned int opcode) {
 	if ((opcode & 0x0E) == 0x0A) {
 		if ((opcode & 0xF0) == 0xF0) {
-			return 1;
+			return INS_TYPE_BLX;
 		}
 		
 		if (opcode & 0x01) {
-			return 2;
+			return INS_TYPE_BL;
 		} else {
-			return 3;
+			return INS_TYPE_B;
 		}
 	}
 	
-	return 0;
+	return INS_TYPE_OTHER;
 }
 
 
@@ -40,16 +47,16 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	} else {
 		uint8_t a, b, c, d;
 		switch (optype) {
-			case 1:
-			case 2:
+			case INS_TYPE_BLX:
+			case INS_TYPE_BL:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands += ENC_VAL_2;
 				break;
 			
-			case 3:
+			case INS_TYPE_B:
 				ins->opcode ^= ENC_OPCODE_1;
 				// Fall through
-			case 0:
+			case INS_TYPE_OTHER:
 				a = ins->operands;
 				b = ins->operands >> 8;
 				c = ins->operands >> 16;
@@ -74,7 +81,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 		ins->opcode ^= ctx->prev_opcode;
 		ctx->prev_opcode = ins->opcode;
 		
-		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xff;
+		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xFF;
 	}
 }
 
@@ -99,15 +106,15 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 		
 		int optype = categorizeOpCode(ins->opcode);
 		switch (optype) {
-			case 1:
+			case INS_TYPE_BLX:
 				ins->opcode ^= 1;
-			case 3:
+			case INS_TYPE_B:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands -= ENC_VAL_2;
 				break;
 			
-			case 0:
-			case 2:
+			case INS_TYPE_OTHER:
+			case INS_TYPE_BL:
 				a = ins->operands;
 				b = ins->operands >> 8;
 				c = ins->operands >> 16;
@@ -136,7 +143,7 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 				break;
 		}
 		
-		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xff;
+		rc4->x = ((uint32_t)rc4->x - ctx->prev_opcode) & 0xFF;
 	}
 }
 
