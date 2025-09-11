@@ -31,6 +31,7 @@ enum {
 	INS_TYPE_B
 };
 
+
 static int categorizeOpCode(unsigned int opcode) {
 	if ((opcode & 0x0E) == 0x0A) {
 		if ((opcode & 0xF0) == 0xF0) {
