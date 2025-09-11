@@ -259,7 +259,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	for (idx = 0; idx < size; idx += 4) {
 		curr_opcode = src_bytes[idx+3];
-		src_bytes[idx+3] = curr_opcode - prev_opcode;
+		src_bytes[idx+3] -= prev_opcode;
 		prev_opcode = curr_opcode;
 		
 		ins_word = *(u32*)(src_bytes + idx);
@@ -344,8 +344,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		}
 		
 		// Update `x`
-		// Random cast required to match
-		ctx->x -= (u32)prev_opcode;
+		ctx->x -= prev_opcode;
 	}
 	
 	return 0;
