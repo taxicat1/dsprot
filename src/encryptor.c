@@ -80,7 +80,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		addr = (u32)(functions->start_addr - ENC_VAL_1);
 		size = functions->size - (u32)&BSS - ENC_VAL_1;
 		
-		end_addr = addr + ((size >> 2) << 2);
+		end_addr = addr + ((size / 4) * 4);
 		
 		xorval = ENC_XOR_START;
 		
