@@ -1,5 +1,7 @@
 #include "rc4.h"
 
+#include "encoding_constants.h"
+
 
 void RC4_Init(RC4_Ctx* ctx, uint8_t* k) {
 	ctx->i = 0;
@@ -10,7 +12,7 @@ void RC4_Init(RC4_Ctx* ctx, uint8_t* k) {
 	}
 	
 	// Modification to RC4
-	ctx->x = 0xAA;
+	ctx->x = ENC_RC4_X_START;
 	
 	/*
 	uint8_t j = 0;

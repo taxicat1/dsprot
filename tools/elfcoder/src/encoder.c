@@ -24,20 +24,27 @@ static const uint8_t SBox[256] = {
 	0xCF, 0xCE, 0xCD, 0xCC, 0xCB, 0xCA, 0xC9, 0xC8, 0xC7, 0xC6, 0xC5, 0xC4, 0xC3, 0xC2, 0xC1, 0xC0
 };
 
+enum {
+	INS_TYPE_OTHER = 0,
+	INS_TYPE_BLX,
+	INS_TYPE_BL,
+	INS_TYPE_B
+};
+
 static int categorizeOpCode(unsigned int opcode) {
 	if ((opcode & 0x0E) == 0x0A) {
 		if ((opcode & 0xF0) == 0xF0) {
-			return 1;
+			return INS_TYPE_BLX;
 		}
 		
 		if (opcode & 0x01) {
-			return 2;
+			return INS_TYPE_BL;
 		} else {
-			return 3;
+			return INS_TYPE_B;
 		}
 	}
 	
-	return 0;
+	return INS_TYPE_OTHER;
 }
 
 
@@ -51,14 +58,14 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	
 	if (rc4 == NULL) {
 		switch (optype) {
-			case 1:
-			case 2:
+			case INS_TYPE_BLX:
+			case INS_TYPE_BL:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands += ENC_VAL_2;
 				break;
 			
-			case 0:
-			case 3:
+			case INS_TYPE_OTHER:
+			case INS_TYPE_B:
 				uint32_t ins_raw = Instruction_GetFull(ins);
 				uint32_t original = ins_raw;
 				ins_raw ^= ctx->xor_val;
@@ -76,16 +83,16 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	} else {
 		uint8_t a, b, c, d;
 		switch (optype) {
-			case 1:
-			case 2:
+			case INS_TYPE_BLX:
+			case INS_TYPE_BL:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands += ENC_VAL_2;
 				break;
 			
-			case 3:
+			case INS_TYPE_B:
 				ins->opcode ^= ENC_OPCODE_1;
 				// Fall through
-			case 0:
+			case INS_TYPE_OTHER:
 				a = ins->operands;
 				b = ins->operands >> 8;
 				c = ins->operands >> 16;
@@ -113,16 +120,16 @@ void Encode_Relocation(Elf32_Rela* reloc) {
 void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	if (rc4 == NULL) {
 		switch (categorizeOpCode(ins->opcode)) {
-			case 1:
-			case 3:
+			case INS_TYPE_BLX:
+			case INS_TYPE_B:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands -= ENC_VAL_2;
 				break;
 			
-			case 2:
+			case INS_TYPE_BL:
 				ins->opcode ^= ENC_OPCODE_1;
 				// Fall through
-			case 0:
+			case INS_TYPE_OTHER:
 				uint32_t ins_raw = Instruction_GetFull(ins);
 				ins_raw ^= ctx->xor_val;
 				Instruction_SetFull(ins, ins_raw);
@@ -135,15 +142,15 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 		uint8_t a, b, c, d, tmp;
 		int optype = categorizeOpCode(ins->opcode);
 		switch (optype) {
-			case 1:
-			case 3:
+			case INS_TYPE_BLX:
+			case INS_TYPE_B:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands -= ENC_VAL_2;
 				break;
 			
-			case 2:
+			case INS_TYPE_BL:
 				ins->opcode ^= ENC_OPCODE_1;
-			case 0:
+			case INS_TYPE_OTHER:
 				a = ins->operands;
 				b = ins->operands >> 8;
 				c = ins->operands >> 16;

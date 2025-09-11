@@ -78,13 +78,13 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		
 		for (; addr < end_addr; addr += 4) {
 			switch (Encryptor_CategorizeInstruction(*(u32*)addr)) {
-				case 1:
-				case 3:
+				case INS_TYPE_BLX:
+				case INS_TYPE_B:
 					*(u32*)addr = ((*(u32*)addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
 					              (((*(u32*)addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 					break;
 				
-				case 2:
+				case INS_TYPE_BL:
 					// Link bit
 					*(u32*)addr ^= (ENC_OPCODE_1 << 24);
 					// Fall through

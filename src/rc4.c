@@ -18,7 +18,7 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	// Must be like this to match
 	Si = Ki = 0;
 	
-	ctx->x = 0xAA;
+	ctx->x = ENC_RC4_X_START;
 	ctx->i = 0;
 	ctx->j = 0;
 	
@@ -117,14 +117,14 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
-			case 1:
-			case 2:
+			case INS_TYPE_BLX:
+			case INS_TYPE_BL:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
 				*(u32*)(dst + idx) = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
 				                     (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
 				break;
 			
-			case 3:
+			case INS_TYPE_B:
 				// Link bit
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
@@ -179,14 +179,14 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
-			case 1:
-			case 3:
+			case INS_TYPE_BLX:
+			case INS_TYPE_B:
 				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
 				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 				
 				break;
 			
-			case 2:
+			case INS_TYPE_BL:
 				// Link bit
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
