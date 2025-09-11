@@ -31,6 +31,7 @@ u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size);
 //      08  Proxy_RC4_DecryptInstructions
 //      0C  Proxy_RC4_Byte
 //      10  Proxy_RC4_Init
+
 const u32 Proxy_RC4_Byte                       = (u32)&RC4_Byte[ENC_VAL_1];
 const u32 Proxy_RC4_DecryptInstructions        = (u32)&RC4_DecryptInstructions[ENC_VAL_1];
 const u32 Proxy_RC4_EncryptInstructions        = (u32)&RC4_EncryptInstructions[ENC_VAL_1];
