@@ -9,8 +9,8 @@
 // Function to be encrypted (cannot be called directly)
 u32 ROMTest_IsBad(void);
 
-#define ROM_BLOCK_SIZE         (0x200)
-#define DSP_EXPECTED_CHECKSUM  (0x9FBB82E0)
+#define ROM_BLOCK_SIZE              (0x200)
+#define ROM_TEST_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
 u32 ROMTest_IsBad(void) {
@@ -165,7 +165,7 @@ u32 ROMTest_IsBad(void) {
 				crc_data_ptr++;
 			} while (--i);
 			
-			if (checksum != DSP_EXPECTED_CHECKSUM) {
+			if (checksum != ROM_TEST_EXPECTED_CHECKSUM) {
 				DSProt_Crash(0, 0);
 				return PRIME_TRUE * PRIME_ROM_TEST;
 			}
@@ -191,7 +191,7 @@ u32 ROMTest_IsBad(void) {
 				crc_data_ptr++;
 			} while (--i);
 			
-			if (checksum != DSP_EXPECTED_CHECKSUM) {
+			if (checksum != ROM_TEST_EXPECTED_CHECKSUM) {
 				DSProt_Crash(0, 0);
 				return PRIME_TRUE * PRIME_ROM_TEST;
 			}
