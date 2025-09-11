@@ -106,8 +106,6 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u32  ins_word;
 	u32  upper;
 	u32  lower;
-	u8   ins_byte;
-	u8   rand_byte;
 	
 	if (size & 3) {
 		return -1;
@@ -139,18 +137,22 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				// Fall through
 			default:
 				// First byte
-				rand_byte = RC4_Byte(ctx);
-				ins_byte = src_bytes[idx];
-				ins_byte ^= rand_byte;
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte;
+				{
+					int rand_byte = RC4_Byte(ctx);
+					int ins_byte = src_bytes[idx];
+					ins_byte ^= rand_byte;
+					ctx->x = ins_byte;
+					dst_bytes[idx] = ins_byte;
+				}
 				
 				// Second byte
-				rand_byte = RC4_Byte(ctx);
-				ins_byte = src_bytes[idx+1];
-				ins_byte ^= rand_byte;
-				ctx->x = ins_byte;
-				dst_bytes[idx+1] = ins_byte;
+				{
+					int rand_byte = RC4_Byte(ctx);
+					int ins_byte = src_bytes[idx+1];
+					ins_byte ^= rand_byte;
+					ctx->x = ins_byte;
+					dst_bytes[idx+1] = ins_byte;
+				}
 				
 				// Third byte
 				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
@@ -168,21 +170,12 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 }
 
 
-// For some reason this inline is required to match
-static inline u8 getInsByte(u8 *ins_byte_ptr, u32 offset, u32 byte);
-static inline u8 getInsByte(u8 *ins_byte_ptr, u32 offset, u32 byte) {
-	return ins_byte_ptr[offset + byte];
-}
-
-
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
 	u8*  src_bytes;
 	u8*  dst_bytes;
 	u32  idx;
 	u32  ins_word;
-	u8   ins_byte;
-	u8   rand_byte;
 	
 	if (size & 3) {
 		return -1;
@@ -206,16 +199,20 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			
 			case 2:
 				// First byte
-				ins_byte = src_bytes[idx];
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx];
+					int rand_byte = RC4_Byte(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx] = ins_byte ^ rand_byte;
+				}
 				
 				// Second byte
-				ins_byte = getInsByte(src_bytes, idx, 1);
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx+1];
+					int rand_byte = RC4_Byte(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				}
 				
 				// Update x
 				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
@@ -232,16 +229,20 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			
 			default:
 				// First byte
-				ins_byte = src_bytes[idx];
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx];
+					int rand_byte = RC4_Byte(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx] = ins_byte ^ rand_byte;
+				}
 				
 				// Second byte
-				ins_byte = getInsByte(src_bytes, idx, 1);
-				rand_byte = RC4_Byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx+1];
+					int rand_byte = RC4_Byte(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				}
 				
 				// Update x
 				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
