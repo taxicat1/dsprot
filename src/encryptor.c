@@ -4,6 +4,8 @@
 #include "bss.h"
 #include "rc4.h"
 
+#define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
+
 void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size);
 u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size);
 
@@ -103,10 +105,10 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 	key  -= (u32)&BSS + ENC_VAL_1;
 	size -= (u32)&BSS + ENC_VAL_1;
 	
-	expanded_key[0] = key ^ size;
-	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
-	expanded_key[2] = ((key << 16) | (key >> 16)) ^ size;
-	expanded_key[3] = ((key << 24) | (key >>  8)) ^ size;
+	expanded_key[0] = ROTL(key,  0) ^ size;
+	expanded_key[1] = ROTL(key,  8) ^ size;
+	expanded_key[2] = ROTL(key, 16) ^ size;
+	expanded_key[3] = ROTL(key, 24) ^ size;
 	
 	func_addr = obfs_func_addr;
 	func_addr -= ENC_VAL_1;
@@ -139,10 +141,10 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	
 	key += (u32)obfs_func_addr >> 20;
 	
-	expanded_key[0] = key ^ size;
-	expanded_key[1] = ((key <<  8) | (key >> 24)) ^ size;
-	expanded_key[2] = ((key << 16) | (key >> 16)) ^ size;
-	expanded_key[3] = ((key << 24) | (key >>  8)) ^ size;
+	expanded_key[0] = ROTL(key,  0) ^ size;
+	expanded_key[1] = ROTL(key,  8) ^ size;
+	expanded_key[2] = ROTL(key, 16) ^ size;
+	expanded_key[3] = ROTL(key, 24) ^ size;
 	
 	((FuncType_RC4_InitAndEncryptInstructions)rc4_enc)(&expanded_key[0], func_addr, func_addr, size);
 	clearDataAndInstructionCache();
