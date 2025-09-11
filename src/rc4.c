@@ -45,6 +45,13 @@ typedef u32 (*FuncType_RC4_DecryptInstructions)(RC4_Ctx*, void*, void*, u32);
 typedef u32 (*FuncType_RC4_CategorizeInstruction)(u32);
 typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
 
+enum {
+	INS_TYPE_OTHER = 0,
+	INS_TYPE_BLX,
+	INS_TYPE_BL,
+	INS_TYPE_B
+};
+
 
 static u32 RC4_CategorizeInstruction(u32 instruction) {
 	u8 upper_byte;
@@ -53,17 +60,17 @@ static u32 RC4_CategorizeInstruction(u32 instruction) {
 	
 	if ((upper_byte & 0x0E) == 0x0A) {
 		if ((upper_byte & 0xF0) == 0xF0) {
-			return 1;
+			return INS_TYPE_BLX;
 		}
 		
 		if (upper_byte & 0x01) {
-			return 2;
+			return INS_TYPE_BL;
 		} else {
-			return 3;
+			return INS_TYPE_B;
 		}
 	}
 	
-	return 0;
+	return INS_TYPE_OTHER;
 }
 
 
@@ -81,7 +88,7 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	// Must be like this to match
 	Si = Ki = 0;
 	
-	ctx->x = 0xAA;
+	ctx->x = ENC_RC4_X_START;
 	ctx->i = 0;
 	ctx->j = 0;
 	
@@ -163,8 +170,8 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		ins_word = *(u32*)(src_bytes + idx);
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
-			case 1:
-			case 2:
+			case INS_TYPE_BLX:
+			case INS_TYPE_BL:
 				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
 				
 				upper = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
@@ -176,7 +183,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				
 				break;
 			
-			case 3:
+			case INS_TYPE_B:
 				// Link bit
 				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
 				// Fall through
@@ -241,15 +248,15 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		ins_word = *(u32*)(src_bytes + idx);
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
-			case 1:
-			case 3:
+			case INS_TYPE_BLX:
+			case INS_TYPE_B:
 				ctx->x += ins_word >> 24; 
 				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
 				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 				
 				break;
 			
-			case 2:
+			case INS_TYPE_BL:
 				rc4_byte_addr = Proxy_RC4_Byte;
 				rc4_byte_addr -= ENC_VAL_1;
 				
