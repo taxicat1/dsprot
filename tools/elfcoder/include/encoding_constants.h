@@ -8,4 +8,6 @@
 
 #define ENC_XOR_START  (0x7FEC9DF1)
 
+#define ENC_RC4_X_START  (0xAA)
+
 #endif
