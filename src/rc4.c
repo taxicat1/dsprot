@@ -31,6 +31,7 @@ u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size);
 //      08  Proxy_RC4_DecryptInstructions
 //      0C  Proxy_RC4_Byte
 //      10  Proxy_RC4_Init
+
 const u32 Proxy_RC4_Byte                       = (u32)&RC4_Byte[ENC_VAL_1];
 const u32 Proxy_RC4_DecryptInstructions        = (u32)&RC4_DecryptInstructions[ENC_VAL_1];
 const u32 Proxy_RC4_EncryptInstructions        = (u32)&RC4_EncryptInstructions[ENC_VAL_1];
@@ -143,8 +144,6 @@ u8 RC4_Byte(RC4_Ctx* ctx) {
 
 u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u32                idx;
-	u32                ins_byte;
-	u32                rand_byte;
 	u32                ins_word;
 	u8*                src_bytes;
 	u8*                dst_bytes;
@@ -190,25 +189,32 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				rc4_byte = (FuncType_RC4_Byte)rc4_byte_addr;
 				
 				// First byte
-				rand_byte = rc4_byte(ctx);
-				ins_byte = src_bytes[idx];
-				ins_byte ^= rand_byte;
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte;
+				{
+					int rand_byte = rc4_byte(ctx);
+					int ins_byte = src_bytes[idx];
+					ins_byte ^= rand_byte;
+					ctx->x = ins_byte;
+					dst_bytes[idx] = ins_byte;
+				}
 				
 				// Second byte
-				rand_byte = rc4_byte(ctx);
-				ins_byte = src_bytes[idx+1];
-				ins_byte ^= rand_byte;
-				ctx->x = ins_byte;
-				dst_bytes[idx+1] = ins_byte;
+				{
+					int rand_byte = rc4_byte(ctx);
+					int ins_byte = src_bytes[idx+1];
+					ins_byte ^= rand_byte;
+					ctx->x = ins_byte;
+					dst_bytes[idx+1] = ins_byte;
+				}
 				
 				// Third byte
-				rand_byte = rc4_byte(ctx);
-				ins_byte = src_bytes[idx+2];
-				ins_byte ^= rand_byte;
-				ctx->x = ins_byte;
-				dst_bytes[idx+2] = ins_byte;
+				{
+					int rand_byte = rc4_byte(ctx);
+					int ins_byte = src_bytes[idx+2];
+					ins_byte ^= rand_byte;
+					ctx->x = ins_byte;
+					dst_bytes[idx+2] = ins_byte;
+				}
+				
 				break;
 		}
 		
@@ -230,10 +236,8 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8                 curr_opcode;
 	u8                 prev_opcode;
 	u32                ins_word;
-	u32                rand_byte;
 	u32                rc4_byte_addr;
 	FuncType_RC4_Byte  rc4_byte;
-	u32                ins_byte;
 	u8*                src_bytes;
 	u8*                dst_bytes;
 	
@@ -269,23 +273,29 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				rc4_byte_addr -= ENC_VAL_1;
 				
 				// First byte
-				ins_byte = src_bytes[idx];
-				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx];
+					int rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx] = ins_byte ^ rand_byte;
+				}
 				
 				// Second byte
-				ins_byte = src_bytes[idx+1];
-				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-				// Random cast required to match
-				ctx->x = (u8)ins_byte;
-				dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx+1];
+					int rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
+					// Random cast required to match
+					ctx->x = (u8)ins_byte;
+					dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				}
 				
 				// Third byte
-				ins_byte = src_bytes[idx+2];
-				rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx+2] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx+2];
+					int rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx+2] = ins_byte ^ rand_byte;
+				}
 				
 				// Fourth byte + link bit
 				dst_bytes[idx+3] = src_bytes[idx+3] ^ ENC_OPCODE_1;
@@ -297,23 +307,29 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				rc4_byte = (FuncType_RC4_Byte)rc4_byte_addr;
 				
 				// First byte
-				ins_byte = src_bytes[idx];
-				rand_byte = rc4_byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx];
+					int rand_byte = rc4_byte(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx] = ins_byte ^ rand_byte;
+				}
 				
 				// Second byte
-				ins_byte = src_bytes[idx+1];
-				rand_byte = rc4_byte(ctx);
-				// Random cast required to match
-				ctx->x = (u8)ins_byte;
-				dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx+1];
+					int rand_byte = rc4_byte(ctx);
+					// Random cast required to match
+					ctx->x = (u8)ins_byte;
+					dst_bytes[idx+1] = ins_byte ^ rand_byte;
+				}
 				
 				// Third byte
-				ins_byte = src_bytes[idx+2];
-				rand_byte = rc4_byte(ctx);
-				ctx->x = ins_byte;
-				dst_bytes[idx+2] = ins_byte ^ rand_byte;
+				{
+					int ins_byte = src_bytes[idx+2];
+					int rand_byte = rc4_byte(ctx);
+					ctx->x = ins_byte;
+					dst_bytes[idx+2] = ins_byte ^ rand_byte;
+				}
 				
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
