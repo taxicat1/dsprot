@@ -16,7 +16,7 @@ u32 Integrity_ROMTest_IsGood(void);
 //   e92d00f0    stmfd sp!, {r4-r7}
 //   e92d000f    stmfd sp!, {r0-r3}
 //   e8bd00f0    ldmfd sp!, {r4-r7}
-//   e59f103c    ldr r1, [pc, #60] ;=func_\@ 
+//   e59f103c    ldr r1, [pc, #60]
 
 
 u32 Integrity_MACOwner_IsBad(void) {
