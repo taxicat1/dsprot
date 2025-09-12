@@ -9,7 +9,13 @@
 u32 Integrity_MACOwner_IsBad(void);
 u32 Integrity_ROMTest_IsBad(void);
 
-#define INTEGRITY_OBFS_OFFSET  (0x2000)
+#define INTEGRITY_OBFS_OFFSET  (ENC_VAL_1 & ~0xFFF)
+
+// The bytes checked here are from the `run_encrypted_func` macro defined in asm_macro.inc:
+//   e18fc00f    orr    ip, pc, pc
+//   e01cc00c    ands   ip, ip, ip
+//   03a0c000    moveq  ip, #0
+//   128cc01c    addne  ip, ip, #28
 
 
 u32 Integrity_MACOwner_IsBad(void) {
@@ -17,7 +23,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 	u32  offset;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)(((u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1]) - (ENC_VAL_1 * 2));
+	addr = (u8*)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1] - (ENC_VAL_1 * 2);
 	addr += INTEGRITY_OBFS_OFFSET;
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
@@ -51,7 +57,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 	u32  offset;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)(((u32)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1]) - (ENC_VAL_1 * 2));
+	addr = (u8*)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1] - (ENC_VAL_1 * 2);
 	addr += INTEGRITY_OBFS_OFFSET;
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
