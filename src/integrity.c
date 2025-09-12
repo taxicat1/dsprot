@@ -11,6 +11,12 @@ u32 Integrity_MACOwner_IsGood(void);
 u32 Integrity_ROMTest_IsBad(void);
 u32 Integrity_ROMTest_IsGood(void);
 
+// The bytes checked here are from the `run_encrypted_func` macro defined in asm_macro.inc:
+//   e18fc00f    orr    ip, pc, pc
+//   e01cc00c    ands   ip, ip, ip
+//   03a0c000    moveq  ip, #0
+//   128cc01c    addne  ip, ip, 28
+
 
 u32 Integrity_MACOwner_IsBad(void) {
 	u8*  addr;
