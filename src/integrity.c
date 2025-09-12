@@ -11,7 +11,13 @@ u32 Integrity_MACOwner_IsGood(void);
 u32 Integrity_ROMTest_IsBad(void);
 u32 Integrity_ROMTest_IsGood(void);
 
-#define INTEGRITY_OBFS_OFFSET  (0x1000)
+#define INTEGRITY_OBFS_OFFSET  (ENC_VAL_1 & ~0xFFF)
+
+// The bytes checked here are from the `run_encrypted_func` macro defined in asm_macro.inc:
+//   e92d00f0    stmfd sp!, {r4-r7}
+//   e92d000f    stmfd sp!, {r0-r3}
+//   e8bd00f0    ldmfd sp!, {r4-r7}
+//   e59f103c    ldr r1, [pc, #96] ;=func_\@ 
 
 
 u32 Integrity_MACOwner_IsBad(void) {
