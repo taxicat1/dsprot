@@ -157,8 +157,6 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u32                rc4_byte_addr;
 	u8                 prev_opcode;
 	FuncType_RC4_Byte  rc4_byte;
-	u32                upper;
-	u32                lower;
 	
 	prev_opcode = 0x00;
 	
@@ -178,12 +176,18 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				src_bytes[idx+3] ^= ENC_OPCODE_1;
 				// Fall through
 			case INS_TYPE_BL:
-				*(u32*)(dst + idx) = *(u32*)(src_bytes + idx);
-				
-				upper = ((*(u32*)(dst + idx) & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
-				lower = (((*(u32*)(dst + idx) & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
-				
-				*(u32*)(dst_bytes + idx) = upper | lower;
+				{
+					u32 upper, lower;
+					u32* src_addr = (u32*)(src_bytes + idx);
+					u32* dst_addr = (u32*)(dst_bytes + idx);
+					
+					*dst_addr = *src_addr;
+					
+					upper = ((*dst_addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
+					lower = (((*dst_addr & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
+					
+					*dst_addr = upper | lower;
+				}
 				break;
 			
 			case INS_TYPE_B:
@@ -270,9 +274,11 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				src_bytes[idx+3] ^= ENC_OPCODE_1;
 				// Fall through
 			case INS_TYPE_B:
-				*(u32*)(dst + idx) = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
-				                     (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
-				
+				{
+					u32* dst_addr = (u32*)(dst_bytes + idx);
+					*dst_addr = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
+					            (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+				}
 				break;
 			
 			case INS_TYPE_BL:
