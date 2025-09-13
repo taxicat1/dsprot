@@ -3,6 +3,8 @@
 #include "encoding_constants.h"
 #include "encryptor.h"
 
+#define RC4_KEY_SIZE  (16)
+
 
 void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	u8    tmp1;
@@ -50,31 +52,24 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 
 
 u8 RC4_Byte(RC4_Ctx* ctx) {
-	u8   i;
-	u8*  S;
-	u8   jval;
-	u8   ival;
-	u32  j;
-	u8   out_idx;
+	u8  i;
+	u8  ival;
+	u8  j;
+	u8  jval;
 	
 	// Modification to RC4: i and j both increased by new variable x
 	i = ctx->i + 1 + ctx->x;
-	j = ctx->x;
-	
-	S = ctx->S;
-	
-	ival = S[i];
-	j += ival + ctx->j;
-	jval = S[j & 0xFF];
+	ival = ctx->S[i];
+	j = ival + ctx->j + ctx->x;
+	jval = ctx->S[j];
 	
 	ctx->i = i;
-	ctx->j = j & 0xFF;
+	ctx->j = j;
 	
-	S[j & 0xFF] = ival;
-	S[i] = jval;
+	ctx->S[j] = ival;
+	ctx->S[i] = jval;
 	
-	out_idx = ival + jval;
-	return ctx->S[out_idx];
+	return ctx->S[(ival + jval) & 0xFF];
 }
 
 
@@ -231,7 +226,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
 	RC4_Ctx ctx;
-	RC4_Init(&ctx, key, 16);
+	RC4_Init(&ctx, key, RC4_KEY_SIZE);
 	// Must coerce output to -1 or 0 like this to match
 	return RC4_EncryptInstructions(&ctx, dst, src, size) == -1 ? -1 : 0;
 }
@@ -239,7 +234,7 @@ u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
 
 u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size) {
 	RC4_Ctx ctx;
-	RC4_Init(&ctx, key, 16);
+	RC4_Init(&ctx, key, RC4_KEY_SIZE);
 	// Must coerce output to -1 or 0 like this to match
 	return RC4_DecryptInstructions(&ctx, dst, src, size) == -1 ? -1 : 0;
 }
