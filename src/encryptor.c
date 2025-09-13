@@ -56,7 +56,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		addr = (u32*)((u32)addr - ENC_VAL_1);
 		end_addr = addr + (size / 4);
 		for (; addr < end_addr; addr++) {
-			switch (Encryptor_CategorizeInstruction(*(u32*)addr)) {
+			switch (Encryptor_CategorizeInstruction(*addr)) {
 				case INS_TYPE_BLX:
 				case INS_TYPE_BL:
 					*addr = ((*addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
