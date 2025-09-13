@@ -93,7 +93,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	for (idx = 0; idx < size; idx += 4) {
 		switch (Encryptor_CategorizeInstruction(*(u32*)(src_bytes + idx))) {
-			case INS_TYPE_BLX:
+			case INS_TYPE_BLXIMM:
 			case INS_TYPE_BL:
 				{
 					u32* src_addr = (u32*)(src_bytes + idx);
@@ -146,7 +146,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	for (idx = 0; idx < size; idx += 4) {
 		switch (Encryptor_CategorizeInstruction(*(u32*)(src_bytes + idx))) {
-			case INS_TYPE_BLX:
+			case INS_TYPE_BLXIMM:
 			case INS_TYPE_BL:
 				{
 					u32* src_addr = (u32*)(src_bytes + idx);
