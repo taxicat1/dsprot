@@ -6,7 +6,7 @@
 
 enum {
 	INS_TYPE_OTHER = 0,
-	INS_TYPE_BLX,
+	INS_TYPE_BLXIMM,
 	INS_TYPE_BL,
 	INS_TYPE_B
 };
@@ -15,7 +15,7 @@ enum {
 static int categorizeOpCode(unsigned int opcode) {
 	if ((opcode & 0x0E) == 0x0A) {
 		if ((opcode & 0xF0) == 0xF0) {
-			return INS_TYPE_BLX;
+			return INS_TYPE_BLXIMM;
 		}
 		
 		if (opcode & 0x01) {
@@ -46,7 +46,7 @@ void Encode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 	} else {
 		uint8_t a, b, c, d;
 		switch (optype) {
-			case INS_TYPE_BLX:
+			case INS_TYPE_BLXIMM:
 			case INS_TYPE_BL:
 				ins->opcode ^= ENC_OPCODE_1;
 				ins->operands += ENC_VAL_2;
@@ -97,7 +97,7 @@ void Decode_Instruction(Encoding_Ctx* ctx, Instruction* ins, RC4_Ctx* rc4) {
 		uint8_t a, b, c, d, tmp;
 		int optype = categorizeOpCode(ins->opcode);
 		switch (optype) {
-			case INS_TYPE_BLX:
+			case INS_TYPE_BLXIMM:
 			case INS_TYPE_B:
 				rc4->x += ins->opcode;
 				ins->opcode ^= ENC_OPCODE_1;

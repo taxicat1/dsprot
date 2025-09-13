@@ -48,7 +48,7 @@ typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
 
 enum {
 	INS_TYPE_OTHER = 0,
-	INS_TYPE_BLX,
+	INS_TYPE_BLXIMM,
 	INS_TYPE_BL,
 	INS_TYPE_B
 };
@@ -61,7 +61,7 @@ static u32 RC4_CategorizeInstruction(u32 instruction) {
 	
 	if ((upper_byte & 0x0E) == 0x0A) {
 		if ((upper_byte & 0xF0) == 0xF0) {
-			return INS_TYPE_BLX;
+			return INS_TYPE_BLXIMM;
 		}
 		
 		if (upper_byte & 0x01) {
@@ -169,7 +169,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		ins_word = *(u32*)(src_bytes + idx);
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
-			case INS_TYPE_BLX:
+			case INS_TYPE_BLXIMM:
 			case INS_TYPE_BL:
 				{
 					u32 upper, lower;
@@ -257,7 +257,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		ins_word = *(u32*)(src_bytes + idx);
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
-			case INS_TYPE_BLX:
+			case INS_TYPE_BLXIMM:
 			case INS_TYPE_B:
 				{
 					u32* dst_addr = (u32*)(dst_bytes + idx);
