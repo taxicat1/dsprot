@@ -49,9 +49,9 @@ static inline void clearDataAndInstructionCache(void) {
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32*  prevmem;
-	u32   addr;
+	u32*  addr;
 	u32   size;
-	u32   end_addr;
+	u32*  end_addr;
 	u32   xorval;
 	
 	// Zero memory in the function callee
@@ -61,22 +61,14 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	do {
 		xorval = ENC_XOR_START;
 		
-		size = functions->size;
-		addr = (u32)functions->start_addr;
+		addr = functions->start_addr - ENC_VAL_1;
+		size = functions->size - (u32)&BSS - ENC_VAL_1;
 		
-		size -= (u32)&BSS;
-		size -= ENC_VAL_1;
-		addr -= ENC_VAL_1;
+		end_addr = addr + (size / 4);
 		
-		end_addr = addr + ((size / 4) * 4);
-		
-		while (addr < end_addr) {
-			u32 ins = *(u32*)addr;
-			ins ^= xorval;
-			*(u32*)addr = ins;
-			
-			addr += 4;
-			xorval ^= ins - (ins >> 8);
+		for (; addr < end_addr; addr++) {
+			*addr ^= xorval;
+			xorval ^= *addr - (*addr >> 8);
 		}
 		
 		// Zero memory in the argument data structure
@@ -84,7 +76,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		functions->start_addr = NULL;
 		
 		functions++;
-	} while (functions->start_addr != 0);
+	} while (functions->start_addr);
 	
 	clearDataAndInstructionCache();
 }
