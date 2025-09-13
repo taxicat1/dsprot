@@ -49,11 +49,11 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		size = functions->size - (u32)&BSS - ENC_VAL_1;
 		
 		addr = functions->start_addr;
-		if (addr == 0) {
+		if (addr == NULL) {
 			break;
 		}
 		
-		addr = (u32*)((u32)addr - ENC_VAL_1);
+		addr = (void*)addr - ENC_VAL_1;
 		end_addr = addr + (size / 4);
 		for (; addr < end_addr; addr++) {
 			switch (Encryptor_CategorizeInstruction(*addr)) {
