@@ -53,10 +53,10 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) {
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32   size;
-	u32   end_addr;
+	u32*  end_addr;
 	u32   xorval;
 	u32   bss_addr;
-	u32   addr;
+	u32*  addr;
 	u32*  prevmem;
 	
 	bss_addr = (u32)&BSS;
@@ -67,32 +67,32 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	prevmem[0] = prevmem[1] = prevmem[2] = 0;
 	
 	do {
-		addr = (u32)(functions->start_addr - ENC_VAL_1);
+		addr = functions->start_addr - ENC_VAL_1;
 		size = functions->size - bss_addr - ENC_VAL_1;
 		
-		end_addr = addr + (size & ~3);
+		end_addr = addr + (size / 4);
 		
 		xorval = ENC_XOR_START;
 		
-		for (; addr < end_addr; addr += 4) {
-			switch (Encryptor_CategorizeInstruction(*(u32*)addr)) {
+		for (; addr < end_addr; addr++) {
+			switch (Encryptor_CategorizeInstruction(*addr)) {
 				case INS_TYPE_BLX:
 				case INS_TYPE_B:
-					*(u32*)addr = ((*(u32*)addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
-					              (((*(u32*)addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+					*addr = ((*addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
+					        (((*addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
 					
-					xorval ^= *(u32*)addr >> 24;
+					xorval ^= *addr >> 24;
 					xorval &= 0x00FFFFFF;
 					break;
 				
 				case INS_TYPE_BL:
 					// Link bit
-					*(u32*)addr ^= (ENC_OPCODE_1 << 24);
+					*addr ^= (ENC_OPCODE_1 << 24);
 					// Fall through
 				default:
-					*(u32*)addr ^= xorval;
-					xorval ^= *(u32*)addr;
-					xorval ^= *(u32*)addr >> 8;
+					*addr ^= xorval;
+					xorval ^= *addr;
+					xorval ^= *addr >> 8;
 					xorval &= 0x00FFFFFF;
 			}
 		}
