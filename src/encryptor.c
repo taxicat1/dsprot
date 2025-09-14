@@ -139,6 +139,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	expanded_key[3] = ROTL(key, 24) ^ size;
 	
 	((FuncType_RC4_InitAndEncryptInstructions)rc4_enc)(&expanded_key[0], func_addr, func_addr, size);
+	
 	clearDataAndInstructionCache();
 	
 	return key + ((u32)&BSS + ENC_VAL_1);
