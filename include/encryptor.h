@@ -15,7 +15,6 @@ enum {
 	INS_TYPE_B
 };
 
-
 u32 Encryptor_CategorizeInstruction(u32 instruction);
 void Encryptor_DecodeFunctionTable(FuncInfo* functions);
 void* Encryptor_DecryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
