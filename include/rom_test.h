@@ -66,6 +66,6 @@ typedef struct {
 extern void CARDi_ReadRom(u32 dma, const void *src, void *dst, u32 len, void* callback, void *arg, BOOL is_async);
 
 // Assembly decryption wrapper
-extern u32 RunEncrypted_ROMTest_IsBad(void);
+extern u32 RunEncrypted_ROMTest_IsBad(void* __unused);
 
 #endif
