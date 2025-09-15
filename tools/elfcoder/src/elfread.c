@@ -138,13 +138,13 @@ static void ElfFile_Destroy(ElfFile* elf) {
 
 
 static void createRC4Key(uint32_t key_ins, uint8_t* outkey) {
-	outkey[0] = outkey[4] = outkey[8]  = outkey[12] = key_ins & 0xff;
-	outkey[1] = outkey[5] = outkey[9]  = outkey[13] = (key_ins >> 8) & 0xff;
-	outkey[2] = outkey[6] = outkey[10] = outkey[14] = (key_ins >> 16) & 0xff;
-	outkey[3] = outkey[7] = outkey[11] = outkey[15] = (key_ins >> 24) & 0xff;
+	outkey[0] = outkey[4] = outkey[8]  = outkey[12] =  key_ins        & 0xFF;
+	outkey[1] = outkey[5] = outkey[9]  = outkey[13] = (key_ins >>  8) & 0xFF;
+	outkey[2] = outkey[6] = outkey[10] = outkey[14] = (key_ins >> 16) & 0xFF;
+	outkey[3] = outkey[7] = outkey[11] = outkey[15] = (key_ins >> 24) & 0xFF;
 	
-	outkey[0]  ^= 0xff;
-	outkey[15] ^= 0xff;
+	outkey[0]  ^= 0xFF;
+	outkey[15] ^= 0xFF;
 }
 
 
