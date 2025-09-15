@@ -39,10 +39,13 @@ u32 ROMTest_IsBad(void) {
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
 	
+	// Checking the ROM reading results were as expected:
+	//   0 == 1 == 2 == 3
+	//   3 != 4 and 3 != 5
+	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
 			mul = PRIME_TRUE;
-			// Likely must be a goto here
 			goto EXIT;
 		}
 	}
@@ -54,6 +57,7 @@ u32 ROMTest_IsBad(void) {
 	}
 	
 EXIT:
+	// Erasing read buffer
 	for (i = 0; i < ROM_BLOCK_SIZE/4; i++) {
 		((u32*)&rom_buf[0])[i] = i;
 	}
@@ -91,10 +95,13 @@ u32 ROMTest_IsGood(void) {
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
 	
+	// Checking the ROM reading results were as expected:
+	//   0 == 1 == 2 == 3
+	//   3 != 4 and 3 != 5
+	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
 			mul = PRIME_FALSE;
-			// Likely must be a goto here
 			goto EXIT;
 		}
 	}
@@ -106,6 +113,7 @@ u32 ROMTest_IsGood(void) {
 	}
 	
 EXIT:
+	// Erasing read buffer
 	for (i = 0; i < ROM_BLOCK_SIZE/4; i++) {
 		((u32*)&rom_buf[0])[i] = i;
 	}
