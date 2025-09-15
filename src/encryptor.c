@@ -18,7 +18,7 @@ void Encryptor_StartRange(u32* addr) {
 	for (i = 0; i < 16; i++) {
 		*keyptr = key_ins >> ((i % 4) * 8);
 		if (i % 15 == 0) {
-			*keyptr ^= 0xff;
+			*keyptr ^= 0xFF;
 		}
 		keyptr++;
 	}
@@ -53,7 +53,7 @@ void Encryptor_EndRange(u32* addr) {
 	for (i = 0; i < 16; i++) {
 		*keyptr = key_ins >> ((i % 4) * 8);
 		if (i % 15 == 0) {
-			*keyptr ^= 0xff;
+			*keyptr ^= 0xFF;
 		}
 		keyptr++;
 	}
