@@ -27,7 +27,7 @@ libdsprotinstant:
 ```
 
 The exported functions are:
-- `void* DSProt_Crash(u32 __unused1, u32 __unused2)`
+- `void* DSProt_Crash(void* __unused1, void* __unused2)`
 - `void* DSProt_DetectAll(void* callback, void* param1, void* param2);`
 
 Plus an inline function within the header:

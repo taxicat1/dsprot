@@ -5,7 +5,7 @@
 #include "encoding_constants.h"
 
 // Function to be encrypted (cannot be called directly)
-u32 MACOwner_IsBad(void);
+u32 MACOwner_IsBad(void* __unused);
 
 #define MAC_ADDR_SIZE  (6)
 
@@ -21,7 +21,9 @@ static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
 };
 
 
-u32 MACOwner_IsBad(void) {
+u32 MACOwner_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
 	int          i;
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
@@ -41,7 +43,7 @@ u32 MACOwner_IsBad(void) {
 		owner_info.birthday.day   == 1 &&
 		owner_info.nickNameLength == 0
 	) {
-		DSProt_Crash(0, 0);
+		DSProt_Crash(NULL, NULL);
 		mul = PRIME_TRUE;
 		goto EXIT;
 	}
@@ -53,7 +55,7 @@ u32 MACOwner_IsBad(void) {
 		}
 	}
 	
-	DSProt_Crash(0, 0);
+	DSProt_Crash(NULL, NULL);
 	mul = PRIME_TRUE;
 	
 EXIT:
