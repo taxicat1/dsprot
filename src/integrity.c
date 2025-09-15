@@ -6,8 +6,8 @@
 #include "rom_test.h"
 
 // Functions to be encrypted (cannot be called directly)
-u32 Integrity_MACOwner_IsBad(void);
-u32 Integrity_ROMTest_IsBad(void);
+u32 Integrity_MACOwner_IsBad(void* __unused);
+u32 Integrity_ROMTest_IsBad(void* __unused);
 
 #define INTEGRITY_OBFS_OFFSET  (ENC_VAL_1 & ~0xFFF)
 
@@ -18,7 +18,9 @@ u32 Integrity_ROMTest_IsBad(void);
 //   128cc068    addne  ip, ip, #104
 
 
-u32 Integrity_MACOwner_IsBad(void) {
+u32 Integrity_MACOwner_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
 	u8*  addr;
 	u32  offset;
 	
@@ -52,7 +54,9 @@ u32 Integrity_MACOwner_IsBad(void) {
 }
 
 
-u32 Integrity_ROMTest_IsBad(void) {
+u32 Integrity_ROMTest_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
 	u8*  addr;
 	u32  offset;
 	

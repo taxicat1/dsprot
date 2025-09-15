@@ -6,12 +6,14 @@
 #include "io_reg.h"
 
 // Function to be encrypted (cannot be called directly)
-u32 ROMTest_IsBad(void);
+u32 ROMTest_IsBad(void* __unused);
 
 #define ROM_BLOCK_SIZE  (0x200)
 
 
-u32 ROMTest_IsBad(void) {
+u32 ROMTest_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
 	u32   crcs[16];
 	u8    rom_buf[ROM_BLOCK_SIZE];
 	u32   rom_addr;
@@ -329,23 +331,23 @@ u32 ROMTest_IsBad(void) {
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[6]) {
-			DSProt_Crash(0, 0);
+			DSProt_Crash(NULL, NULL);
 			return PRIME_TRUE * PRIME_ROM_TEST;
 		}
 	}
 	
 	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
-		DSProt_Crash(0, 0);
+		DSProt_Crash(NULL, NULL);
 		return PRIME_TRUE * PRIME_ROM_TEST;
 	}
 	
 	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
-		DSProt_Crash(0, 0);
+		DSProt_Crash(NULL, NULL);
 		return PRIME_TRUE * PRIME_ROM_TEST;
 	}
 	
 	if (!(crcs[12] == crcs[14] && crcs[13] == crcs[15])) {
-		DSProt_Crash(0, 0);
+		DSProt_Crash(NULL, NULL);
 		return PRIME_TRUE * PRIME_ROM_TEST;
 	}
 	
