@@ -35,7 +35,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	for (i = 0; i < 3; i++) {
 		
 		// Cannot be an inlined function here
-		do {
+		{
 			void*         dest      = buf_ptr;
 			unsigned int  addr      = rom_addr;
 			s32           num_bytes = ROM_BLOCK_SIZE;
@@ -153,7 +153,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			
 			// Write original value back to to external memory control register
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
-		} while (0);
+		}
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -162,7 +162,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		
 		// Run an integrity check on the CRC function
-		do {
+		{
 			u32  checksum;
 			u32  i;
 			u32* crc_data_ptr;
@@ -180,7 +180,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 				ctx->failure_code = FAILURE_CODE_ROM_TEST_3;
 				return PRIME_TRUE * PRIME_ROM_TEST_1;
 			}
-		} while (0);
+		}
 		
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -237,7 +237,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	for (i = 0; i < 3; i++) {
 		
 		// Cannot be an inlined function here
-		do {
+		{
 			void*         dest      = buf_ptr;
 			unsigned int  addr      = rom_addr;
 			s32           num_bytes = ROM_BLOCK_SIZE;
@@ -355,7 +355,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			
 			// Write original value back to to external memory control register
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
-		} while (0);
+		}
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -364,7 +364,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		
 		// Run an integrity check on the CRC function
-		do {
+		{
 			u32  checksum;
 			u32  i;
 			u32* crc_data_ptr;
@@ -382,7 +382,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 				ctx->failure_code = FAILURE_CODE_ROM_TEST_2;
 				return PRIME_FALSE * PRIME_ROM_TEST_2;
 			}
-		} while (0);
+		}
 		
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
