@@ -36,7 +36,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	buf_ptr = &rom_buf[0];
 	
 	for (i = 0; i < 6; i++) {
-		do {
+		{
 			// This is executing an obfuscated manual cartridge ROM read.
 			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 			//
@@ -162,7 +162,7 @@ u32 ROMTest_IsBad(void* __unused) {
 			
 			// Write original value back to to external memory control register
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
-		} while (0);
+		}
 		
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -206,7 +206,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	rom_addr += 0x1E000;
 	
 	for (i = i; i < 8; i++) {
-		do {
+		{
 			void* dest      = buf_ptr;
 			u32   addr      = rom_addr;
 			s32   num_bytes = ROM_BLOCK_SIZE;
@@ -291,7 +291,7 @@ u32 ROMTest_IsBad(void* __unused) {
 			}
 			
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
-		} while (0);
+		}
 		
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -316,7 +316,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	rom_addr -= 0x1D000;
 	
 	for (; i < 10; i++) {
-		do {
+		{
 			void* dest      = buf_ptr;
 			u32   addr      = rom_addr;
 			s32   num_bytes = ROM_BLOCK_SIZE;
@@ -402,7 +402,7 @@ u32 ROMTest_IsBad(void* __unused) {
 			}
 			
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
-		} while (0);
+		}
 		
 		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
