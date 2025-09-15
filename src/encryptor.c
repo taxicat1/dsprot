@@ -6,10 +6,8 @@
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
 
-void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size);
-u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size);
-
-static void clearDataAndInstructionCache(void);
+void* Encryptor_DecryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
+u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
 
 const u32 Proxy_Encryptor_EncryptFunction = (u32)&Encryptor_EncryptFunction[ENC_VAL_1];
 const u32 Proxy_Encryptor_DecryptFunction = (u32)&Encryptor_DecryptFunction[ENC_VAL_1];
@@ -61,8 +59,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	do {
 		xorval = ENC_XOR_START;
 		
-		addr = functions->start_addr - ENC_VAL_1;
-		size = functions->size - (u32)&BSS - ENC_VAL_1;
+		addr = (u32*)(functions->obfs_addr - ENC_VAL_1);
+		size = functions->obfs_size - (u32)&BSS - ENC_VAL_1;
 		
 		end_addr = addr + (size / 4);
 		
@@ -72,17 +70,17 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		}
 		
 		// Zero memory in the argument data structure
-		functions->size = 0;
-		functions->start_addr = NULL;
+		functions->obfs_size = 0;
+		functions->obfs_addr = 0;
 		
 		functions++;
-	} while (functions->start_addr);
+	} while (functions->obfs_addr != 0);
 	
 	clearDataAndInstructionCache();
 }
 
 
-void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
+void* Encryptor_DecryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    key;
 	u32    size;
@@ -102,7 +100,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 	expanded_key[2] = ROTL(key, 16) ^ size;
 	expanded_key[3] = ROTL(key, 24) ^ size;
 	
-	func_addr = obfs_func_addr;
+	func_addr = (void*)obfs_func_addr;
 	func_addr -= ENC_VAL_1;
 	
 	((FuncType_RC4_InitAndDecryptInstructions)rc4_dec)(&expanded_key[0], func_addr, func_addr, size);
@@ -113,7 +111,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 }
 
 
-u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
+u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    key;
 	u32    size;
@@ -123,7 +121,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	rc4_enc = Proxy_RC4_InitAndEncryptInstructions;
 	rc4_enc -= ENC_VAL_1;
 	
-	func_addr = obfs_func_addr;
+	func_addr = (void*)obfs_func_addr;
 	func_addr -= ENC_VAL_1;
 	
 	key  = obfs_key;
@@ -131,7 +129,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	key  -= (u32)&BSS + ENC_VAL_1;
 	size -= (u32)&BSS + ENC_VAL_1;
 	
-	key += (u32)obfs_func_addr >> 20;
+	key += obfs_func_addr >> 20;
 	
 	expanded_key[0] = ROTL(key,  0) ^ size;
 	expanded_key[1] = ROTL(key,  8) ^ size;
