@@ -148,7 +148,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 	obfs_size = obfs_size - literal_obfs_offset;
 	size = obfs_size;
 	
-	obfs_key = obfs_key - literal_obfs_offset + ((u32)func_addr >> 20);
+	obfs_key = obfs_key - literal_obfs_offset + (obfs_func_addr >> 20);
 	new_key = obfs_key;
 	
 	expanded_key[0] = ROTL(new_key,  0) ^ size;
