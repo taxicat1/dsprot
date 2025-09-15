@@ -69,9 +69,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32   size;
 	u32*  prevmem;
 	
-	// This overwrites the instructions in the callee, erasing them
+	// Zero memory in the function callee
 	prevmem = (u32*)functions - 3;
-	// Must be in this compound assignment to match
 	prevmem[0] = prevmem[1] = prevmem[2] = 0;
 	
 	do {
