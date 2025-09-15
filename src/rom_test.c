@@ -34,7 +34,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	
 	for (i = 0; i < 3; i++) {
 		// Cannot be an inlined function here
-		do {
+		{
 			void*         dest      = buf_ptr;
 			unsigned int  addr      = rom_addr;
 			s32           num_bytes = ROM_BLOCK_SIZE;
@@ -151,10 +151,10 @@ u32 ROMTest_IsBad(void* __unused) {
 			
 			// Write original value back to to external memory control register
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
-		} while (0);
+		}
 		
 		// First CRC integrity check
-		do {
+		{
 			u32  i;
 			u32* crc_data_ptr;
 			u32  checksum;
@@ -171,7 +171,7 @@ u32 ROMTest_IsBad(void* __unused) {
 				DSProt_Crash(NULL, NULL);
 				return PRIME_TRUE * PRIME_ROM_TEST;
 			}
-		} while (0);
+		}
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -180,7 +180,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		
 		// Second CRC integrity check
-		do {
+		{
 			u32  i;
 			u32* crc_data_ptr;
 			u32  checksum;
@@ -197,7 +197,7 @@ u32 ROMTest_IsBad(void* __unused) {
 				DSProt_Crash(NULL, NULL);
 				return PRIME_TRUE * PRIME_ROM_TEST;
 			}
-		} while (0);
+		}
 		
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
