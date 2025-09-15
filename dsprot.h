@@ -31,6 +31,7 @@ static u32 __DSProt_DetectNotEmulator_compatibilityWrapper(void* callback);
 static u32 __DSProt_DetectDummy_compatibilityWrapper(void* callback);
 static u32 __DSProt_DetectNotDummy_compatibilityWrapper(void* callback);
 
+
 // Each wrapper here needs a unique address
 static u32 __DSProt_DetectFlashcart_compatibilityWrapper(void* callback) {
 	if (callback) {
@@ -80,7 +81,6 @@ static u32 __DSProt_DetectNotDummy_compatibilityWrapper(void* callback) {
 }
 
 
-
 static inline u32 DSProt_DetectFlashcart_Old(void* callback) {
 	return DSProt_DetectFlashcart(__DSProt_DetectFlashcart_compatibilityWrapper, callback, 0) == ~DSP_DETECTFLASHCART_OK;
 }
@@ -109,6 +109,7 @@ static inline u32 DSProt_DetectDummy_Old(void* callback) {
 static inline u32 DSProt_DetectNotDummy_Old(void* callback) {
 	return DSProt_DetectNotDummy(__DSProt_DetectNotDummy_compatibilityWrapper, callback, 0) == ~DSP_DETECTNOTDUMMY_OK;
 }
+
 
 #ifdef __cplusplus
 }
