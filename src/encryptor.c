@@ -6,8 +6,6 @@
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
 
-void clearDataAndInstructionCache(void);
-
 
 static inline void clearDataAndInstructionCache(void) {
 	// This function is an inlining and combination of DC_FlushAll, IC_InvalidateAll, and DC_WaitWriteBufferEmpty.
