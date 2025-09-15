@@ -58,7 +58,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32   bss_addr;
 	u32*  addr;
 	
-	if (functions == NULL || functions->start_addr == NULL) {
+	if (functions == NULL || functions->obfs_addr == 0) {
 		return;
 	}
 	
@@ -67,13 +67,13 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	do {
 		xorval = ENC_XOR_START;
 		
-		size = functions->size - bss_addr - ENC_VAL_1;
+		size = functions->obfs_size - bss_addr - ENC_VAL_1;
 		
-		if (functions->start_addr == NULL) {
+		if (functions->obfs_addr == 0) {
 			return;
 		}
 		
-		addr = functions->start_addr - ENC_VAL_1;
+		addr = (u32*)(functions->obfs_addr - ENC_VAL_1);
 		end_addr = addr + (size / 4);
 		
 		for (; addr < end_addr; addr++) {
@@ -101,13 +101,13 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 			}
 		}
 		
-		clearDataAndInstructionCache(functions->start_addr - ENC_VAL_1, size);
+		clearDataAndInstructionCache((void*)(functions->obfs_addr - ENC_VAL_1), size);
 		functions++;
-	} while (functions->start_addr != NULL);
+	} while (functions->obfs_addr != 0);
 }
 
 
-void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
+void* Encryptor_DecryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    literal_obfs_offset;
 	u32    key;
@@ -127,7 +127,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 	expanded_key[2] = ROTL(key, 16) ^ size;
 	expanded_key[3] = ROTL(key, 24) ^ size;
 	
-	func_addr = obfs_func_addr;
+	func_addr = (void*)obfs_func_addr;
 	func_addr -= ENC_VAL_1;
 	
 	RC4_InitAndDecryptInstructions(&expanded_key[0], func_addr, func_addr, size);
@@ -137,7 +137,7 @@ void* Encryptor_DecryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_siz
 }
 
 
-u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size) {
+u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    literal_obfs_offset;
 	u32    new_key;
@@ -146,7 +146,7 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, void* obfs_func_addr, u32 obfs_size)
 	
 	literal_obfs_offset = (u32)&BSS + ENC_VAL_1;
 	
-	func_addr = obfs_func_addr;
+	func_addr = (void*)obfs_func_addr;
 	
 	obfs_size = obfs_size - literal_obfs_offset;
 	size = obfs_size;
