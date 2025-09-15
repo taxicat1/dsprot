@@ -31,10 +31,13 @@ u32 ROMTest_IsBad(void) {
 	
 	ENCRYPTION_START(KEY_ROM_TEST_1);
 	
+	// Checking the ROM reading results were as expected:
+	//   0 == 1 == 2 == 3
+	//   3 != 4 and 3 != 5
+	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
 			ret = 1;
-			// Likely must be a goto here
 			goto EXIT;
 		}
 	}
@@ -46,6 +49,7 @@ u32 ROMTest_IsBad(void) {
 	}
 	
 EXIT:
+	// Erasing read buffer
 	for (i = 0; i < ROM_BLOCK_SIZE; i++) {
 		rom_buf[i] = 0;
 	}
@@ -80,10 +84,13 @@ u32 ROMTest_IsGood(void) {
 	
 	ENCRYPTION_START(KEY_ROM_TEST_2);
 	
+	// Checking the ROM reading results were as expected:
+	//   0 == 1 == 2 == 3
+	//   3 != 4 and 3 != 5
+	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
 			ret = 0;
-			// Likely must be a goto here
 			goto EXIT;
 		}
 	}
@@ -95,6 +102,7 @@ u32 ROMTest_IsGood(void) {
 	}
 	
 EXIT:
+	// Erasing read buffer
 	for (i = 0; i < ROM_BLOCK_SIZE; i++) {
 		rom_buf[i] = 0;
 	}
