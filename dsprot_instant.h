@@ -35,6 +35,7 @@ static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void*
 	}
 }
 
+
 #undef DSP_EXPECTED_CHECKSUM
 
 #ifdef __cplusplus
