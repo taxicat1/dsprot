@@ -56,6 +56,7 @@ static inline u32 DSProt_DetectNotDummy_Old(void* callback) {
 	return DSProt_DetectNotDummy(__DSProt_compatibilityWrapper, callback, 0) == ~(u32)callback;
 }
 
+
 #ifdef __cplusplus
 }
 #endif
