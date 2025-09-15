@@ -149,6 +149,7 @@ u32 ROMTest_IsBad(void) {
 			// Write original value back to to external memory control register
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
 		}
+		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Use standard ROM reading function for above 0x8000
@@ -321,6 +322,7 @@ u32 ROMTest_IsGood(void) {
 			// Write original value back to to external memory control register
 			((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/2] = ext_mem_register_val_original;
 		}
+		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Use standard ROM reading function for above 0x8000
