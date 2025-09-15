@@ -24,6 +24,6 @@ extern void OS_GetMacAddress(u8* mac_addr);
 extern void OS_GetOwnerInfo(OSOwnerInfo* info);
 
 // Assembly decryption wrapper
-extern u32 RunEncrypted_MACOwner_IsBad(void);
+extern u32 RunEncrypted_MACOwner_IsBad(void* __unused);
 
 #endif

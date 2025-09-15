@@ -15,19 +15,19 @@ void* DetectAll(void* callback, void* param1, void* param2);
 
 #define DSP_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
-typedef u32 (*U32Func)(u32);
+typedef u32 (*TaskFunc)(void*);
 typedef void* (*CallbackFunc)(void*, void*);
 
 void* DetectAll(void* callback, void* param1, void* param2) {
-	u32      func_queue[5];
-	void*    ret;
-	u32      i;
-	u32*     func_queue_ptr;
-	u32*     func_data_ptr;
-	u32      func_data_checksum;
-	u32      func_ret;
-	U32Func  queued_func;
-	u32      func_ret_total;
+	u32       func_queue[5];
+	void*     ret;
+	u32       i;
+	u32*      func_queue_ptr;
+	u32*      func_data_ptr;
+	u32       func_data_checksum;
+	u32       func_ret;
+	TaskFunc  queued_func;
+	u32       func_ret_total;
 	
 	func_queue[0] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1];
 	func_queue[1] = (u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1];
@@ -39,7 +39,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 	
 	func_queue_ptr = &func_queue[0];
 	do {
-		queued_func = (U32Func)(*func_queue_ptr - ENC_VAL_1);
+		queued_func = (TaskFunc)(*func_queue_ptr - ENC_VAL_1);
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)queued_func;
@@ -52,17 +52,17 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
 			// The goto is useless, but required to match
-			ret = DSProt_Crash(0, 0); // No return
+			ret = DSProt_Crash(NULL, NULL); // No return
 			goto EXIT;
 		}
 		
-		func_ret = queued_func(0);
+		func_ret = queued_func(NULL);
 		
 		// `func_ret` should always be a prime-encoded Boolean
 		// 0 would indicate tampering
 		if (func_ret == 0) {
 			// The goto is useless, but required to match
-			ret = DSProt_Crash(0, 0); // No return
+			ret = DSProt_Crash(NULL, NULL); // No return
 			goto EXIT;
 		} else {
 			func_ret_total += func_ret;
@@ -76,7 +76,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 			ret = NULL;
 		}
 	} else {
-		ret = DSProt_Crash(0, 0);
+		ret = DSProt_Crash(NULL, NULL);
 	}
 	
 EXIT:

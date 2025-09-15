@@ -7,13 +7,15 @@
 #include "io_reg.h"
 
 // Function to be encrypted (cannot be called directly)
-u32 ROMTest_IsBad(void);
+u32 ROMTest_IsBad(void* __unused);
 
 #define ROM_BLOCK_SIZE              (0x200)
 #define ROM_TEST_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
-u32 ROMTest_IsBad(void) {
+u32 ROMTest_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
 	u32    crcs[7];
 	u8     rom_buf[ROM_BLOCK_SIZE];
 	void*  buf_ptr;
@@ -166,7 +168,7 @@ u32 ROMTest_IsBad(void) {
 			} while (--i);
 			
 			if (checksum != ROM_TEST_EXPECTED_CHECKSUM) {
-				DSProt_Crash(0, 0);
+				DSProt_Crash(NULL, NULL);
 				return PRIME_TRUE * PRIME_ROM_TEST;
 			}
 		} while (0);
@@ -192,7 +194,7 @@ u32 ROMTest_IsBad(void) {
 			} while (--i);
 			
 			if (checksum != ROM_TEST_EXPECTED_CHECKSUM) {
-				DSProt_Crash(0, 0);
+				DSProt_Crash(NULL, NULL);
 				return PRIME_TRUE * PRIME_ROM_TEST;
 			}
 		} while (0);
@@ -216,13 +218,13 @@ u32 ROMTest_IsBad(void) {
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
-			DSProt_Crash(0, 0);
+			DSProt_Crash(NULL, NULL);
 			return PRIME_TRUE * PRIME_ROM_TEST;
 		}
 	}
 	
 	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
-		DSProt_Crash(0, 0);
+		DSProt_Crash(NULL, NULL);
 		return PRIME_TRUE * PRIME_ROM_TEST;
 	}
 	

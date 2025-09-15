@@ -4,7 +4,7 @@
 #include "types.h"
 
 // Assembly decryption wrapper
-extern void* DSProt_Crash(u32 __unused1, u32 __unused2);
+extern void* DSProt_Crash(void* __unused1, void* __unused2);
 
 // Nitro functions
 // <nitro/os.h>
