@@ -88,8 +88,8 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	u32   x;
 	u32   y;
 	
-	// Must be like this to match
-	Si = Ki = 0;
+	Ki = 0;
+	Si = 0;
 	
 	ctx->x = ENC_RC4_X_START;
 	ctx->i = 0;
