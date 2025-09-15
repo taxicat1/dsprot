@@ -4,8 +4,8 @@
 #include "types.h"
 
 typedef struct {
-	void*  start_addr;
-	u32    size;
+	u32  obfs_addr;
+	u32  obfs_size;
 } FuncInfo;
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions);
