@@ -3,13 +3,13 @@
 
 #include "types.h"
 
-// Assembly decryption wrapper
-extern void* DSProt_Crash(void* __unused1, void* __unused2);
-
 // Nitro functions
 // <nitro/os.h>
 extern void OS_Terminate(void);
 // <nitro/mi.h>
 extern void MIi_CpuClear32(register u32 data, register void *destp, register u32 size);
+
+// Assembly decryption wrapper
+extern void* DSProt_Crash(void* __unused1, void* __unused2);
 
 #endif
