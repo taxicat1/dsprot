@@ -102,7 +102,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		functions->start_addr = NULL;
 		functions++;
 		
-	} while (functions->start_addr != 0);
+	} while (functions->start_addr != NULL);
 }
 
 
