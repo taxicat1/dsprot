@@ -12,11 +12,11 @@
 // Function to be encrypted (cannot be called directly)
 void* DetectAll(void* callback, void* param1, void* param2);
 
-
 #define DSP_EXPECTED_CHECKSUM  (0x0786385F)
 
 typedef u32 (*TaskFunc)(void*);
 typedef void* (*CallbackFunc)(void*, void*);
+
 
 void* DetectAll(void* callback, void* param1, void* param2) {
 	u32       func_queue[5];
