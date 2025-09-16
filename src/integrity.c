@@ -14,7 +14,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 	
 	ENCRYPTION_START(KEY_INTEGRITY_1);
 	
-	addr = (u8*)MACOwner_IsBad - INTEGRITY_OBFS_OFFSET;
+	addr = (u8*)&MACOwner_IsBad - INTEGRITY_OBFS_OFFSET;
 	ret = (u32)addr + 1;
 	
 	if (
@@ -53,7 +53,7 @@ u32 Integrity_MACOwner_IsGood(void) {
 	
 	ENCRYPTION_START(KEY_INTEGRITY_2);
 	
-	addr = (u8*)MACOwner_IsGood - INTEGRITY_OBFS_OFFSET;
+	addr = (u8*)&MACOwner_IsGood - INTEGRITY_OBFS_OFFSET;
 	// x ^ x == 0, but must be like this to match
 	ret = (u32)addr ^ (u32)addr;
 	
@@ -92,7 +92,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 	
 	ENCRYPTION_START(KEY_INTEGRITY_3);
 	
-	addr = (u8*)ROMTest_IsBad - INTEGRITY_OBFS_OFFSET;
+	addr = (u8*)&ROMTest_IsBad - INTEGRITY_OBFS_OFFSET;
 	ret = (u32)addr + 1;
 	
 	if (
@@ -133,7 +133,7 @@ u32 Integrity_ROMTest_IsGood(void) {
 	
 	ENCRYPTION_START(KEY_INTEGRITY_4);
 	
-	addr = (u8*)ROMTest_IsGood - INTEGRITY_OBFS_OFFSET;
+	addr = (u8*)&ROMTest_IsGood - INTEGRITY_OBFS_OFFSET;
 	// x ^ x == 0, but must be like this to match
 	ret = (u32)addr ^ (u32)addr;
 	
