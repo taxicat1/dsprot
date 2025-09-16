@@ -37,14 +37,14 @@ void* DetectFlashcartA(void* param1, void* param2) {
 	
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1];
-	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1];
+	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
+	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
 	
 	
-	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
+	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
-	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
+	callback_tbl = (DSProt_Callback*)(ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1) - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
@@ -129,14 +129,14 @@ void* DetectFlashcartB(void* param1, void* param2) {
 	
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_ROMTest_IsGood[ENC_VAL_1];
-	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsGood[ENC_VAL_1];
+	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1);
+	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsGood, ENC_VAL_1);
 	
 	
-	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
+	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
-	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
+	callback_tbl = (DSProt_Callback*)(ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1) - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
@@ -221,14 +221,14 @@ void* DetectEmulatorA(void* param1, void* param2) {
 	
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1];
-	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1];
+	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
+	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1);
 	
 	
-	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
+	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
-	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
+	callback_tbl = (DSProt_Callback*)(ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1) - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
@@ -313,14 +313,14 @@ void* DetectEmulatorB(void* param1, void* param2) {
 	
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_MACOwner_IsGood[ENC_VAL_1];
-	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsGood[ENC_VAL_1];
+	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1);
+	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsGood, ENC_VAL_1);
 	
 	
-	tmp = &DSProt_CallbackIndex + ENC_VAL_1/sizeof(u32);
+	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
-	callback_tbl = (DSProt_Callback*)((u32)&DSProt_CallbackTable[ENC_VAL_1/sizeof(u32)] - ENC_VAL_1);
+	callback_tbl = (DSProt_Callback*)(ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1) - ENC_VAL_1);
 	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
 	
 	// Temporary assignment required to match
