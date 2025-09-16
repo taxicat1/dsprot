@@ -17,16 +17,19 @@ u32 DetectNotEmulator(void* callback, void* param);
 u32 DetectDummy(void* callback, void* param);
 u32 DetectNotDummy(void* callback, void* param);
 
-static inline u32 executeFunctionQueue(u32* func_queue_ptr);
-
 #define DSP_OBFS_OFFSET  (0x320)
 
 typedef u32 (*U32Func)(void);
 typedef u32 (*ArgFunc)(void*);
 
+enum {
+	EXPECT_FALSE,
+	EXPECT_TRUE
+};
+
 
 // This was likely not originally an inline, but an inline is able to match here nicely
-static inline u32 executeFunctionQueue(u32* func_queue_ptr) {
+static inline u32 dsprotMain(u32* func_queue_ptr, int expected_result, void* callback, void* param) {
 	u32 func_ret_total;
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_TRUE * PRIME_FALSE;
@@ -35,107 +38,81 @@ static inline u32 executeFunctionQueue(u32* func_queue_ptr) {
 		func_queue_ptr++;
 	} while (*func_queue_ptr != 0);
 	
+	if (expected_result == EXPECT_TRUE) {
+		if (!(func_ret_total % PRIME_TRUE)) {
+			return ((ArgFunc)callback)(param);
+		}
+	} else {
+		if (func_ret_total % PRIME_FALSE) {
+			return ((ArgFunc)callback)(param);
+		}
+	}
+	
 	return func_ret_total;
 }
 
 
 u32 DetectFlashcart(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
+	return dsprotMain(&func_queue[0], EXPECT_FALSE, callback, param);
 }
 
 
 u32 DetectNotFlashcart(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
+	return dsprotMain(&func_queue[0], EXPECT_TRUE, callback, param);
 }
 
 
 u32 DetectEmulator(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
+	return dsprotMain(&func_queue[0], EXPECT_FALSE, callback, param);
 }
 
 
 u32 DetectNotEmulator(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
+	return dsprotMain(&func_queue[0], EXPECT_TRUE, callback, param);
 }
 
 
 u32 DetectDummy(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
+	u32 func_queue[32];
 	
 	// No integrity check on dummy detectors
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_Dummy_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
 	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (ret % PRIME_FALSE) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
+	return dsprotMain(&func_queue[0], EXPECT_FALSE, callback, param);
 }
 
 
 u32 DetectNotDummy(void* callback, void* param) {
-	u32  func_queue[32];
-	u32  ret;
+	u32 func_queue[32];
 	
 	// No integrity check on dummy detectors
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_Dummy_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
 	
-	ret = executeFunctionQueue(&func_queue[0]);
-	if (!(ret % PRIME_TRUE)) {
-		return (u32)((ArgFunc)callback)(param);
-	}
-	
-	return ret;
+	return dsprotMain(&func_queue[0], EXPECT_TRUE, callback, param);
 }
