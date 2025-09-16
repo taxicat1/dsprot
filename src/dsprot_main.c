@@ -15,13 +15,11 @@ u32 DetectNotEmulator(void* callback);
 u32 DetectDummy(void* callback);
 u32 DetectNotDummy(void* callback);
 
-static inline BOOL executeFunctionQueue(u32* func_queue, int compare_type);
-
 #define DSP_OBFS_OFFSET  (0x320)
 
 enum {
-	DETECT_POSITIVE,
-	DETECT_NEGATIVE
+	EXPECT_FALSE,
+	EXPECT_TRUE
 };
 
 typedef u32 (*U32Func)(void);
@@ -29,7 +27,8 @@ typedef void (*VoidFunc)(void);
 
 
 // This was likely not originally an inline, but an inline is able to match here nicely
-static inline BOOL executeFunctionQueue(u32* func_queue, int compare_type) {
+static inline u32 dsprotMain(u32* func_queue, int expected_result, void* callback) {
+	BOOL  ret;
 	BOOL  func_result;
 	s32   compare_sum;
 	u32   i;
@@ -49,115 +48,79 @@ static inline BOOL executeFunctionQueue(u32* func_queue, int compare_type) {
 		compare_sum <<= 1;
 	}
 	
-	if (compare_type == DETECT_NEGATIVE) {
-		return (func_result_sum >> 1) == (compare_sum >> 1);
+	if (expected_result == EXPECT_TRUE) {
+		ret = (func_result_sum >> 1) == (compare_sum >> 1);
 	} else {
-		return ((func_result_sum & compare_sum) >> 1) != 0;
+		ret = ((func_result_sum & compare_sum) >> 1) != 0;
 	}
+	
+	if (callback != NULL && ret) {
+		((VoidFunc)callback)();
+	}
+	
+	return (u32)ret;
 }
 
 
 u32 DetectFlashcart(void* callback) {
-	u32   func_queue[32];
-	BOOL  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0], DETECT_POSITIVE);
-	
-	if (callback != NULL && ret) {
-		((VoidFunc)callback)();
-	}
-	
-	return (u32)ret;
+	return dsprotMain(&func_queue[0], EXPECT_FALSE, callback);
 }
 
 
 u32 DetectNotFlashcart(void* callback) {
-	u32   func_queue[32];
-	BOOL  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0], DETECT_NEGATIVE);
-	
-	if (callback != NULL && ret) {
-		((VoidFunc)callback)();
-	}
-	
-	return (u32)ret;
+	return dsprotMain(&func_queue[0], EXPECT_TRUE, callback);
 }
 
 
 u32 DetectEmulator(void* callback) {
-	u32   func_queue[32];
-	BOOL  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0], DETECT_POSITIVE);
-	
-	if (callback != NULL && ret) {
-		((VoidFunc)callback)();
-	}
-	
-	return (u32)ret;
+	return dsprotMain(&func_queue[0], EXPECT_FALSE, callback);
 }
 
 
 u32 DetectNotEmulator(void* callback) {
-	u32   func_queue[32];
-	BOOL  ret;
+	u32 func_queue[32];
 	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsGood, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
-	ret = executeFunctionQueue(&func_queue[0], DETECT_NEGATIVE);
-	
-	if (callback != NULL && ret) {
-		((VoidFunc)callback)();
-	}
-	
-	return (u32)ret;
+	return dsprotMain(&func_queue[0], EXPECT_TRUE, callback);
 }
 
 
 u32 DetectDummy(void* callback) {
-	u32   func_queue[32];
-	BOOL  ret;
+	u32 func_queue[32];
 	
 	// Prevent optimization of the function queue processing
 	*(u32*)&func_queue[0] = 0;
 	
-	ret = executeFunctionQueue(&func_queue[0], DETECT_POSITIVE);
-	
-	if (callback != NULL && ret) {
-		((VoidFunc)callback)();
-	}
-	
-	return (u32)ret;
+	return dsprotMain(&func_queue[0], EXPECT_FALSE, callback);
 }
 
 
 u32 DetectNotDummy(void* callback) {
-	u32   func_queue[32];
-	BOOL  ret;
+	u32 func_queue[32];
 	
 	// Prevent optimization of the function queue processing
 	*(u32*)&func_queue[0] = 0;
 	
-	ret = executeFunctionQueue(&func_queue[0], DETECT_NEGATIVE);
-	
-	if (callback != NULL && ret) {
-		((VoidFunc)callback)();
-	}
-	
-	return (u32)ret;
+	return dsprotMain(&func_queue[0], EXPECT_TRUE, callback);
 }
