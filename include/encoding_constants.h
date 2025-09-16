@@ -6,6 +6,8 @@
 
 #define ENC_OPCODE_1  (0x01)
 
+#define ADDR_PLUS_ADDEND(ref, addend)  ((u32)(&ref + ((addend) / sizeof(*&ref))))
+
 #define ENC_XOR_START  (0xF03852CB)
 
 #define ENC_RC4_X_START  (0xAA)
