@@ -27,7 +27,7 @@ u32 Integrity_MACOwner_IsBad(DSProt_Ctx* __unused) {
 	u32  offset;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += INTEGRITY_OBFS_OFFSET;
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
@@ -63,7 +63,7 @@ u32 Integrity_MACOwner_IsGood(DSProt_Ctx* __unused) {
 	u32  offset;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_MACOwner_IsGood[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += INTEGRITY_OBFS_OFFSET;
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
@@ -99,7 +99,7 @@ u32 Integrity_ROMTest_IsBad(DSProt_Ctx* __unused) {
 	u32  offset;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += INTEGRITY_OBFS_OFFSET;
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
@@ -135,7 +135,7 @@ u32 Integrity_ROMTest_IsGood(DSProt_Ctx* __unused) {
 	u32  offset;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_ROMTest_IsGood[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += INTEGRITY_OBFS_OFFSET;
 	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
