@@ -35,11 +35,9 @@ void* DetectFlashcartA(void* param1, void* param2) {
 	u32               func_ret_total;
 	u32               func_ret;
 	
-	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
-	
 	
 	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
@@ -59,7 +57,6 @@ void* DetectFlashcartA(void* param1, void* param2) {
 	work.failure_callback_return = 0;
 	work.failure_code            = 0;
 	
-	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
 	func_queue_ptr = &func_queue[0];
@@ -78,9 +75,9 @@ void* DetectFlashcartA(void* param1, void* param2) {
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
 		}
 		
 		// Run next inner function with context arg
@@ -91,13 +88,14 @@ void* DetectFlashcartA(void* param1, void* param2) {
 		if (func_ret == 0 && work.failure_code == 0) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {			
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
-		} else {
-			func_ret_total += func_ret;
 		}
-	} while (*++func_queue_ptr != 0);
+		
+		func_ret_total += func_ret;
+		func_queue_ptr++;
+	} while (*func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_FALSE)) {
@@ -105,10 +103,9 @@ void* DetectFlashcartA(void* param1, void* param2) {
 	} else {
 		if (work.failure_code) {
 			return work.failure_callback_return;
+		} else {
+			return work.failure_callback(param1, param2);
 		}
-		
-		// No failure code, so call failure callback instead
-		return work.failure_callback(param1, param2);
 	}
 }
 
@@ -127,11 +124,9 @@ void* DetectFlashcartB(void* param1, void* param2) {
 	u32               func_ret_total;
 	u32               func_ret;
 	
-	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsGood, ENC_VAL_1);
-	
 	
 	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
@@ -151,7 +146,6 @@ void* DetectFlashcartB(void* param1, void* param2) {
 	work.failure_callback_return = 0;
 	work.failure_code            = 0;
 	
-	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
 	func_queue_ptr = &func_queue[0];
@@ -170,9 +164,9 @@ void* DetectFlashcartB(void* param1, void* param2) {
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
 		}
 		
 		// Run next inner function with context arg
@@ -183,13 +177,14 @@ void* DetectFlashcartB(void* param1, void* param2) {
 		if (func_ret == 0 && work.failure_code == 0) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
-		} else {
-			func_ret_total += func_ret;
 		}
-	} while (*++func_queue_ptr != 0);
+		
+		func_ret_total += func_ret;
+		func_queue_ptr++;
+	} while (*func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_TRUE)) {
@@ -197,10 +192,9 @@ void* DetectFlashcartB(void* param1, void* param2) {
 	} else {
 		if (work.failure_code) {
 			return work.failure_callback_return;
+		} else {
+			return work.failure_callback(param1, param2);
 		}
-		
-		// No failure code, so call failure callback instead
-		return work.failure_callback(param1, param2);
 	}
 }
 
@@ -219,11 +213,9 @@ void* DetectEmulatorA(void* param1, void* param2) {
 	u32               func_ret_total;
 	u32               func_ret;
 	
-	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1);
-	
 	
 	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
@@ -243,7 +235,6 @@ void* DetectEmulatorA(void* param1, void* param2) {
 	work.failure_callback_return = 0;
 	work.failure_code            = 0;
 	
-	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
 	func_queue_ptr = &func_queue[0];
@@ -262,9 +253,9 @@ void* DetectEmulatorA(void* param1, void* param2) {
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
 		}
 		
 		// Run next inner function with context arg
@@ -275,13 +266,14 @@ void* DetectEmulatorA(void* param1, void* param2) {
 		if (func_ret == 0 && work.failure_code == 0) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
-		} else {
-			func_ret_total += func_ret;
 		}
-	} while (*++func_queue_ptr != 0);
+		
+		func_ret_total += func_ret;
+		func_queue_ptr++;
+	} while (*func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_FALSE)) {
@@ -289,10 +281,9 @@ void* DetectEmulatorA(void* param1, void* param2) {
 	} else {
 		if (work.failure_code) {
 			return work.failure_callback_return;
+		} else {
+			return work.failure_callback(param1, param2);
 		}
-		
-		// No failure code, so call failure callback instead
-		return work.failure_callback(param1, param2);
 	}
 }
 
@@ -311,11 +302,9 @@ void* DetectEmulatorB(void* param1, void* param2) {
 	u32               func_ret_total;
 	u32               func_ret;
 	
-	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsGood, ENC_VAL_1);
-	
 	
 	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
@@ -335,7 +324,6 @@ void* DetectEmulatorB(void* param1, void* param2) {
 	work.failure_callback_return = 0;
 	work.failure_code            = 0;
 	
-	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
 	func_queue_ptr = &func_queue[0];
@@ -354,9 +342,9 @@ void* DetectEmulatorB(void* param1, void* param2) {
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
 		}
 		
 		// Run next inner function with context arg
@@ -367,13 +355,14 @@ void* DetectEmulatorB(void* param1, void* param2) {
 		if (func_ret == 0 && work.failure_code == 0) {
 			if (work.failure_callback_return) {
 				return work.failure_callback_return;
+			} else {
+				return work.failure_callback(param1, param2);
 			}
-			
-			return work.failure_callback(param1, param2);
-		} else {
-			func_ret_total += func_ret;
 		}
-	} while (*++func_queue_ptr != 0);
+		
+		func_ret_total += func_ret;
+		func_queue_ptr++;
+	} while (*func_queue_ptr != 0);
 	
 	// Check if total is valid
 	if (!(func_ret_total % PRIME_TRUE)) {
@@ -381,9 +370,8 @@ void* DetectEmulatorB(void* param1, void* param2) {
 	} else {
 		if (work.failure_code) {
 			return work.failure_callback_return;
+		} else {
+			return work.failure_callback(param1, param2);
 		}
-		
-		// No failure code, so call failure callback instead
-		return work.failure_callback(param1, param2);
 	}
 }
