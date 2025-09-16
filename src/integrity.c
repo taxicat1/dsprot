@@ -22,7 +22,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 	u8*  addr;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)(&RunEncrypted_MACOwner_IsBad + ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += ENC_VAL_1;
 	
 	// Bytes of the first four instructions of the function
@@ -54,7 +54,7 @@ u32 Integrity_MACOwner_IsGood(void) {
 	u8*  addr;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_MACOwner_IsGood[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)(&RunEncrypted_MACOwner_IsGood + ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += ENC_VAL_1;
 	
 	// Bytes of the first four instructions of the function
@@ -86,7 +86,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 	u8*  addr;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)(&RunEncrypted_ROMTest_IsBad + ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += ENC_VAL_1;
 	
 	// Bytes of the first four instructions of the function
@@ -118,7 +118,7 @@ u32 Integrity_ROMTest_IsGood(void) {
 	u8*  addr;
 	
 	// Obfuscated handling of function address
-	addr = (u8*)&RunEncrypted_ROMTest_IsGood[ENC_VAL_1] - (ENC_VAL_1 * 2);
+	addr = (u8*)(&RunEncrypted_ROMTest_IsGood + ENC_VAL_1) - (ENC_VAL_1 * 2);
 	addr += ENC_VAL_1;
 	
 	// Bytes of the first four instructions of the function
