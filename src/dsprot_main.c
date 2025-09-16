@@ -64,10 +64,11 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 			// The goto is useless, but required to match
 			ret = DSProt_Crash(NULL, NULL); // No return
 			goto EXIT;
-		} else {
-			func_ret_total += func_ret;
 		}
-	} while (*++func_queue_ptr != 0);
+		
+		func_ret_total += func_ret;
+		func_queue_ptr++;
+	} while (*func_queue_ptr != 0);
 	
 	if (!(func_ret_total % PRIME_FALSE)) {
 		if (callback != NULL) {
