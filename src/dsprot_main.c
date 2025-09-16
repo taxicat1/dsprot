@@ -44,8 +44,8 @@ u32 DetectFlashcart(void* callback, void* param) {
 	u32  ret;
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
+	func_queue[0] = (u32)(&RunEncrypted_ROMTest_IsBad + ENC_VAL_1) + DSP_OBFS_OFFSET;
+	func_queue[1] = (u32)(&RunEncrypted_Integrity_ROMTest_IsBad + ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
 	if ((ret % PRIME_FALSE) && callback != NULL) {
@@ -61,8 +61,8 @@ u32 DetectNotFlashcart(void* callback, void* param) {
 	u32  ret;
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_ROMTest_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_ROMTest_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
+	func_queue[0] = (u32)(&RunEncrypted_ROMTest_IsGood + ENC_VAL_1) + DSP_OBFS_OFFSET;
+	func_queue[1] = (u32)(&RunEncrypted_Integrity_ROMTest_IsGood + ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
 	if (!(ret % PRIME_TRUE) && callback != NULL) {
@@ -78,8 +78,8 @@ u32 DetectEmulator(void* callback, void* param) {
 	u32  ret;
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
+	func_queue[0] = (u32)(&RunEncrypted_MACOwner_IsBad + ENC_VAL_1) + DSP_OBFS_OFFSET;
+	func_queue[1] = (u32)(&RunEncrypted_Integrity_MACOwner_IsBad + ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
 	if ((ret % PRIME_FALSE) && callback != NULL) {
@@ -95,8 +95,8 @@ u32 DetectNotEmulator(void* callback, void* param) {
 	u32  ret;
 	
 	func_queue[2] = 0;
-	func_queue[0] = (u32)&RunEncrypted_MACOwner_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
-	func_queue[1] = (u32)&RunEncrypted_Integrity_MACOwner_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
+	func_queue[0] = (u32)(&RunEncrypted_MACOwner_IsGood + ENC_VAL_1) + DSP_OBFS_OFFSET;
+	func_queue[1] = (u32)(&RunEncrypted_Integrity_MACOwner_IsGood + ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
 	if (!(ret % PRIME_TRUE) && callback != NULL) {
@@ -112,7 +112,7 @@ u32 DetectDummy(void* callback, void* param) {
 	u32  ret;
 	
 	// No integrity check on dummy detectors
-	func_queue[0] = (u32)&RunEncrypted_Dummy_IsBad[ENC_VAL_1] + DSP_OBFS_OFFSET;
+	func_queue[0] = (u32)(&RunEncrypted_Dummy_IsBad + ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
@@ -129,7 +129,7 @@ u32 DetectNotDummy(void* callback, void* param) {
 	u32  ret;
 	
 	// No integrity check on dummy detectors
-	func_queue[0] = (u32)&RunEncrypted_Dummy_IsGood[ENC_VAL_1] + DSP_OBFS_OFFSET;
+	func_queue[0] = (u32)(&RunEncrypted_Dummy_IsGood + ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = 0;
 	
 	ret = executeFunctionQueue(&func_queue[0]);
