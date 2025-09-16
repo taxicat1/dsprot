@@ -29,10 +29,10 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 	TaskFunc  queued_func;
 	u32       func_ret_total;
 	
-	func_queue[0] = (u32)&RunEncrypted_Integrity_MACOwner_IsBad[ENC_VAL_1];
-	func_queue[1] = (u32)&RunEncrypted_MACOwner_IsBad[ENC_VAL_1];
-	func_queue[2] = (u32)&RunEncrypted_ROMTest_IsBad[ENC_VAL_1];
-	func_queue[3] = (u32)&RunEncrypted_Integrity_ROMTest_IsBad[ENC_VAL_1];
+	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1);
+	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
+	func_queue[2] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
+	func_queue[3] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
 	func_queue[4] = 0;
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
