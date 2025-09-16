@@ -16,7 +16,7 @@ void* DetectEmulatorA(void* param1, void* param2);
 void* DetectEmulatorB(void* param1, void* param2);
 
 #define DSP_EXPECTED_CHECKSUM  (0x0786385F)
-#define DSP_OBFS_OFFSET        (0x200)
+#define DSP_OBFS_OFFSET        (ENC_VAL_1 & 0xFFF)
 
 typedef u32 (*DSProt_Task)(DSProt_Ctx*);
 
