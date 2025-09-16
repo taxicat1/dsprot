@@ -11,4 +11,6 @@
 #define ENC_BYTE_B  (0x56)
 #define ENC_BYTE_C  (0x68)
 
+#define ADDR_PLUS_ADDEND(ref, addend)  ((u32)(&ref + ((addend) / sizeof(*&ref))))
+
 #endif
