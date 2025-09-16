@@ -9,8 +9,8 @@
 void* Encryptor_DecryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
 u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
 
-const u32 Proxy_Encryptor_EncryptFunction = (u32)&Encryptor_EncryptFunction[ENC_VAL_1];
-const u32 Proxy_Encryptor_DecryptFunction = (u32)&Encryptor_DecryptFunction[ENC_VAL_1];
+const u32 Proxy_Encryptor_EncryptFunction = ADDR_PLUS_ADDEND(Encryptor_EncryptFunction, ENC_VAL_1);
+const u32 Proxy_Encryptor_DecryptFunction = ADDR_PLUS_ADDEND(Encryptor_DecryptFunction, ENC_VAL_1);
 
 
 static inline void clearDataAndInstructionCache(void) {

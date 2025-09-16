@@ -30,7 +30,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	CARD_LockRom(lock_id);
 	
 	buf_ptr = &rom_buf[0];
-	crc_data_addr = (u32)&RunEncrypted_ROMUtil_CRC32[ENC_VAL_1] - ENC_VAL_1;
+	crc_data_addr = ADDR_PLUS_ADDEND(RunEncrypted_ROMUtil_CRC32, ENC_VAL_1) - ENC_VAL_1;
 	
 	for (i = 0; i < 3; i++) {
 		// Cannot be an inlined function here
