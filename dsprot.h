@@ -1,6 +1,14 @@
 #ifndef DSPROT_H
 #define DSPROT_H
 
+// Expected return values if no flashcart/emulator/tampering was detected
+#define DSP_DETECTFLASHCART_OK     3292783
+#define DSP_DETECTNOTFLASHCART_OK  3299395
+#define DSP_DETECTEMULATOR_OK      3297121
+#define DSP_DETECTNOTEMULATOR_OK   3298087
+#define DSP_DETECTDUMMY_OK         3249644
+#define DSP_DETECTNOTDUMMY_OK      3249446
+
 #ifndef SDK_ASM
 
 #include <nitro/types.h> // u32
