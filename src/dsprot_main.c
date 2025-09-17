@@ -10,12 +10,12 @@
 #include "dummy.h"
 
 // Functions to be encrypted (cannot be called directly)
-u32 DetectFlashcart(void* callback, void* param);
-u32 DetectNotFlashcart(void* callback, void* param);
-u32 DetectEmulator(void* callback, void* param);
-u32 DetectNotEmulator(void* callback, void* param);
-u32 DetectDummy(void* callback, void* param);
-u32 DetectNotDummy(void* callback, void* param);
+u32 DetectFlashcart(void* callback, void* param, u32 __unused);
+u32 DetectNotFlashcart(void* callback, void* param, u32 __unused);
+u32 DetectEmulator(void* callback, void* param, u32 __unused);
+u32 DetectNotEmulator(void* callback, void* param, u32 __unused);
+u32 DetectDummy(void* callback, void* param, u32 __unused);
+u32 DetectNotDummy(void* callback, void* param, u32 __unused);
 
 #define DSP_OBFS_OFFSET  (0x320)
 
@@ -52,7 +52,9 @@ static inline u32 dsprotMain(u32* func_queue_ptr, int expected_result, void* cal
 }
 
 
-u32 DetectFlashcart(void* callback, void* param) {
+u32 DetectFlashcart(void* callback, void* param, u32 __unused) {
+	#pragma unused(__unused)
+	
 	u32 func_queue[32];
 	
 	func_queue[2] = 0;
@@ -63,7 +65,9 @@ u32 DetectFlashcart(void* callback, void* param) {
 }
 
 
-u32 DetectNotFlashcart(void* callback, void* param) {
+u32 DetectNotFlashcart(void* callback, void* param, u32 __unused) {
+	#pragma unused(__unused)
+	
 	u32 func_queue[32];
 	
 	func_queue[2] = 0;
@@ -74,7 +78,9 @@ u32 DetectNotFlashcart(void* callback, void* param) {
 }
 
 
-u32 DetectEmulator(void* callback, void* param) {
+u32 DetectEmulator(void* callback, void* param, u32 __unused) {
+	#pragma unused(__unused)
+	
 	u32 func_queue[32];
 	
 	func_queue[2] = 0;
@@ -85,7 +91,9 @@ u32 DetectEmulator(void* callback, void* param) {
 }
 
 
-u32 DetectNotEmulator(void* callback, void* param) {
+u32 DetectNotEmulator(void* callback, void* param, u32 __unused) {
+	#pragma unused(__unused)
+	
 	u32 func_queue[32];
 	
 	func_queue[2] = 0;
@@ -96,7 +104,9 @@ u32 DetectNotEmulator(void* callback, void* param) {
 }
 
 
-u32 DetectDummy(void* callback, void* param) {
+u32 DetectDummy(void* callback, void* param, u32 __unused) {
+	#pragma unused(__unused)
+	
 	u32 func_queue[32];
 	
 	// No integrity check on dummy detectors
@@ -107,7 +117,9 @@ u32 DetectDummy(void* callback, void* param) {
 }
 
 
-u32 DetectNotDummy(void* callback, void* param) {
+u32 DetectNotDummy(void* callback, void* param, u32 __unused) {
+	#pragma unused(__unused)
+	
 	u32 func_queue[32];
 	
 	// No integrity check on dummy detectors
