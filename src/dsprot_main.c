@@ -18,8 +18,8 @@ u32 DSProt_DetectNotDummy(void* callback);
 
 #define DSP_OBFS_OFFSET  (0x320)
 
-typedef u32 (*U32Func)(void);
-typedef void (*VoidFunc)(void);
+typedef u32 (*TaskFunc)(void);
+typedef void (*CallbackFunc)(void);
 
 
 u32 DSProt_DetectFlashcart(void* callback) {
@@ -39,7 +39,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	func_result_sum = 0;
 	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
@@ -51,7 +51,7 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
 	if (callback != NULL && compare_sum != 0) {
-		((VoidFunc)callback)();
+		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
@@ -77,7 +77,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	func_result_sum = 0;
 	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
@@ -89,7 +89,7 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
 	if (callback != NULL && compare_sum != 0) {
-		((VoidFunc)callback)();
+		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
@@ -115,7 +115,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 	func_result_sum = 0;
 	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
@@ -127,7 +127,7 @@ u32 DSProt_DetectEmulator(void* callback) {
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
 	if (callback != NULL && compare_sum != 0) {
-		((VoidFunc)callback)();
+		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
@@ -153,7 +153,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	func_result_sum = 0;
 	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
@@ -165,7 +165,7 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
 	if (callback != NULL && compare_sum != 0) {
-		((VoidFunc)callback)();
+		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
@@ -190,7 +190,7 @@ u32 DSProt_DetectDummy(void* callback) {
 	func_result_sum = 0;
 	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
@@ -202,7 +202,7 @@ u32 DSProt_DetectDummy(void* callback) {
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
 	if (callback != NULL && compare_sum != 0) {
-		((VoidFunc)callback)();
+		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
@@ -227,7 +227,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	func_result_sum = 0;
 	
 	for (i = 0; func_queue[i] != 0; i++) {
-		func_result = ((U32Func)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
+		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
@@ -239,7 +239,7 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
 	if (callback != NULL && compare_sum != 0) {
-		((VoidFunc)callback)();
+		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
