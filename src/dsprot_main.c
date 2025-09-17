@@ -12,6 +12,20 @@
 // Function to be encrypted (cannot be called directly)
 void* DetectAll(void* callback, void* param1, void* param2);
 
+#define DSP_OBFS_OFFSET  (ENC_VAL_1 & 0xFFF)
+
+// This checksum value is derived from the first 9 instructions of the `run_encrypted_func` macro in asm_macro.inc:
+//   e18fc00f    orr    ip, pc, pc
+//   e01cc00c    ands   ip, ip, ip
+//   03a0c000    moveq  ip, #0
+//   128cc01c    addne  ip, ip, #28
+//   e59cc014    ldr    ip, [ip, #20]
+//   e24ccc21    sub    ip, ip, #8448  @ 0x2100
+//   e92d1000    stmfd  sp!, {ip}
+//   e18fc00f    orr    ip, pc, pc
+//   e8bd8000    ldmfd  sp!, {pc}
+
+#define DSP_CHECKSUM_INS       (9)
 #define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
 
 typedef u32 (*TaskFunc)(void*);
@@ -43,7 +57,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)queued_func;
-		i = 9;
+		i = DSP_CHECKSUM_INS;
 		func_data_checksum = 0;
 		do {
 			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
