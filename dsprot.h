@@ -16,6 +16,7 @@ extern void* DSProt_DetectFlashcartB(void* param1, void* param2);
 extern void* DSProt_DetectEmulatorA(void* param1, void* param2);
 extern void* DSProt_DetectEmulatorB(void* param1, void* param2);
 
+#define DSP_CHECKSUM_INS       (37)
 #define DSP_EXPECTED_CHECKSUM  (0x9F75A8D6)
 
 typedef void* (*DSProt_Callback)(void*, void*);
@@ -37,7 +38,7 @@ static inline void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2) 
 	u32   i;
 	
 	func_data_ptr = (u32*)DSProt_DetectFlashcartA;
-	i = 37;
+	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
@@ -59,7 +60,7 @@ static inline void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2) 
 	u32   i;
 	
 	func_data_ptr = (u32*)DSProt_DetectFlashcartB;
-	i = 37;
+	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
@@ -81,7 +82,7 @@ static inline void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2) {
 	u32   i;
 	
 	func_data_ptr = (u32*)DSProt_DetectEmulatorA;
-	i = 37;
+	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
@@ -103,7 +104,7 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 	u32   i;
 	
 	func_data_ptr = (u32*)DSProt_DetectEmulatorB;
-	i = 37;
+	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
@@ -120,6 +121,7 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 
 
 #undef DSP_EXPECTED_CHECKSUM
+#undef DSP_CHECKSUM_INS
 
 #ifdef __cplusplus
 }
