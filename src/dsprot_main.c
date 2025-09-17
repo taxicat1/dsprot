@@ -19,8 +19,8 @@ u32 DetectNotDummy(void* callback, void* param, u32 __unused);
 
 #define DSP_OBFS_OFFSET  (0x320)
 
-typedef u32 (*U32Func)(void);
-typedef u32 (*ArgFunc)(void*);
+typedef u32 (*TaskFunc)(void);
+typedef u32 (*CallbackFunc)(void*);
 
 enum {
 	EXPECT_FALSE,
@@ -34,17 +34,17 @@ static inline u32 dsprotMain(u32* func_queue_ptr, int expected_result, void* cal
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_TRUE * PRIME_FALSE;
 	do {
-		func_ret_total += ((U32Func)(*func_queue_ptr - ENC_VAL_1 - DSP_OBFS_OFFSET))();
+		func_ret_total += ((TaskFunc)(*func_queue_ptr - ENC_VAL_1 - DSP_OBFS_OFFSET))();
 		func_queue_ptr++;
 	} while (*func_queue_ptr != 0);
 	
 	if (expected_result == EXPECT_TRUE) {
 		if (!(func_ret_total % PRIME_TRUE) && callback != NULL) {
-			return ((ArgFunc)callback)(param);
+			return ((CallbackFunc)callback)(param);
 		}
 	} else {
 		if ((func_ret_total % PRIME_FALSE) && callback != NULL) {
-			return ((ArgFunc)callback)(param);
+			return ((CallbackFunc)callback)(param);
 		}
 	}
 	
