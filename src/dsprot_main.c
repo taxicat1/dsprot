@@ -84,7 +84,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)task_func;
-		i = DSP_CHECK_SIZE;
+		i = DSP_CHECKSUM_INS;
 		func_data_checksum = 0;
 		do {
 			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
