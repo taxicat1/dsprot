@@ -147,8 +147,7 @@ asm u32 Encryptor_DecryptionWrapperFragment(void) {
 	// - Decrypt the inner function
 	// - Call the decrypted inner function, with the arguments that were passed to the wrapper
 	// - Save the return value of the inner function
-	// - Re-encrypt the inner function, which changes the key
-	// - Save the new key back to the callee
+	// - Re-encrypt the inner function
 	// - Return back the value the inner function returned
 	//
 	// This is nontrivial, because you must preserve `r0`-`r3` and the stack pointer as they were before
