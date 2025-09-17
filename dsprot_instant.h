@@ -12,6 +12,7 @@ extern "C" {
 extern void* DSProt_Crash(void* __unused1, void* __unused2);
 extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
 
+#define DSP_CHECKSUM_INS       (37)
 #define DSP_EXPECTED_CHECKSUM  (0x9F75A8D6)
 
 
@@ -21,7 +22,7 @@ static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void*
 	u32   i;
 	
 	func_data_ptr = (u32*)DSProt_DetectAll;
-	i = 37;
+	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
@@ -38,6 +39,7 @@ static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void*
 
 
 #undef DSP_EXPECTED_CHECKSUM
+#undef DSP_CHECKSUM_INS
 
 #ifdef __cplusplus
 }
