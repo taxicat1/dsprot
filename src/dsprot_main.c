@@ -21,8 +21,6 @@ u32 DSProt_DetectNotDummy(void* callback);
 typedef u32 (*U32Func)(void);
 typedef void (*VoidFunc)(void);
 
-// Possible TODO: get a `static inline executeFunctionQueue` to match here as in other versions
-
 
 u32 DSProt_DetectFlashcart(void* callback) {
 	u32   func_queue[32];
