@@ -12,8 +12,6 @@
 // Function to be encrypted (cannot be called directly)
 void* DetectAll(void* callback, void* param1, void* param2);
 
-#define DSP_OBFS_OFFSET  (ENC_VAL_1 & 0xFFF)
-
 // This checksum value is derived from the first 9 instructions of the `run_encrypted_func` macro in asm_macro.inc:
 //   e18fc00f    orr    ip, pc, pc
 //   e01cc00c    ands   ip, ip, ip
