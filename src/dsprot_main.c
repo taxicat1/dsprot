@@ -28,11 +28,11 @@ enum {
 
 static inline void populateCallbacks(DSProt_Ctx* work) {
 	// This part is very strange to match. May be a better way to do this
-    void*             tmp;
-    DSProt_Callback*  callback_tbl;
-    u32               callback_idx;
-    
-    tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
+	void*             tmp;
+	DSProt_Callback*  callback_tbl;
+	u32               callback_idx;
+	
+	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	
 	callback_tbl = (DSProt_Callback*)(ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1) - ENC_VAL_1);
