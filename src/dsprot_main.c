@@ -15,8 +15,40 @@ void* DetectFlashcartB(void* param1, void* param2);
 void* DetectEmulatorA(void* param1, void* param2);
 void* DetectEmulatorB(void* param1, void* param2);
 
+#define DSP_OBFS_OFFSET  (ENC_VAL_1 & 0xFFF)
+
+// This checksum value is derived from the first 28 instructions of the `run_encrypted_func` macro in asm_macro.inc:
+//   e18fc00f    orr      ip, pc, pc
+//   e01cc00c    ands     ip, ip, ip
+//   03a0c000    moveq    ip, #0
+//   128cc068    addne    ip, ip, #104  @ 0x68
+//   e59cc014    ldr      ip, [ip, #20]
+//   e24cc000    sub      ip, ip, #0
+//   e92d001f    push     {r0, r1, r2, r3, r4}
+//   e1a01d2c    lsr      r1, ip, #26
+//   e0233003    eor      r3, r3, r3
+//   e1a0c30c    lsl      ip, ip, #6
+//   e1a0c32c    lsr      ip, ip, #6
+//   e1a0000c    mov      r0, ip
+//   e5902000    ldr      r2, [r0]
+//   e1a04c22    lsr      r4, r2, #24
+//   e35400ea    cmp      r4, #234  @ 0xea
+//   135400eb    cmpne    r4, #235  @ 0xeb
+//   102338e2    eorne    r3, r3, r2, ror #17
+//   10833e62    addne    r3, r3, r2, ror #28
+//   10233172    eorne    r3, r3, r2, ror r1
+//   e2511001    subs     r1, r1, #1
+//   e2800004    add      r0, r0, #4
+//   1afffff5    bne      -36
+//   058f3014    streq    r3, [pc, #20]
+//   08bd001f    popeq    {r0, r1, r2, r3, r4}
+//   18bd03e0    popne    {r5, r6, r7, r8, r9}
+//   092d1000    stmfdeq  sp!, {ip}
+//   e18fc00f    orr      ip, pc, pc
+//   08bd8000    ldmfdeq  sp!, {pc}
+
+#define DSP_CHECKSUM_INS       (28)
 #define DSP_EXPECTED_CHECKSUM  (0x0786385F)
-#define DSP_OBFS_OFFSET        (ENC_VAL_1 & 0xFFF)
 
 typedef u32 (*DSProt_Task)(DSProt_Ctx*);
 
@@ -71,7 +103,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		
 		// Preliminary integrity check
 		func_data_ptr = (u32*)task_func;
-		i = 28;
+		i = DSP_CHECKSUM_INS;
 		func_data_checksum = 0;
 		do {
 			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
