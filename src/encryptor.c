@@ -184,7 +184,7 @@ asm u32 Encryptor_DecryptionWrapperFragment(void) {
 	mov    r4, r0                                // Preserve the return from the inner function in `r4`, move it back to `r0` later.
 	sub    ip, ip, #ENC_VAL_1                    // Deobfuscate function decryptor address
 	ldmib  r10, {r0-r2}                          // Read function encryptor arguments from data structure (key, addr, size).
-	blx    ip                                    // Call function encryptor, which returns obfuscated new key.
+	blx    ip                                    // Call function encryptor, which returns obfuscated new key (unused).
 	str    r0, [r10, #0x4]                       // New key is stored back into data structure.
 	mov    r0, r4                                // Return value from inner function is moved back to `r0` to return it.
 	ldmia  sp!, {r4}                             // Original value of `r4` restored from the stack so we can properly return.
