@@ -112,7 +112,6 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	ENCRYPTION_END(KEY_ROM_UTIL_READ_1);
 	
 	CARD_UnlockRom(lock_id);
-	
 	OS_ReleaseLockID(lock_id);
 }
 
