@@ -1,5 +1,6 @@
 #include "encryptor.h"
 
+#include "nitro_os.h"
 #include "rc4.h"
 
 

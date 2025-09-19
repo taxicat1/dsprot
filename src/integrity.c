@@ -1,7 +1,7 @@
 #include "integrity.h"
 
-#include "keys.h"
 #include "encryptor.h"
+#include "keys.h"
 #include "mac_owner.h"
 #include "rom_test.h"
 

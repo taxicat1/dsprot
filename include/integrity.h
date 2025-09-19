@@ -1,7 +1,7 @@
 #ifndef INTEGRITY_H
 #define INTEGRITY_H
 
-#include "types.h"
+#include "nitro_types.h"
 
 u32 Integrity_MACOwner_IsBad(void);
 u32 Integrity_MACOwner_IsGood(void);
