@@ -63,7 +63,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	card_ctrl_13 <<= 5;
 	
 	// Read port setting
-	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~0x7000000) | 0xA1000000;
+	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~REG_MI_MCCNT1_PC_MASK) | 0xA1000000;
 	
 	// Calculate offset to round back to nearest 0x200-byte block.
 	// E.G. if we want to read starting from 0x1208, we actually need to
@@ -72,15 +72,15 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	addr_offset = 0 - (addr & 0x1FF);
 	
 	// Wait for card to not be busy
-	while (*(REGType32v*)(register_base_1 + 0x1A4) & 0x80000000) { }
+	while (*(REGType32v*)(register_base_1 + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_START_MASK) { }
 	
-	// Writing to card ROM and SPI control register
-	*(REGType8v*)(register_base_1 + 0x1A1) = 0x80;
+	// Write busy flag to card ROM and SPI control register
+	*(REGType8v*)(register_base_1 + REG_MCCNT0_OFFSET + 1) = REG_MI_MCCNT0_BUSY_MASK;
 	
 	// Obfuscated read 8-byte command out from gamecard bus, write this back later
 	bufptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		*bufptr++ = *(vnull + HW_REG_BASE + 0x1A8 + i);
+		*bufptr++ = *(vnull + HW_REG_BASE + REG_MCCMD0_OFFSET + i);
 	}
 	
 	addr += addr_offset;
@@ -90,30 +90,30 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		
 		// Write 8-byte command to registers
 		// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
-		register_base_2[0x1A8] = 0xB7;
-		register_base_2[0x1A9] = addr >> 24;
-		register_base_2[0x1AA] = addr >> 16;
-		register_base_2[0x1AB] = addr >> 8;
-		register_base_2[0x1AC] = addr;
-		register_base_2[0x1AD] = 0x00;
-		register_base_2[0x1AE] = 0x00;
-		register_base_2[0x1AF] = 0x00;
+		register_base_2[REG_MCCMD0_OFFSET + 0] = 0xB7;
+		register_base_2[REG_MCCMD0_OFFSET + 1] = addr >> 24;
+		register_base_2[REG_MCCMD0_OFFSET + 2] = addr >> 16;
+		register_base_2[REG_MCCMD0_OFFSET + 3] = addr >> 8;
+		register_base_2[REG_MCCMD0_OFFSET + 4] = addr;
+		register_base_2[REG_MCCMD0_OFFSET + 5] = 0x00;
+		register_base_2[REG_MCCMD0_OFFSET + 6] = 0x00;
+		register_base_2[REG_MCCMD0_OFFSET + 7] = 0x00;
 		
 		// Submit command
-		*(REGType32v*)(register_base_1 + 0x1A4) = card_ctrl_cmd;
+		*(REGType32v*)(register_base_1 + REG_MCCNT1_OFFSET) = card_ctrl_cmd;
 		
 		// Copy the output into the destination buffer, within the bounds of num_bytes
 		// (Must read the output out of the I/O register regardless)
 		do {
-			if (*(REGType32v*)(register_base_1 + 0x1A4) & 0x800000) {
-				output = *(REGType32v*)(register_base_1 + 0x100010);
+			if (*(REGType32v*)(register_base_1 + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_RDY_MASK) {
+				output = *(REGType32v*)(register_base_1 + REG_MCD1_OFFSET);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
 					*(u32*)(dest + addr_offset) = output;
 				}
 				
 				addr_offset += sizeof(u32);
 			}
-		} while (*(REGType32v*)(register_base_1 + 0x1A4) & 0x80000000);
+		} while (*(REGType32v*)(register_base_1 + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_START_MASK);
 		
 		// Advance address to next block
 		addr += 0x200;
@@ -122,7 +122,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Write 8-byte command back to gamecard bus
 	bufptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		*(vnull + HW_REG_BASE + 0x1A8 + i) = *bufptr++;
+		*(vnull + HW_REG_BASE + REG_MCCMD0_OFFSET + i) = *bufptr++;
 	}
 	
 	// Write original value back to to external memory control register
