@@ -9,5 +9,4 @@
 #define reg_MI_EXMEMCNT          (*(REGType16v*)(HW_REG_BASE + REG_EXMEMCNT_OFFSET))
 #define REG_MI_EXMEMCNT_MP_MASK  (0x800)
 
-
 #endif
