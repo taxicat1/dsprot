@@ -9,7 +9,7 @@
 u32 ROMTest_IsBad(void);
 u32 ROMTest_IsGood(void);
 
-#define ROM_BLOCK_SIZE  (0x200)
+#define ROM_BLOCK_SIZE  CARD_ROM_PAGE_SIZE
 
 
 u32 ROMTest_IsBad(void) {
@@ -32,7 +32,7 @@ u32 ROMTest_IsBad(void) {
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Use standard ROM reading function for above 0x8000
-		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARDi_ReadRom(-1, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		rom_addr += ROM_BLOCK_SIZE;
@@ -88,7 +88,7 @@ u32 ROMTest_IsGood(void) {
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Use standard ROM reading function for above 0x8000
-		CARDi_ReadRom(-1, (void*)rom_addr + 0x7000, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARDi_ReadRom(-1, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		rom_addr += ROM_BLOCK_SIZE;
