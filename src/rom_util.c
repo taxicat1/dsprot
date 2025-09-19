@@ -91,7 +91,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Wait for card to not be busy
 	while (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_START) { }
 	
-	// Write busy flag to card ROM and SPI control register
+	// Write enable flag to card ROM and SPI control register
 	*(REGType8v*)(register_base + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 	
 	// Read 8-byte command out from gamecard bus, write this back later
