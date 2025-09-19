@@ -1,6 +1,8 @@
 #include "rom_test.h"
 
 #include "primes.h"
+#include "nitro_card.h"
+#include "nitro_os.h"
 #include "rom_util.h"
 
 // Functions to be encrypted (cannot be called directly)

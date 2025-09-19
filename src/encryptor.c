@@ -1,7 +1,7 @@
 #include "encryptor.h"
 
-#include "encoding_constants.h"
 #include "bss.h"
+#include "encoding_constants.h"
 #include "rc4.h"
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
