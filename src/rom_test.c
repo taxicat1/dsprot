@@ -9,7 +9,7 @@
 u32 ROMTest_IsBad(void);
 u32 ROMTest_IsGood(void);
 
-#define ROM_BLOCK_SIZE  (0x200)
+#define ROM_BLOCK_SIZE  CARD_ROM_PAGE_SIZE
 
 
 u32 ROMTest_IsBad(void) {
