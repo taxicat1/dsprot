@@ -4,6 +4,8 @@
 #include "nitro_types.h"
 
 // <nitro/card.h>
+#define CARD_ROM_PAGE_SIZE  (0x200)
+
 extern void CARD_LockRom(u16 lock_id);
 extern void CARD_UnlockRom(u16 lock_id);
 extern void CARDi_ReadRom(u32 dma, const void* src, void* dst, u32 len, void* callback, void* arg, BOOL is_async);
