@@ -1,11 +1,10 @@
 /* No dedicated header */
 
-#include "types.h"
-
-#include "integrity.h"
-#include "rom_test.h"
-#include "mac_owner.h"
 #include "encoding_constants.h"
+#include "integrity.h"
+#include "mac_owner.h"
+#include "nitro_types.h"
+#include "rom_test.h"
 
 // Functions to be encrypted (cannot be called directly)
 u32 DetectFlashcart(void* callback);
