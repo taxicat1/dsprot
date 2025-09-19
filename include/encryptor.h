@@ -1,13 +1,7 @@
 #ifndef ENCRYPTOR_H
 #define ENCRYPTOR_H
 
-#include "types.h"
-
-// Nitro functions
-// <nitro/os.h>
-extern void DC_StoreAll(void);
-extern void IC_Disable(void);
-extern void IC_Enable(void);
+#include "nitro_types.h"
 
 void Encryptor_StartRange(u32* addr);
 void Encryptor_EndRange(u32* addr);
