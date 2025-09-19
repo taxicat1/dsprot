@@ -1,8 +1,8 @@
 #include "integrity.h"
 
+#include "encoding_constants.h"
 #include "mac_owner.h"
 #include "rom_test.h"
-#include "encoding_constants.h"
 
 // Functions to be encrypted (cannot be called directly)
 u32 Integrity_MACOwner_IsBad(void);
