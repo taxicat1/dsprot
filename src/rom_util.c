@@ -63,13 +63,13 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 	
 	// Obfuscated, create address 0x027FFE60
-	// This is an address in the .nds header: port 0x040001A4 / setting for normal commands
+	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 	card_ctrl_13 = 5;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
 	
 	// This read is not a used location, should always read 0
-	if (((REGType8v*)register_base_1)[0x4000] & 1) {
+	if (*(REGType8v*)(register_base_1 + 0x4000) & 1) {
 		card_ctrl_13 |= 0x40000;
 	}
 	card_ctrl_13 <<= 5;
@@ -82,7 +82,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// E.G. if we want to read starting from 0x1208, we actually need to
 	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 	// This would set `addr_offset` to -8.
-	addr_offset = 0 - (addr & (CARD_ROM_PAGE_SIZE - 1);
+	addr_offset = 0 - (addr & (CARD_ROM_PAGE_SIZE - 1));
 	
 	// Wait for card to not be busy
 	while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
