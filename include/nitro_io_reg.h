@@ -7,19 +7,8 @@
 #define HW_REG_BASE  (0x04000000)
 
 #define REG_EXMEMCNT_OFFSET      (0x204)
-#define reg_MI_EXMEMCNT          (*(REGType16v *)(HW_REG_BASE + REG_EXMEMCNT_OFFSET))
+#define reg_MI_EXMEMCNT          (*(REGType16v*)(HW_REG_BASE + REG_EXMEMCNT_OFFSET))
 #define REG_MI_EXMEMCNT_MP_MASK  (0x800)
 
-#define REG_MCD1_OFFSET  (0x100010)
-
-#define REG_MCCMD0_OFFSET  (0x1A8)
-
-#define REG_MCCNT0_OFFSET        (0x1A0)
-#define REG_MI_MCCNT0_BUSY_MASK  (0x0080)
-
-#define REG_MCCNT1_OFFSET         (0x1A4)
-#define REG_MI_MCCNT1_START_MASK  (0x80000000)
-#define REG_MI_MCCNT1_PC_MASK     (0x07000000)
-#define REG_MI_MCCNT1_RDY_MASK    (0x00800000)
 
 #endif
