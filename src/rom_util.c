@@ -56,7 +56,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	card_ctrl_13 -= 13;
 	
 	// This is not a used location, should always read 0
-	if (((REGType8v*)register_base_1)[0x4000] & 1) {
+	if (*(REGType8v*)(register_base_1 + 0x4000) & 1) {
 		card_ctrl_13 |= 0x40000;
 	}
 	
@@ -72,15 +72,15 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	addr_offset = 0 - (addr & 0x1FF);
 	
 	// Wait for card to not be busy
-	while (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x80000000) { }
+	while (*(REGType32v*)(register_base_1 + 0x1A4) & 0x80000000) { }
 	
 	// Writing to card ROM and SPI control register
-	((REGType8v*)register_base_1)[0x1A1] = 0x80;
+	*(REGType8v*)(register_base_1 + 0x1A1) = 0x80;
 	
 	// Obfuscated read 8-byte command out from gamecard bus, write this back later
 	bufptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		*bufptr++ = (vnull + HW_REG_BASE)[0x1A8+i];
+		*bufptr++ = *(vnull + HW_REG_BASE + 0x1A8 + i);
 	}
 	
 	addr += addr_offset;
@@ -100,20 +100,20 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		register_base_2[0x1AF] = 0x00;
 		
 		// Submit command
-		((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] = card_ctrl_cmd;
+		*(REGType32v*)(register_base_1 + 0x1A4) = card_ctrl_cmd;
 		
 		// Copy the output into the destination buffer, within the bounds of num_bytes
 		// (Must read the output out of the I/O register regardless)
 		do {
-			if (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x800000) {
-				output = ((REGType32v*)(register_base_1 + 0x100000))[4];
+			if (*(REGType32v*)(register_base_1 + 0x1A4) & 0x800000) {
+				output = *(REGType32v*)(register_base_1 + 0x100010);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
 					*(u32*)(dest + addr_offset) = output;
 				}
 				
 				addr_offset += sizeof(u32);
 			}
-		} while (((REGType32v*)register_base_1)[0x1A4/sizeof(u32)] & 0x80000000);
+		} while (*(REGType32v*)(register_base_1 + 0x1A4) & 0x80000000);
 		
 		// Advance address to next block
 		addr += 0x200;
@@ -122,11 +122,11 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Write 8-byte command back to gamecard bus
 	bufptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		(vnull + HW_REG_BASE)[0x1A8+i] = *bufptr++;
+		*(vnull + HW_REG_BASE + 0x1A8 + i) = *bufptr++;
 	}
 	
 	// Write original value back to to external memory control register
-	((REGType16v*)register_base_1)[REG_EXMEMCNT_OFFSET/sizeof(u16)] = ext_mem_register_val_original;
+	*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
 		
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
