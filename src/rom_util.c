@@ -1,8 +1,10 @@
 #include "rom_util.h"
 
-#include "keys.h"
 #include "encryptor.h"
-#include "io_reg.h"
+#include "keys.h"
+#include "nitro_card.h"
+#include "nitro_io_reg.h"
+#include "nitro_os.h"
 
 
 void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
