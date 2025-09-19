@@ -6,6 +6,24 @@
 #include "nitro_io_reg.h"
 #include "nitro_os.h"
 
+// Not actually available from standard Nitro includes
+#define REG_CARD_MASTER_CNT_OFFSET  (0x1A1)
+#define REG_CARDCNT_OFFSET          (0x1A4)
+#define REG_CARD_CMD_OFFSET         (0x1A8)
+#define REG_CARD_DATA_OFFSET        (0x100010)
+
+#define CARDMST_ENABLE      (0x80)
+
+#define CARD_DATA_READY     (0x00800000)
+#define CARD_COMMAND_PAGE   (0x01000000)
+#define CARD_COMMAND_MASK   (0x07000000)
+#define CARD_RESET_HI       (0x20000000)
+#define CARD_ACCESS_MODE    (0x40000000)
+#define CARD_READ_MODE      (0x00000000)
+#define CARD_START          (0x80000000)
+
+#define MROMOP_G_READ_PAGE  (0xB7000000)
+
 
 void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
@@ -36,7 +54,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Alias for register base (0x04000000)
 	register_base = 1;
 	register_base <<= 26;
-	card_cmd = (REGType8v*)(register_base + REG_MCCMD0_OFFSET);
+	card_cmd = (REGType8v*)(register_base + REG_CARD_CMD_OFFSET);
 	
 	// External memory control register (0x04000204)
 	reg_mi_exmemcnt = 1;
@@ -48,7 +66,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	*(REGType16v*)reg_mi_exmemcnt &= ~REG_MI_EXMEMCNT_MP_MASK;
 	
 	// Obfuscated, create address 0x027FFE60
-	// This is an address in the .nds header: port 0x040001A4 / setting for normal commands
+	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 	card_ctrl_13 = 5;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
@@ -60,22 +78,23 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	
 	card_ctrl_13 <<= 5;
 	
-	// Read port setting
-	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~REG_MI_MCCNT1_PC_MASK) | 0xA1000000;
+	// Read port setting and set page read flags
+	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
+	                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 	
 	// Calculate offset to round back to nearest 0x200-byte block.
 	// E.G. if we want to read starting from 0x1208, we actually need to
 	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 	// This would set `addr_offset` to -8.
-	addr_offset = 0 - (addr & 0x1FF);
+	addr_offset = 0 - (addr & (CARD_ROM_PAGE_SIZE - 1));
 	
 	// Wait for card to not be busy
-	while (*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_START_MASK) { }
+	while (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_START) { }
 	
 	// Write busy flag to card ROM and SPI control register
-	*(REGType8v*)(register_base + REG_MCCNT0_OFFSET + 1) = REG_MI_MCCNT0_BUSY_MASK;
+	*(REGType8v*)(register_base + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 	
-	// Obfuscated read 8-byte command out from gamecard bus, write this back later
+	// Read 8-byte command out from gamecard bus, write this back later
 	for (i = 0; i < 8; i++) {
 		buffer[i] = card_cmd[i];
 	}
@@ -87,7 +106,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		
 		// Write 8-byte command to registers
 		// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
-		card_cmd[0] = 0xB7;
+		card_cmd[0] = MROMOP_G_READ_PAGE >> 24;
 		card_cmd[1] = addr >> 24;
 		card_cmd[2] = addr >> 16;
 		card_cmd[3] = addr >> 8;
@@ -97,23 +116,23 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		card_cmd[7] = 0x00;
 		
 		// Submit command
-		*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) = card_ctrl_cmd;
+		*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
 		
 		// Copy the output into the destination buffer, within the bounds of num_bytes
 		// (Must read the output out of the I/O register regardless)
 		do {
-			if (*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_RDY_MASK) {
-				output = *(REGType32v*)(register_base + REG_MCD1_OFFSET);
+			if (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
+				output = *(REGType32v*)(register_base + REG_CARD_DATA_OFFSET);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
 					*(u32*)(dest + addr_offset) = output;
 				}
 				
 				addr_offset += 4;
 			}
-		} while (*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_START_MASK);
+		} while (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_START);
 		
 		// Advance address to next block
-		addr += 0x200;
+		addr += CARD_ROM_PAGE_SIZE;
 	}
 	
 	// Write 8-byte command back to gamecard bus
