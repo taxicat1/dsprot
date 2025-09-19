@@ -1,8 +1,9 @@
 #include "mac_owner.h"
 
 #include "crash.h"
-#include "primes.h"
 #include "encoding_constants.h"
+#include "nitro_os.h"
+#include "primes.h"
 
 // Function to be encrypted (cannot be called directly)
 u32 MACOwner_IsBad(void* __unused);
