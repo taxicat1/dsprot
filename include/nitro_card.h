@@ -4,6 +4,8 @@
 #include "nitro_types.h"
 
 // <nitro/card.h>
+#define CARD_ROM_PAGE_SIZE  (0x200)
+
 typedef struct {
 	u32  offset;
 	u32  length;
