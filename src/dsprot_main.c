@@ -1,12 +1,11 @@
 /* No dedicated header */
 
-#include "types.h"
-#include "keys.h"
-
 #include "encryptor.h"
 #include "integrity.h"
-#include "rom_test.h"
+#include "keys.h"
 #include "mac_owner.h"
+#include "nitro_types.h"
+#include "rom_test.h"
 
 // Exported functions
 u32 DSProt_DetectFlashcart(void* callback);

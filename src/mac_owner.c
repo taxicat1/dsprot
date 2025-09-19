@@ -1,7 +1,8 @@
 #include "mac_owner.h"
 
-#include "keys.h"
 #include "encryptor.h"
+#include "keys.h"
+#include "nitro_os.h"
 
 #define MAC_ADDR_SIZE  (6)
 

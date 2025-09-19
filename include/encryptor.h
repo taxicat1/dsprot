@@ -1,12 +1,7 @@
 #ifndef ENCRYPTOR_H
 #define ENCRYPTOR_H
 
-#include "types.h"
-
-// Nitro functions
-// <nitro/os.h>
-extern void DC_FlushRange(const void* start_addr, u32 num_bytes);
-extern void IC_InvalidateRange(void* start_addr, u32 num_bytes);
+#include "nitro_types.h"
 
 void Encryptor_StartRange(u32* addr);
 void Encryptor_EndRange(u32* addr);
