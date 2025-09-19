@@ -36,7 +36,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Alias for register base (0x04000000)
 	register_base = 1;
 	register_base <<= 26;
-	card_cmd = (REGType8v*)(register_base + 0x1A8);
+	card_cmd = (REGType8v*)(register_base + REG_MCCMD0_OFFSET);
 	
 	// External memory control register (0x04000204)
 	reg_mi_exmemcnt = 1;
@@ -61,7 +61,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	card_ctrl_13 <<= 5;
 	
 	// Read port setting
-	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~0x7000000) | 0xA1000000;
+	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~REG_MI_MCCNT1_PC_MASK) | 0xA1000000;
 	
 	// Calculate offset to round back to nearest 0x200-byte block.
 	// E.G. if we want to read starting from 0x1208, we actually need to
@@ -70,10 +70,10 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	addr_offset = 0 - (addr & 0x1FF);
 	
 	// Wait for card to not be busy
-	while (*(REGType32v*)(register_base + 0x1A4) & 0x80000000) { }
+	while (*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_START_MASK) { }
 	
-	// Writing to card ROM and SPI control register
-	*(REGType8v*)(register_base + 0x1A1) = 0x80;
+	// Write busy flag to card ROM and SPI control register
+	*(REGType8v*)(register_base + REG_MCCNT0_OFFSET + 1) = REG_MI_MCCNT0_BUSY_MASK;
 	
 	// Obfuscated read 8-byte command out from gamecard bus, write this back later
 	for (i = 0; i < 8; i++) {
@@ -97,20 +97,20 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		card_cmd[7] = 0x00;
 		
 		// Submit command
-		*(REGType32v*)(register_base + 0x1A4) = card_ctrl_cmd;
+		*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) = card_ctrl_cmd;
 		
 		// Copy the output into the destination buffer, within the bounds of num_bytes
 		// (Must read the output out of the I/O register regardless)
 		do {
-			if (*(REGType32v*)(register_base + 0x1A4) & 0x800000) {
-				output = *(REGType32v*)(register_base + 0x100010);
+			if (*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_RDY_MASK) {
+				output = *(REGType32v*)(register_base + REG_MCD1_OFFSET);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
 					*(u32*)(dest + addr_offset) = output;
 				}
 				
 				addr_offset += 4;
 			}
-		} while (*(REGType32v*)(register_base + 0x1A4) & 0x80000000);
+		} while (*(REGType32v*)(register_base + REG_MCCNT1_OFFSET) & REG_MI_MCCNT1_START_MASK);
 		
 		// Advance address to next block
 		addr += 0x200;
