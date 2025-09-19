@@ -16,7 +16,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
-	u32         register_base_1;
+	u32         register_base;
 	REGType8v*  card_cmd;
 	s32         addr_offset;
 	u8          buffer[8];
@@ -28,18 +28,18 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	s32         card_ctrl_cmd;
 	
 	// Alias for register base (0x04000000)
-	register_base_1 = 1;
-	register_base_1 <<= 26;
+	register_base = 1;
+	register_base <<= 26;
 	
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
 	ENCRYPTION_START(KEY_ROM_UTIL_READ_1);
 	
-	card_cmd = (REGType8v*)(register_base_1 + 0x1A8);
+	card_cmd = (REGType8v*)(register_base + 0x1A8);
 	
 	// External memory control register (0x04000204)
-	reg_mi_exmemcnt = register_base_1 + REG_EXMEMCNT_OFFSET;
+	reg_mi_exmemcnt = register_base + REG_EXMEMCNT_OFFSET;
 	
 	// Save value to rewrite later
 	ext_mem_register_val_original = *(REGType16v*)reg_mi_exmemcnt;
@@ -55,10 +55,10 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	addr_offset = 0 - (addr & 0x1FF);
 	
 	// Wait for card to not be busy
-	while (*(REGType32v*)(register_base_1 + 0x1A4) & 0x80000000) { }
+	while (*(REGType32v*)(register_base + 0x1A4) & 0x80000000) { }
 	
 	// Writing to card ROM and SPI control register
-	*(REGType8v*)(register_base_1 + 0x1A1) = 0x80;
+	*(REGType8v*)(register_base + 0x1A1) = 0x80;
 	
 	// Obfuscated read 8-byte command out from gamecard bus, write this back later
 	for (i = 0; i < 8; i++) {
@@ -82,20 +82,20 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		card_cmd[7] = 0x00;
 		
 		// Submit command
-		*(REGType32v*)(register_base_1 + 0x1A4) = card_ctrl_cmd;
+		*(REGType32v*)(register_base + 0x1A4) = card_ctrl_cmd;
 		
 		// Copy the output into the destination buffer, within the bounds of num_bytes
 		// (Must read the output out of the I/O register regardless)
 		do {
-			if (*(REGType32v*)(register_base_1 + 0x1A4) & 0x800000) {
-				output = *(REGType32v*)(register_base_1 + 0x100010);
+			if (*(REGType32v*)(register_base + 0x1A4) & 0x800000) {
+				output = *(REGType32v*)(register_base + 0x100010);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
 					*(u32*)(dest + addr_offset) = output;
 				}
 				
 				addr_offset += 4;
 			}
-		} while (*(REGType32v*)(register_base_1 + 0x1A4) & 0x80000000);
+		} while (*(REGType32v*)(register_base + 0x1A4) & 0x80000000);
 		
 		// Advance address to next block
 		addr += 0x200;
@@ -107,7 +107,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	}
 	
 	// Write original value back to to external memory control register
-	*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
+	*(REGType16v*)(register_base + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
 	
 	ENCRYPTION_END(KEY_ROM_UTIL_READ_1);
 	
