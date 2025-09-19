@@ -1,8 +1,9 @@
 #include "mac_owner.h"
 
-#include "primes.h"
-#include "failure_codes.h"
 #include "encoding_constants.h"
+#include "failure_codes.h"
+#include "nitro_os.h"
+#include "primes.h"
 
 // Functions to be encrypted (cannot be called directly)
 u32 MACOwner_IsBad(DSProt_Ctx* ctx);
