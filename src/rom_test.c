@@ -24,7 +24,6 @@
 
 #define MROMOP_G_READ_PAGE  (0xB7000000)
 
-
 // Functions to be encrypted (cannot be called directly)
 u32 ROMTest_IsBad(void);
 u32 ROMTest_IsGood(void);
