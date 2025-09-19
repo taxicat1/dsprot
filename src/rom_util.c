@@ -146,7 +146,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	
 	// Write original value back to to external memory control register
 	*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		
+	
 	CARD_UnlockRom(lock_id);
 	OS_ReleaseLockID(lock_id);
 }
