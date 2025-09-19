@@ -1,13 +1,13 @@
 /* No dedicated header */
 
-#include "dsprot_types.h"
 #include "callback.h"
-
-#include "primes.h"
+#include "dsprot_types.h"
 #include "encoding_constants.h"
 #include "integrity.h"
-#include "rom_test.h"
 #include "mac_owner.h"
+#include "nitro_types.h"
+#include "primes.h"
+#include "rom_test.h"
 
 // Functions to be encrypted (cannot be called directly)
 void* DetectFlashcartA(void* param1, void* param2);

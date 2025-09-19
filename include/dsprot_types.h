@@ -1,7 +1,7 @@
 #ifndef DSPROT_TYPES_H
 #define DSPROT_TYPES_H
 
-#include "types.h"
+#include "nitro_types.h"
 
 typedef void* (*DSProt_Callback)(void*, void*);
 
