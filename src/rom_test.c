@@ -2,9 +2,10 @@
 
 #include "encryptor.h"
 #include "keys.h"
+#include "nitro_card.h"
 #include "rom_util.h"
 
-#define ROM_BLOCK_SIZE  (0x200)
+#define ROM_BLOCK_SIZE  CARD_ROM_PAGE_SIZE
 
 
 u32 ROMTest_IsBad(void) {
