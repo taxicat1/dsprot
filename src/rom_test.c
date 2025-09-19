@@ -1,10 +1,12 @@
 #include "rom_test.h"
 
+#include "crash.h"
 #include "encoding_constants.h"
+#include "nitro_card.h"
+#include "nitro_io_reg.h"
+#include "nitro_os.h"
 #include "primes.h"
 #include "rom_util.h"
-#include "crash.h"
-#include "io_reg.h"
 
 // Function to be encrypted (cannot be called directly)
 u32 ROMTest_IsBad(void* __unused);
