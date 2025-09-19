@@ -1,8 +1,8 @@
 #include "integrity.h"
 
-#include "primes.h"
 #include "encoding_constants.h"
 #include "mac_owner.h"
+#include "primes.h"
 #include "rom_test.h"
 
 // Functions to be encrypted (cannot be called directly)

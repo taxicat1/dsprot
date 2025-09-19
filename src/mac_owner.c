@@ -1,7 +1,8 @@
 #include "mac_owner.h"
 
-#include "primes.h"
 #include "encoding_constants.h"
+#include "nitro_os.h"
+#include "primes.h"
 
 // Functions to be encrypted (cannot be called directly)
 u32 MACOwner_IsBad(void);
