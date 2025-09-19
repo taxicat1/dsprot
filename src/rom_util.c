@@ -63,7 +63,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 	
 	// Obfuscated, create address 0x027FFE60
-	// This is an address in the .nds header: port 0x040001A4 / setting for normal commands
+	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 	card_ctrl_13 = 5;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
