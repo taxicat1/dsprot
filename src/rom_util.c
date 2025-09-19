@@ -92,7 +92,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		
 		// Write 8-byte command to registers
 		// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
-		card_cmd[0] = 0xB7;
+		card_cmd[0] = MROMOP_G_READ_PAGE >> 24;
 		card_cmd[1] = addr >> 24;
 		card_cmd[2] = addr >> 16;
 		card_cmd[3] = addr >> 8;
@@ -118,7 +118,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		} while (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_START);
 		
 		// Advance address to next block
-		addr += 0x200;
+		addr += CARD_ROM_PAGE_SIZE;
 	}
 	
 	// Write 8-byte command back to gamecard bus
