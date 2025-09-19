@@ -1,13 +1,7 @@
 #ifndef CRASH_H
 #define CRASH_H
 
-#include "types.h"
-
-// Nitro functions
-// <nitro/os.h>
-extern void OS_Terminate(void);
-// <nitro/mi.h>
-extern void MIi_CpuClear32(register u32 data, register void *destp, register u32 size);
+#include "nitro_types.h"
 
 // Assembly decryption wrapper
 extern void* DSProt_Crash(void* __unused1, void* __unused2);

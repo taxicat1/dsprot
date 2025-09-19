@@ -1,6 +1,8 @@
 #include "crash.h"
 
 #include "encoding_constants.h"
+#include "nitro_os.h"
+#include "nitro_mi.h"
 
 // Function to be encrypted (cannot be called directly)
 void* Crash(register void* __unused1, register void* __unused2);
