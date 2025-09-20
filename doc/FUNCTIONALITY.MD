@@ -18,7 +18,7 @@ DS Protect has two methods of antipiracy detection:
 	- `0x2C000 - 0x2C1FF`
 	- `0x2D000 - 0x2D1FF`
 	
-	("mirrored" meaning read started from the end of the ROM, expecting it will loop back to the beginning)
+	("mirrored" meaning read starting from the end of the ROM, expecting it will loop back to the beginning)
 	
 	`CARDi_ReadRom` then reads these pages:
 	- `0x8000 - 0x81FF`
