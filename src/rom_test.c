@@ -46,7 +46,7 @@ u32 ROMTest_IsBad(void) {
 	CARD_LockRom(lock_id);
 	
 	for (i = 0; i < 3; i++) {
-		// Use obfuscated read for below 0x8000
+		// For below 8000h reads, use manual read
 		// Cannot be an inlined function here
 		{
 			void* dest      = &rom_buf[0];
@@ -173,7 +173,8 @@ u32 ROMTest_IsBad(void) {
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// Use standard ROM reading function for above 0x8000
+		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// This function is patched over on flashcarts, which can be detected
 		CARDi_ReadRom(-1, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
@@ -225,7 +226,7 @@ u32 ROMTest_IsGood(void) {
 	CARD_LockRom(lock_id);
 	
 	for (i = 0; i < 3; i++) {
-		// Use obfuscated read for below 0x8000
+		// For below 8000h reads, use manual read
 		// Cannot be an inlined function here
 		{
 			void* dest      = &rom_buf[0];
@@ -352,7 +353,8 @@ u32 ROMTest_IsGood(void) {
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// Use standard ROM reading function for above 0x8000
+		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// This function is patched over on flashcarts, which can be detected
 		CARDi_ReadRom(-1, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
