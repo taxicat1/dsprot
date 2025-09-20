@@ -47,9 +47,10 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
@@ -85,9 +86,10 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
@@ -123,9 +125,10 @@ u32 DSProt_DetectEmulator(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
@@ -161,9 +164,10 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
@@ -198,9 +202,10 @@ u32 DSProt_DetectDummy(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
@@ -235,9 +240,10 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
