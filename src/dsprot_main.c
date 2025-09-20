@@ -47,15 +47,16 @@ u32 DSProt_DetectFlashcart(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_1);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -85,15 +86,16 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_2);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -123,15 +125,16 @@ u32 DSProt_DetectEmulator(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_3);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -161,15 +164,16 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_4);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -198,15 +202,16 @@ u32 DSProt_DetectDummy(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) & (compare_sum >> 1)) != 0;
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_5);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
 
 
@@ -235,13 +240,14 @@ u32 DSProt_DetectNotDummy(void* callback) {
 		compare_sum <<= 1;
 	}
 	
+	// `compare_sum` recycled as Boolean return
 	compare_sum = ((func_result_sum >> 1) == (compare_sum >> 1));
 	
-	if (callback != NULL && compare_sum != 0) {
+	if (callback != NULL && compare_sum) {
 		((CallbackFunc)callback)();
 	}
 	
 	ENCRYPTION_END(KEY_DSPROT_MAIN_6);
 	
-	return compare_sum;
+	return (u32)compare_sum;
 }
