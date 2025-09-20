@@ -71,8 +71,8 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
 	
 	// Creating address 0x027FFE60 cont.
-	// This read is not a used location, should always read 0
-	card_ctrl_13 += *(REGType8v*)(register_base_1 + 0x4000) & 1;
+	// If the system is in DSi mode, the address is changed to 0x02FFFE60
+	card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
 	card_ctrl_13 <<= 5;
