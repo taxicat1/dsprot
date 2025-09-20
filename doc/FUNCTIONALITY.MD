@@ -18,9 +18,9 @@ DS Protect has two methods of antipiracy detection:
 	- `0x8200 - 0x83FF`
 	- `0x8400 - 0x85FF`
 	
-	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. 
+	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address.
 	
-	Additionally, many flashcarts will patch over `CARDi_ReadRom` with their own code, in order to properly read from their SD cards. If this was done, then reads of the same location will return different data between the manual read and SDK read.
+	The first SDK read at `0x8000` should also return identical data to the manual reads. However, flashcarts will patch over `CARDi_ReadRom` with their own code in order to properly read from their SD cards, so if this was done, the data will not match.
 	
 	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 
