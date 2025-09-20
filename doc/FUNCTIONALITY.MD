@@ -6,15 +6,23 @@ DS Protect has two methods of antipiracy detection:
 	- A MAC address of `00:00:00:00:00:00` (indicating an emulator that is not emulating a MAC address at all)
 	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of No$GBA)
 
-2. ROM read check. It will conduct six reads of the cartridge ROM at these locations:
+2. ROM read check. It will conduct six reads of the cartridge ROM, performing three with a manual read (writing to I/O registers), and three with the SDK's `CARDi_ReadRom`.
+	
+	The manual reads will read these pages:
 	- `0x1000 - 0x11FF`
 	- `0x1200 - 0x13FF`
 	- `0x1400 - 0x15FF`
+	
+	`CARDi_ReadRom` then reads these pages:
 	- `0x8000 - 0x81FF`
 	- `0x8200 - 0x83FF`
 	- `0x8400 - 0x85FF`
 	
-	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first four reads will all receive the same data. The last two reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. If the expected read pattern is not matched (`1 == 2 == 3 == 4` and `4 != 5 != 6`) it will report it is running on a flashcart.
+	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address.
+	
+	The first SDK read at `0x8000` should also return identical data to the manual reads. However, flashcarts will patch over `CARDi_ReadRom` with their own code in order to properly read from their SD cards, so if this was done, the data will not match.
+	
+	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 
 3. Additionally, there is a third "dummy" method which does not actually do any antipiracy detection. This is apparently purely to confuse reverse engineering.
 
