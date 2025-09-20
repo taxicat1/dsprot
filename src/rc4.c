@@ -1,9 +1,21 @@
 #include "rc4.h"
 
+typedef struct {
+	int  i;
+	int  j;
+	u8   S[256];
+} RC4_Ctx;
+
 #define RC4_KEY_SIZE  (16)
 
+static void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len);
+static u8 RC4_Byte(RC4_Ctx* ctx);
+static u32 RC4_InitSBox(u8* sbox);
+static u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size);
+static u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size);
 
-void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
+
+static void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	u8   tmp1;
 	u8   tmp2;
 	int  Ki;
@@ -36,7 +48,7 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 }
 
 
-u8 RC4_Byte(RC4_Ctx* ctx) {
+static u8 RC4_Byte(RC4_Ctx* ctx) {
 	u8  i;
 	u8  ival;
 	u8  j;
@@ -57,7 +69,7 @@ u8 RC4_Byte(RC4_Ctx* ctx) {
 }
 
 
-u32 RC4_InitSBox(u8* sbox) {
+static u32 RC4_InitSBox(u8* sbox) {
 	int  i;
 	int  x;
 	for (i = 0; i < 256; i++) {
@@ -69,7 +81,7 @@ u32 RC4_InitSBox(u8* sbox) {
 }
 
 
-u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
+static u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
 	u32  idx;
 	u8*  src_bytes;
@@ -95,7 +107,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 }
 
 
-u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
+static u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	// Identical to encryption
 	return RC4_EncryptInstructions(ctx, src, dst, size);
 }
