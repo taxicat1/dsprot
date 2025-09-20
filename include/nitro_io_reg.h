@@ -7,4 +7,7 @@
 #define REG_EXMEMCNT_OFFSET      (0x204)
 #define REG_MI_EXMEMCNT_MP_MASK  (0x800)
 
+#define REG_A9ROM_OFFSET         (0x4000)
+#define REG_SCFG_A9ROM_SEC_MASK  (0x01)
+
 #endif
