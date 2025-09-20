@@ -9,14 +9,16 @@ DS Protect has two methods of antipiracy detection:
 2. ROM read check. It will conduct sixteen reads of the cartridge ROM, performing eight with a manual read (writing to I/O registers), and eight with the SDK's `CARDi_ReadRom`.
 	
 	The manual reads will read these pages:
-	- `ROM_SIZE + 0x1000 - ROM_SIZE + 0x11FF`
-	- `ROM_SIZE + 0x1200 - ROM_SIZE + 0x13FF`
-	- `ROM_SIZE + 0x1400 - ROM_SIZE + 0x15FF`
-	- `ROM_SIZE + 0x1600 - ROM_SIZE + 0x17FF`
-	- `ROM_SIZE + 0xA000 - ROM_SIZE + 0xA1FF`
-	- `ROM_SIZE + 0xD000 - ROM_SIZE + 0xD1FF`
+	- `0x1000 - 0x11FF` (mirrored)
+	- `0x1200 - 0x13FF` (mirrored)
+	- `0x1400 - 0x15FF` (mirrored)
+	- `0x1600 - 0x17FF` (mirrored)
+	- `0xA000 - 0xA1FF` (mirrored)
+	- `0xD000 - 0xD1FF` (mirrored)
 	- `0x2C000 - 0x2C1FF`
 	- `0x2D000 - 0x2D1FF`
+	
+	("mirrored" meaning read starting from the end of the ROM, expecting it will loop back to the beginning)
 	
 	`CARDi_ReadRom` then reads these pages:
 	- `0x8000 - 0x81FF`
@@ -30,7 +32,7 @@ DS Protect has two methods of antipiracy detection:
 	
 	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. 
 	
-	Additionally, many flashcarts will patch over `CARDi_ReadRom` with their own code, in order to properly read from their SD cards. If this was done, then reads of the same location will return different data between the manual read and SDK read.
+	Additionally, flashcarts will patch over `CARDi_ReadRom` with their own code in order to properly read from their SD cards. If this was done, then reads using the SDK functions will return different data from the manual reads.
 	
 	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 
