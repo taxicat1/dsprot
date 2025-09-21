@@ -87,8 +87,8 @@ The function is of the form:
 ```asm
 	arm_func_start clearDataAndInstructionCache
 clearDataAndInstructionCache:
-	add  r1, r1, r0
 	mov  ip, #0
+	add  r1, r1, r0
 	bic  r0, r0, #31
 @1:
 	mcr  p15, 0, ip, c7, c10, 4
