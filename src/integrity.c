@@ -21,10 +21,10 @@ static inline u32 checkDecryptionWrapper(u8* addr, u32 match_ret, u32 mismatch_r
 	idx = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
 	// The bytes checked here are from the `run_encrypted_func` macro defined in asm_macro.inc:
-	//   e92d00f0    stmfd sp!, {r4-r7}
-	//   e92d000f    stmfd sp!, {r0-r3}
-	//   e8bd00f0    ldmfd sp!, {r4-r7}
-	//   e59f103c    ldr r1, [pc, #60]
+	//   e92d00f0    stmfd  sp!, {r4-r7}
+	//   e92d000f    stmfd  sp!, {r0-r3}
+	//   e8bd00f0    ldmfd  sp!, {r4-r7}
+	//   e59f103c    ldr    r1, [pc, #60]
 	if (addr[idx++] != 0xF0) return mismatch_ret;
 	if (addr[idx++] != 0x00) return mismatch_ret;
 	if (addr[idx++] != 0x2D) return mismatch_ret;
