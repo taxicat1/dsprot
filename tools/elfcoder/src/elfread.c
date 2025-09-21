@@ -193,7 +193,7 @@ static void encodeRelocations(
 		fread(&reloc, sizeof(Elf32_Rela), 1, elf->fhandle);
 		
 		if (
-			(reloc.r_offset >= symbol->st_value) &&
+			(reloc.r_offset >= symbol->st_value) && 
 			(reloc.r_offset < (symbol->st_value + encoded_size))
 		) {
 			if (task->encoding_type == ENC_DECODE) {
