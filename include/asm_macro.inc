@@ -2,20 +2,20 @@
 #include "encoding_constants.h"
 
 	.macro arm_func_start name
-	.balign 4, 0
-	.global \name
-	.type \name, @function
+	.balign  4, 0
+	.global  \name
+	.type    \name, @function
 	.arm
 	.endm
 
 	.macro local_arm_func_start name
-	.balign 4, 0
-	.type \name, @function
+	.balign  4, 0
+	.type    \name, @function
 	.arm
 	.endm
 
 	.macro arm_func_end name
-	.size \name, .-\name
+	.size  \name, .-\name
 	.endm
 
 
@@ -60,13 +60,13 @@ hash_loop_\@:                           ;
 	ldmltfd  sp!, {r5, r6, r7, r8, sb}  ; Incorrect pop, ruining registers if address is lower
 	stmgedb  sp!, {ip}                  ; Stash address of decryption wrapper fragment onto stack
 	orr      ip, pc, pc                 ; Re-get `pc`, which now points to the data structure in the pool
-	ldmia    sp!, {pc}                  ; Pop decryption wrapper fragment address off stack to `pc
-	.word BSS + 1
-	.word BSS + 3
-	.word \func + ENC_VAL_1
-	.word BSS + \length + ENC_VAL_1
-	.word 0x00000000
-	.word Encryptor_DecryptionWrapperFragment + (\hashed_instructions << 26)
+	ldmia    sp!, {pc}                  ; Pop decryption wrapper fragment address off stack to `pc`
+	.word    BSS + 1
+	.word    BSS + 3
+	.word    \func + ENC_VAL_1
+	.word    BSS + \length + ENC_VAL_1
+	.word    0x00000000
+	.word    Encryptor_DecryptionWrapperFragment + (\hashed_instructions << 26)
 	.endm
 
 
@@ -80,7 +80,7 @@ hash_loop_\@:                           ;
 	.endm
 
 	.macro func_table_entry func, size
-	.word  \func + ENC_VAL_1,  BSS + \size + ENC_VAL_1
+	.word  \func + ENC_VAL_1, BSS + \size + ENC_VAL_1
 	.endm
 
 	.macro func_table_end
