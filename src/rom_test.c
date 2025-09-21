@@ -100,6 +100,8 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			// External memory control register (0x04000204)
 			// Save value to rewrite later
 			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			
+			// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
 			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 			
 			// Obfuscated, create address 0x027FFE60
@@ -128,12 +130,14 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			addr_offset = 0 - addr_offset;
 			
 			// Wait for card to not be busy
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
+			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+				continue;
+			}
 			
 			// Write enable flag to card ROM and SPI control register
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
-			// Obfuscated read 8-byte command out from gamecard bus, write this back later
+			// Read 8-byte command out from gamecard bus, write this back later
 			for (i = 0; i < 8; i++) {
 				tmp_buf_1[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
 			}
@@ -173,7 +177,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 				reading_addr += CARD_ROM_PAGE_SIZE;
 			}
 			
-			// Write 8-byte command back to gamecard bus
+			// Done reading, restore everything how it was before
+			
+			// Write original command back to gamecard bus
 			for (i = 0; i < 8; i++) {
 				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_1[i];
 			}
@@ -252,6 +258,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			register_base_2 = (REGType8v*)HW_REG_BASE;
 			
 			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			
 			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 			
 			card_ctrl_13 = 5;
@@ -269,7 +276,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			
 			addr_offset = 0 - addr_offset;
 			
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
+			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+				continue;
+			}
 			
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
@@ -447,6 +456,8 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			// External memory control register (0x04000204)
 			// Save value to rewrite later
 			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			
+			// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
 			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 			
 			// Obfuscated, create address 0x027FFE60
@@ -475,12 +486,14 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			addr_offset = 0 - addr_offset;
 			
 			// Wait for card to not be busy
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
+			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+				continue;
+			}
 			
 			// Write enable flag to card ROM and SPI control register
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
-			// Obfuscated read 8-byte command out from gamecard bus, write this back later
+			// Read 8-byte command out from gamecard bus, write this back later
 			for (i = 0; i < 8; i++) {
 				tmp_buf_1[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
 			}
@@ -520,7 +533,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 				reading_addr += CARD_ROM_PAGE_SIZE;
 			}
 			
-			// Write 8-byte command back to gamecard bus
+			// Done reading, restore everything how it was before
+			
+			// Write original command back to gamecard bus
 			for (i = 0; i < 8; i++) {
 				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_1[i];
 			}
@@ -599,6 +614,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			register_base_2 = (REGType8v*)HW_REG_BASE;
 			
 			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			
 			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 			
 			card_ctrl_13 = 5;
@@ -616,7 +632,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			
 			addr_offset = 0 - addr_offset;
 			
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
+			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+				continue;
+			}
 			
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
