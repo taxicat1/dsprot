@@ -2,20 +2,20 @@
 #include "encoding_constants.h"
 
 	.macro arm_func_start name
-	.balign 4, 0
-	.global \name
-	.type \name, @function
+	.balign  4, 0
+	.global  \name
+	.type    \name, @function
 	.arm
 	.endm
 
 	.macro local_arm_func_start name
-	.balign 4, 0
-	.type \name, @function
+	.balign  4, 0
+	.type    \name, @function
 	.arm
 	.endm
 
 	.macro arm_func_end name
-	.size \name, .-\name
+	.size  \name, .-\name
 	.endm
 
 
@@ -47,10 +47,10 @@
 
 
 	.macro overwrite_instructions self
-	ldr r0, =\self+ENC_VAL_1
-	ldr r1, =0xE12FFF1E       ; <bx lr> command
-	sub r0, r0, #ENC_VAL_1
-	stmia r0!, {r1-r10}       ; Writes <bx lr> followed by whatever garbage happened to be in `r2`-`r10`
+	ldr    r0, =\self+ENC_VAL_1
+	ldr    r1, =0xE12FFF1E       ; <bx lr> command
+	sub    r0, r0, #ENC_VAL_1
+	stmia  r0!, {r1-r10}         ; Writes <bx lr> followed by whatever garbage happened to be in `r2`-`r10`
 	.endm
 
 
@@ -64,7 +64,7 @@
 	.endm
 
 	.macro func_table_entry func, size
-	.word  \func + ENC_VAL_1,  BSS + \size + ENC_VAL_1
+	.word  \func + ENC_VAL_1, BSS + \size + ENC_VAL_1
 	.endm
 
 	.macro func_table_end
