@@ -191,7 +191,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			case INS_TYPE_BLXIMM:
 			case INS_TYPE_B:
 				{
-					u32* dst_addr = (u32*)(dst + idx);
+					u32* dst_addr = (u32*)(dst_bytes + idx);
 					ctx->x += (ins_word >> 24);
 					*dst_addr = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) | 
 					            (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
