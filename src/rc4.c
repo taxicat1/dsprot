@@ -70,11 +70,9 @@ static u8 RC4_Byte(RC4_Ctx* ctx) {
 
 
 static u32 RC4_InitSBox(u8* sbox) {
-	int  i;
-	int  x;
+	int i;
 	for (i = 0; i < 256; i++) {
-		x = i & 0xFF;
-		sbox[i] = x ^ 1;
+		sbox[i] = (u8)i ^ 1;
 	}
 	
 	return 0;
