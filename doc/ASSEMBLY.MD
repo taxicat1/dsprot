@@ -106,7 +106,7 @@ This has two giveaways that it is assembly:
 The crash function takes the form:
 
 ```asm
-	asm_func_start Crash
+	arm_func_start Crash
 Crash:
 	mov    r10, pc
 	orrs   r10, r10, r10
