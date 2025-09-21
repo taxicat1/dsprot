@@ -1,5 +1,5 @@
-#ifndef KEYFILE_H
-#define KEYFILE_H
+#ifndef KEYDATA_H
+#define KEYDATA_H
 
 #include <stdint.h>
 
