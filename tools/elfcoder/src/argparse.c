@@ -20,8 +20,8 @@ static int isValidIdentifier(const char* str) {
 	
 	// Must start with [_a-zA-Z]
 	if (
-		str[0] != '_' &&
-		(str[0] < 'a' || str[0] > 'z') &&
+		str[0] != '_' && 
+		(str[0] < 'a' || str[0] > 'z') && 
 		(str[0] < 'A' || str[0] > 'Z')
 	) {
 		return 0;
@@ -30,9 +30,9 @@ static int isValidIdentifier(const char* str) {
 	// Subsequent characters must be [_a-zA-Z0-9]+
 	for (int i = 1; str[i] != '\0'; i++) {
 		if (
-			str[i] != '_' &&
-			(str[i] < 'a' || str[i] > 'z') &&
-			(str[i] < 'A' || str[i] > 'Z') &&
+			str[i] != '_' && 
+			(str[i] < 'a' || str[i] > 'z') && 
+			(str[i] < 'A' || str[i] > 'Z') && 
 			(str[i] < '0' || str[i] > '9')
 		) {
 			return 0;
@@ -46,7 +46,7 @@ static void printDescription(void) {
 	printf(
 		"Encode or decode ARM ELF files, with or without a key.                          \n"
 		"If encoding, output an assembly file that will decode them.                     \n"
-		"For DS Protect version 1.23z.                                                   \n"
+		"For DS Protect version 1.23.                                                    \n"
 	);
 }
 
@@ -68,7 +68,7 @@ static void printUsage(const char* self_name) {
 
 
 static int argCompare(char* arg, char short_letter, char* long_str) {
-	return (arg[1] == short_letter && arg[2] == '\0') ||
+	return (arg[1] == short_letter && arg[2] == '\0') || 
 	       (strcmp(arg, long_str) == 0);
 }
 

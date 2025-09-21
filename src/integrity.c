@@ -50,7 +50,7 @@ static inline u32 checkDecryptionWrapper(u8* addr, u32 match_ret, u32 mismatch_r
 
 
 u32 Integrity_MACOwner_IsBad(void) {
-    u8*  addr;
+	u8*  addr;
 	u32  ret;
 	
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1) - (ENC_VAL_1 * 2);
@@ -61,7 +61,7 @@ u32 Integrity_MACOwner_IsBad(void) {
 
 
 u32 Integrity_MACOwner_IsGood(void) {
-    u8*  addr;
+	u8*  addr;
 	u32  ret;
 	
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1) - (ENC_VAL_1 * 2);
@@ -72,7 +72,7 @@ u32 Integrity_MACOwner_IsGood(void) {
 
 
 u32 Integrity_ROMTest_IsBad(void) {
-    u8*  addr;
+	u8*  addr;
 	u32  ret;
 	
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1) - (ENC_VAL_1 * 2);
@@ -83,7 +83,7 @@ u32 Integrity_ROMTest_IsBad(void) {
 
 
 u32 Integrity_ROMTest_IsGood(void) {
-    u8*  addr;
+	u8*  addr;
 	u32  ret;
 	
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1) - (ENC_VAL_1 * 2);
