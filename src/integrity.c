@@ -13,144 +13,74 @@ u32 Integrity_ROMTest_IsGood(void);
 
 #define INTEGRITY_OBFS_OFFSET  (ENC_VAL_1 & ~0xFFF)
 
-// The bytes checked here are from the `run_encrypted_func` macro defined in asm_macro.inc:
-//   e92d00f0    stmfd sp!, {r4-r7}
-//   e92d000f    stmfd sp!, {r0-r3}
-//   e8bd00f0    ldmfd sp!, {r4-r7}
-//   e59f103c    ldr r1, [pc, #96]
+
+// This was likely not originally an inline, but an inline is able to match here nicely
+static inline u32 checkDecryptionWrapper(u8* addr, u32 match_ret, u32 mismatch_ret) {
+	u32 idx;
+	
+	addr += INTEGRITY_OBFS_OFFSET;
+	idx = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
+	
+	// The bytes checked here are from the `run_encrypted_func` macro defined in asm_macro.inc:
+	//   e92d00f0    stmfd  sp!, {r4-r7}
+	//   e92d000f    stmfd  sp!, {r0-r3}
+	//   e8bd00f0    ldmfd  sp!, {r4-r7}
+	//   e59f103c    ldr    r1, [pc, #96]
+	if (addr[idx++] != 0xF0) return mismatch_ret;
+	if (addr[idx++] != 0x00) return mismatch_ret;
+	if (addr[idx++] != 0x2D) return mismatch_ret;
+	if (addr[idx++] != 0xE9) return mismatch_ret;
+	
+	if (addr[idx++] != 0x0F) return mismatch_ret;
+	if (addr[idx++] != 0x00) return mismatch_ret;
+	if (addr[idx++] != 0x2D) return mismatch_ret;
+	if (addr[idx++] != 0xE9) return mismatch_ret;
+	
+	if (addr[idx++] != 0xF0) return mismatch_ret;
+	if (addr[idx++] != 0x00) return mismatch_ret;
+	if (addr[idx++] != 0xBD) return mismatch_ret;
+	if (addr[idx++] != 0xE8) return mismatch_ret;
+	
+	if (addr[idx++] != 0x60) return mismatch_ret;
+	if (addr[idx++] != 0x10) return mismatch_ret;
+	if (addr[idx++] != 0x9F) return mismatch_ret;
+	if (addr[idx++] != 0xE5) return mismatch_ret;
+	
+	return match_ret;
+}
 
 
 u32 Integrity_MACOwner_IsBad(void) {
-	u8*  addr;
-	u32  offset;
+	u8* addr;
 	
-	// Obfuscated handling of function address
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1) - (ENC_VAL_1 * 2);
-	addr += INTEGRITY_OBFS_OFFSET;
-	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
-	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	return PRIME_INTEGRITY * PRIME_FALSE;
+	return checkDecryptionWrapper(addr, PRIME_INTEGRITY * PRIME_FALSE, PRIME_INTEGRITY * PRIME_TRUE);
 }
 
 
 u32 Integrity_MACOwner_IsGood(void) {
-	u8*  addr;
-	u32  offset;
+	u8* addr;
 	
-	// Obfuscated handling of function address
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1) - (ENC_VAL_1 * 2);
-	addr += INTEGRITY_OBFS_OFFSET;
-	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
-	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	return PRIME_INTEGRITY * PRIME_TRUE;
+	return checkDecryptionWrapper(addr, PRIME_INTEGRITY * PRIME_TRUE, PRIME_INTEGRITY * PRIME_FALSE);
 }
 
 
 u32 Integrity_ROMTest_IsBad(void) {
-	u8*  addr;
-	u32  offset;
+	u8* addr;
 	
-	// Obfuscated handling of function address
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1) - (ENC_VAL_1 * 2);
-	addr += INTEGRITY_OBFS_OFFSET;
-	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
-	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_TRUE;
-	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_TRUE;
-	
-	return PRIME_INTEGRITY * PRIME_FALSE;
+	return checkDecryptionWrapper(addr, PRIME_INTEGRITY * PRIME_FALSE, PRIME_INTEGRITY * PRIME_TRUE);
 }
 
 
 u32 Integrity_ROMTest_IsGood(void) {
-	u8*  addr;
-	u32  offset;
+	u8* addr;
 	
-	// Obfuscated handling of function address
 	addr = (u8*)ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1) - (ENC_VAL_1 * 2);
-	addr += INTEGRITY_OBFS_OFFSET;
-	offset = ENC_VAL_1 - INTEGRITY_OBFS_OFFSET;
 	
-	// Bytes of the first four instructions of the function
-	if (addr[offset+0x0] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x1] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x2] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x3] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	if (addr[offset+0x4] != 0x0F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x5] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x6] != 0x2D) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x7] != 0xE9) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	if (addr[offset+0x8] != 0xF0) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0x9] != 0x00) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xA] != 0xBD) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xB] != 0xE8) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	if (addr[offset+0xC] != 0x60) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xD] != 0x10) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xE] != 0x9F) return PRIME_INTEGRITY * PRIME_FALSE;
-	if (addr[offset+0xF] != 0xE5) return PRIME_INTEGRITY * PRIME_FALSE;
-	
-	return PRIME_INTEGRITY * PRIME_TRUE;
+	return checkDecryptionWrapper(addr, PRIME_INTEGRITY * PRIME_TRUE, PRIME_INTEGRITY * PRIME_FALSE);
 }
