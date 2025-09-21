@@ -1,4 +1,4 @@
-Module 3 (main):
+Module 1 (main):
 	Functions:
 		DetectFlashcartA
 		DetectFlashcartB
@@ -18,11 +18,11 @@ Module 3 (main):
 		DSProt_DetectEmulatorB
 
 
-Module 3.5 (BSS + garbage + callbacks):
+Module 1.5 (BSS + garbage + callbacks):
 	(no functions, only .bss and .rodata regions)
 
 
-Module 1 (integrity):
+Module 2 (integrity):
 	Functions:
 		Integrity_MACOwner_IsBad
 		Integrity_MACOwner_IsGood
@@ -42,7 +42,7 @@ Module 1 (integrity):
 		RunEncrypted_Integrity_ROMTest_IsGood
 
 
-Module 4 (encryptor):
+Module 3 (encryptor):
 	Functions:
 		Encryptor_DecodeFunctionTable
 		Encryptor_DecryptFunction
@@ -55,7 +55,7 @@ Module 4 (encryptor):
 		Encryptor_DecryptionWrapperFragment
 
 
-Module 5 (core tests):
+Module 4 (core tests):
 	Functions:
 		MACOwner_IsBad
 		MACOwner_IsGood
@@ -86,7 +86,7 @@ Module 5 (core tests):
 		RunEncrypted_ROMUtil_CRC32
 
 
-Module 2 (RC4):
+Module 5 (RC4):
 	Functions:
 		RC4_CategorizeInstruction
 		RC4_Init
