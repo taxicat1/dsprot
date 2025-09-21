@@ -167,7 +167,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		
 		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
 			case INS_TYPE_BLXIMM:
-				// Error correction (this case should never run)
+				// Error correction (this case should never be run)
 				src_bytes[idx+3] ^= ENC_OPCODE_1;
 				// Fall through
 			case INS_TYPE_BL:
