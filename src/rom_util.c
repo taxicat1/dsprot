@@ -54,6 +54,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	
 	ENCRYPTION_START(KEY_ROM_UTIL_READ_1);
 	
+	// Card command register (0x040001A8)
 	card_cmd = (REGType8v*)(register_base + REG_CARD_CMD_OFFSET);
 	
 	// External memory control register (0x04000204)
