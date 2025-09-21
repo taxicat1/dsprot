@@ -25,10 +25,10 @@ void Encryptor_StartRange(u32* addr) {
 	}
 	
 	// Search forward for second key to determine size
-    size = 0;
-    while (key_ins != addr[size]) {
-        size++;
-    }
+	size = 0;
+	while (key_ins != addr[size]) {
+		size++;
+	}
 	
 	if (size) {
 		RC4_InitAndDecryptInstructions(&key[0], addr, addr, size * 4);

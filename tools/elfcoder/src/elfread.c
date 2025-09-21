@@ -298,7 +298,7 @@ static int tryEncryptSymbol(ElfFile* elf, const Elf32_Sym* symbol, int decryptio
 		fread(&reloc, sizeof(Elf32_Rela), 1, elf->fhandle);
 		
 		if (
-			(reloc.r_offset >= symbol->st_value) &&
+			(reloc.r_offset >= symbol->st_value) && 
 			(reloc.r_offset < (symbol->st_value + symbol->st_size))
 		) {
 			if (
