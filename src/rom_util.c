@@ -41,7 +41,6 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	u16         lock_id;
 	u16         ext_mem_register_val_original;
 	u32         output;
-	u32         reg_mi_exmemcnt;
 	int         i;
 	s32         card_ctrl_cmd;
 	
@@ -58,13 +57,17 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	card_cmd = (REGType8v*)(register_base + REG_CARD_CMD_OFFSET);
 	
 	// External memory control register (0x04000204)
-	reg_mi_exmemcnt = register_base + REG_EXMEMCNT_OFFSET;
-	
 	// Save value to rewrite later
-	ext_mem_register_val_original = *(REGType16v*)reg_mi_exmemcnt;
-	*(REGType16v*)reg_mi_exmemcnt &= ~REG_MI_EXMEMCNT_MP_MASK;
+	ext_mem_register_val_original = *(REGType16v*)(register_base + REG_EXMEMCNT_OFFSET);
+	
+	// Set current processor accessing the gamecard bus to the ARM9
+	*(REGType16v*)(register_base + REG_EXMEMCNT_OFFSET) = 
+		(*(REGType16v*)(register_base + REG_EXMEMCNT_OFFSET) & ~REG_MI_EXMEMCNT_MP_MASK) | 
+		(MI_PROCESSOR_ARM9 << REG_MI_EXMEMCNT_MP_SHIFT);
 	
 	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
+	// This address must instead be 0x02FFFE60 if in DSi mode, which is unsupported here
+	// Read port setting and set page read flags
 	card_ctrl_cmd = (*(vs32*)0x027FFE60 & ~CARD_COMMAND_MASK) |
 	                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 	
@@ -75,7 +78,9 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	addr_offset = 0 - (addr & (CARD_ROM_PAGE_SIZE - 1));
 	
 	// Wait for card to not be busy
-	while (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_START) { }
+	while (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_START) {
+		continue;
+	}
 	
 	// Write enable flag to card ROM and SPI control register
 	*(REGType8v*)(register_base + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
@@ -121,7 +126,9 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		addr += CARD_ROM_PAGE_SIZE;
 	}
 	
-	// Write 8-byte command back to gamecard bus
+	// Done reading, restore everything how it was before
+	
+	// Write original command back to gamecard bus
 	for (i = 0; i < 8; i++) {
 		card_cmd[i] = buffer[i];
 	}
