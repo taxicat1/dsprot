@@ -38,9 +38,9 @@ u32 MACOwner_IsBad(DSProt_Ctx* ctx) {
 	
 	OS_GetOwnerInfo(&owner_info);
 	if (
-		i == MAC_ADDR_SIZE &&
-		owner_info.birthday.month == 1 &&
-		owner_info.birthday.day   == 1 &&
+		i == MAC_ADDR_SIZE && 
+		owner_info.birthday.month == 1 && 
+		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
@@ -80,9 +80,9 @@ u32 MACOwner_IsGood(DSProt_Ctx* ctx) {
 	
 	OS_GetOwnerInfo(&owner_info);
 	if (
-		i == MAC_ADDR_SIZE &&
-		owner_info.birthday.month == 1 &&
-		owner_info.birthday.day   == 1 &&
+		i == MAC_ADDR_SIZE && 
+		owner_info.birthday.month == 1 && 
+		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
