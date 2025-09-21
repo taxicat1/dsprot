@@ -1,7 +1,7 @@
 #include "rc4.h"
 
-#include "encryptor.h"
 #include "encoding_constants.h"
+#include "encryptor.h"
 
 #define RC4_KEY_SIZE  (16)
 
