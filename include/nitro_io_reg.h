@@ -4,7 +4,10 @@
 #include "nitro_types.h"
 
 // <nitro/hw/io_reg.h>
-#define REG_EXMEMCNT_OFFSET      (0x204)
-#define REG_MI_EXMEMCNT_MP_MASK  (0x800)
+#define REG_EXMEMCNT_OFFSET       (0x204)
+#define REG_MI_EXMEMCNT_MP_MASK   (0x800)
+#define REG_MI_EXMEMCNT_MP_SHIFT  (11)
+
+#define MI_PROCESSOR_ARM9         (0)
 
 #endif
