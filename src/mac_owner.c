@@ -37,9 +37,9 @@ u32 MACOwner_IsBad(void) {
 	
 	OS_GetOwnerInfo(&owner_info);
 	if (
-		i == MAC_ADDR_SIZE &&
-		owner_info.birthday.month == 1 &&
-		owner_info.birthday.day   == 1 &&
+		i == MAC_ADDR_SIZE && 
+		owner_info.birthday.month == 1 && 
+		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
 		mul = PRIME_TRUE;
@@ -75,9 +75,9 @@ u32 MACOwner_IsGood(void) {
 	
 	OS_GetOwnerInfo(&owner_info);
 	if (
-		i == MAC_ADDR_SIZE &&
-		owner_info.birthday.month == 1 &&
-		owner_info.birthday.day   == 1 &&
+		i == MAC_ADDR_SIZE && 
+		owner_info.birthday.month == 1 && 
+		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
 		mul = PRIME_FALSE;
