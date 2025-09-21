@@ -64,7 +64,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	
 	// Save value to rewrite later
 	ext_mem_register_val_original = *(REGType16v*)reg_mi_exmemcnt;
-
+	
 	// Set current processor accessing the gamecard bus to the ARM9
 	*(REGType16v*)reg_mi_exmemcnt = (*(REGType16v*)reg_mi_exmemcnt & ~REG_MI_EXMEMCNT_MP_MASK) |
 	                                (MI_PROCESSOR_ARM9 << REG_MI_EXMEMCNT_MP_SHIFT);
