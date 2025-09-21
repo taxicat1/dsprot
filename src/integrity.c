@@ -23,9 +23,9 @@ u32 Integrity_MACOwner_IsBad(void) {
 	
 	if (
 		// <MACOwner_IsBad> disassembly:
-		//   e92d4ff8  push  {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
-		//   e24dd060  sub   sp, sp, #96  @ 0x60
-		//   e28d0002  add   r0, sp, #2
+		//   e92d4ff8    push  {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
+		//   e24dd060    sub   sp, sp, #96  @ 0x60
+		//   e28d0002    add   r0, sp, #2
 		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF8 && 
 		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
 		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
@@ -65,9 +65,9 @@ u32 Integrity_MACOwner_IsGood(void) {
 	
 	if (
 		// <MACOwner_IsGood> disassembly:
-		//   e92d4ff8  push  {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
-		//   e24dd060  sub   sp, sp, #96  @ 0x60
-		//   e28d0002  add   r0, sp, #2
+		//   e92d4ff8    push  {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
+		//   e24dd060    sub   sp, sp, #96  @ 0x60
+		//   e28d0002    add   r0, sp, #2
 		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF8 && 
 		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
 		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
@@ -105,10 +105,10 @@ u32 Integrity_ROMTest_IsBad(void) {
 	
 	if (
 		// <ROMTest_IsBad> disassembly:
-		//   e92d4ff0  push  {r4, r5, r6, r7, r8, r9, sl, fp, lr}
-		//   e24ddf89  sub   sp, sp, #548  @ 0x224
-		//   e3a0c001  mov   ip, #1
-		//   e1a0c78c  lsl   ip, ip, #15
+		//   e92d4ff0    push  {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+		//   e24ddf89    sub   sp, sp, #548  @ 0x224
+		//   e3a0c001    mov   ip, #1
+		//   e1a0c78c    lsl   ip, ip, #15
 		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF0 && 
 		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
 		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
@@ -151,10 +151,10 @@ u32 Integrity_ROMTest_IsGood(void) {
 	
 	if (
 		// <ROMTest_IsGood> disassembly:
-		//   e92d4ff0  push  {r4, r5, r6, r7, r8, r9, sl, fp, lr}
-		//   e24ddf89  sub   sp, sp, #548  @ 0x224
-		//   e3a0c001  mov   ip, #1
-		//   e1a0c78c  lsl   ip, ip, #15
+		//   e92d4ff0    push  {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+		//   e24ddf89    sub   sp, sp, #548  @ 0x224
+		//   e3a0c001    mov   ip, #1
+		//   e1a0c78c    lsl   ip, ip, #15
 		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF0 && 
 		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
 		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
