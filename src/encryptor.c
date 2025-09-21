@@ -6,10 +6,10 @@
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
 
-void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes);
+static void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes);
 
 
-asm void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes) {
+static asm void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes) {
 	// This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange.
 	// Both of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
 	
