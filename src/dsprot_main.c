@@ -3,8 +3,8 @@
 #include "dummy.h"
 #include "encoding_constants.h"
 #include "integrity.h"
-#include "nitro_types.h"
 #include "mac_owner.h"
+#include "nitro_types.h"
 #include "primes.h"
 #include "rom_test.h"
 
