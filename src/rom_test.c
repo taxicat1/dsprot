@@ -87,6 +87,8 @@ u32 ROMTest_IsBad(void) {
 			// External memory control register (0x04000204)
 			// Save value to rewrite later
 			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			
+			// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
 			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 			
 			// Obfuscated, create address 0x027FFE60
@@ -115,12 +117,14 @@ u32 ROMTest_IsBad(void) {
 			addr_offset = 0 - addr_offset;
 			
 			// Wait for card to not be busy
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
+			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+				continue;
+			}
 			
 			// Writing to card ROM and SPI control register
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
-			// Obfuscated read 8-byte command out from gamecard bus, write this back later
+			// Read 8-byte command out from gamecard bus, write this back later
 			bufptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
 				*bufptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
@@ -161,7 +165,9 @@ u32 ROMTest_IsBad(void) {
 				reading_addr += CARD_ROM_PAGE_SIZE;
 			}
 			
-			// Write 8-byte command back to gamecard bus
+			// Done reading, restore everything how it was before
+			
+			// Write original command back to gamecard bus
 			bufptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
 				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *bufptr++;
@@ -267,6 +273,8 @@ u32 ROMTest_IsGood(void) {
 			// External memory control register (0x04000204)
 			// Save value to rewrite later
 			ext_mem_register_val_original = reg_MI_EXMEMCNT;
+			
+			// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
 			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
 			
 			// Obfuscated, create address 0x027FFE60
@@ -295,12 +303,14 @@ u32 ROMTest_IsGood(void) {
 			addr_offset = 0 - addr_offset;
 			
 			// Wait for card to not be busy
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
+			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+				continue;
+			}
 			
 			// Writing to card ROM and SPI control register
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
-			// Obfuscated read 8-byte command out from gamecard bus, write this back later
+			// Read 8-byte command out from gamecard bus, write this back later
 			bufptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
 				*bufptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
@@ -341,7 +351,9 @@ u32 ROMTest_IsGood(void) {
 				reading_addr += CARD_ROM_PAGE_SIZE;
 			}
 			
-			// Write 8-byte command back to gamecard bus
+			// Done reading, restore everything how it was before
+			
+			// Write original command back to gamecard bus
 			bufptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
 				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *bufptr++;
