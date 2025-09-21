@@ -31,7 +31,7 @@ u32 ROMTest_IsBad(void) {
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		if (i == 2) {
-			// Must be like this to match
+			// Has to be like this to match
 			rom_addr = 1;
 			rom_addr <<= 15;
 		} else {
@@ -88,7 +88,7 @@ u32 ROMTest_IsGood(void) {
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		if (i == 2) {
-			// Must be like this to match
+			// Has to be like this to match
 			rom_addr = 1;
 			rom_addr <<= 15;
 		} else {
