@@ -39,9 +39,9 @@ u32 MACOwner_IsBad(void* __unused) {
 	
 	OS_GetOwnerInfo(&owner_info);
 	if (
-		i == MAC_ADDR_SIZE &&
-		owner_info.birthday.month == 1 &&
-		owner_info.birthday.day   == 1 &&
+		i == MAC_ADDR_SIZE && 
+		owner_info.birthday.month == 1 && 
+		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
 		DSProt_Crash(NULL, NULL);
