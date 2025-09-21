@@ -2,20 +2,20 @@
 #include "encoding_constants.h"
 
 	.macro arm_func_start name
-	.balign 4, 0
-	.global \name
-	.type \name, @function
+	.balign  4, 0
+	.global  \name
+	.type    \name, @function
 	.arm
 	.endm
 
 	.macro local_arm_func_start name
-	.balign 4, 0
-	.type \name, @function
+	.balign  4, 0
+	.type    \name, @function
 	.arm
 	.endm
 
 	.macro arm_func_end name
-	.size \name, .-\name
+	.size  \name, .-\name
 	.endm
 
 
@@ -56,7 +56,7 @@
 	.endm
 
 	.macro func_table_entry func, size
-	.word  \func + ENC_VAL_1,  BSS + \size + ENC_VAL_1
+	.word  \func + ENC_VAL_1, BSS + \size + ENC_VAL_1
 	.endm
 
 	.macro func_table_end
