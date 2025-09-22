@@ -4,6 +4,8 @@
 #include "nitro_types.h"
 
 // <nitro/os.h>
+#define HW_CACHE_LINE_SIZE  (32)
+
 typedef struct {
 	u8   language;
 	u8   favoriteColor;
