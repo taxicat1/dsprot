@@ -2,6 +2,7 @@
 
 #include "bss.h"
 #include "encoding_constants.h"
+#include "nitro_os.h"
 #include "rc4.h"
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
@@ -10,19 +11,19 @@ static void clearDataAndInstructionCache(register void* start_addr, register u32
 
 
 static asm void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes) {
-	// This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange.
-	// Both of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
+	/* This function is an inlining and combination of DC_FlushRange and IC_InvalidateRange. */
+	/* Both of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c */
 	
 	add  r1, r1, r0
 	mov  ip, #0
-	bic  r0, r0, #31
+	bic  r0, r0, #HW_CACHE_LINE_SIZE - 1
 	
 @1:
-	mcr  p15, 0, r0, c7, c5, 1
-	mcr  p15, 0, ip, c7, c10, 4
-	mcr  p15, 0, r0, c7, c14, 1
+	mcr  p15, 0, r0, c7, c5, 1   /* IC invalidate */
+	mcr  p15, 0, ip, c7, c10, 4  /* Wait write buffer empty */
+	mcr  p15, 0, r0, c7, c14, 1  /* DC flush */
 	
-	add  r0, r0, #32
+	add  r0, r0, #HW_CACHE_LINE_SIZE
 	cmp  r0, r1
 	blt  @1
 	
