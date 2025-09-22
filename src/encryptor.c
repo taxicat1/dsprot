@@ -2,6 +2,7 @@
 
 #include "bss.h"
 #include "encoding_constants.h"
+#include "nitro_os.h"
 #include "rc4.h"
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
@@ -10,6 +11,9 @@
 static inline void clearDataAndInstructionCache(void) {
 	// This function is an inlining and combination of DC_FlushAll, IC_InvalidateAll, and DC_WaitWriteBufferEmpty.
 	// All of these functions are implemented as asm functions in Nitro SDK: build/libraries/os/ARM9/src/os_cache.c
+	
+	// This function must also be an asm literal inside a C function, not an asm function, in order to inline properly.
+	
 	asm {
 		/* DC_FlushAll */
 		mov  ip, #0
@@ -18,14 +22,14 @@ static inline void clearDataAndInstructionCache(void) {
 		mov  r0, #0
 	@2:
 		orr  r2, r1, r0
-		mcr  p15, 0, ip, c7, c10, 4
-		mcr  p15, 0, r2, c7, c14, 2
+		mcr  p15, 0, ip, c7, c10, 4  /* Wait write buffer empty */
+		mcr  p15, 0, r2, c7, c14, 2  /* DC flush */
 		
-		add  r0, r0, #32
-		cmp  r0, 0x400
+		add  r0, r0, #HW_CACHE_LINE_SIZE
+		cmp  r0, #HW_DCACHE_SIZE/4
 		blt  @2
 		
-		add  r1, r1, 0x40000000
+		add  r1, r1, 1<<HW_C7_CACHE_SET_NO_SHIFT
 		cmp  r1, #0
 		bne  @1
 		
