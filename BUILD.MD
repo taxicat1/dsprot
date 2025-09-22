@@ -41,3 +41,15 @@ Plus inline functions within the header:
 - `void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2);`
 
 See [FUNCTIONALITY.MD](./doc/FUNCTIONALITY.MD) for more details on using these functions.
+
+### Dependence on TWL SDK
+
+These TWL SDK functions are required for linking. If your decomp does not include TWL SDK, they will need to be found and correctly named. This can be done by cross-referencing DS Protect as dumped from the game ROM with a disassembly of the compiled `dsprot.a`.
+
+- `CARD_LockRom`
+- `CARD_UnlockRom`
+- `CARDi_ReadRom`
+- `OS_GetLockID`
+- `OS_GetMacAddress`
+- `OS_GetOwnerInfo`
+- `OS_ReleaseLockID`
