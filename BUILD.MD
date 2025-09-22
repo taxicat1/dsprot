@@ -43,3 +43,14 @@ Additionally, inline functions are provided by the header that emulate the old D
 - `u32 DSProt_DetectNotDummy_Old(void* callback);`
 
 See [FUNCTIONALITY.MD](./doc/FUNCTIONALITY.MD) for more details on using these functions.
+
+### Dependence on Nitro SDK
+
+These Nitro SDK functions are required for linking. If your decomp does not include Nitro SDK, they will need to be found and correctly named. This can be done by cross-referencing DS Protect as dumped from the game ROM with a disassembly of the compiled `dsprot.a`.
+
+- `CARD_LockRom`
+- `CARD_UnlockRom`
+- `OS_GetLockID`
+- `OS_GetMacAddress`
+- `OS_GetOwnerInfo`
+- `OS_ReleaseLockID`
