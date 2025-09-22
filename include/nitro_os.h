@@ -4,6 +4,10 @@
 #include "nitro_types.h"
 
 // <nitro/os.h>
+#define HW_CACHE_LINE_SIZE        (32)
+#define HW_C7_CACHE_SET_NO_SHIFT  (30)
+#define HW_DCACHE_SIZE            (0x1000)
+
 typedef struct {
 	u8   language;
 	u8   favoriteColor;
