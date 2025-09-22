@@ -23,7 +23,10 @@ u32 MACOwner_IsBad(void) {
 	OSOwnerInfo  owner_info;
 	int          i;
 	
+	// Assignment to 0 here and at the start of the loop are both required to match,
+	// likely due to the inline asm created by the encryption macro disabling optimizations around it
 	i = 0;
+	
 	OS_GetMacAddress(&mac_addr[0]);
 	
 	ENCRYPTION_START(KEY_MAC_OWNER_1);
