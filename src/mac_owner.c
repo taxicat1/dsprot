@@ -21,9 +21,9 @@ static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
 
 
 u32 MACOwner_IsBad(void) {
-	int          i;
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
+	int          i;
 	u32          ret;
 	
 	OS_GetMacAddress(&mac_addr[0]);
@@ -59,9 +59,9 @@ EXIT:
 
 
 u32 MACOwner_IsGood(void) {
-	int          i;
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
+	int          i;
 	u32          ret;
 	
 	OS_GetMacAddress(&mac_addr[0]);
