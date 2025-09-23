@@ -1,12 +1,12 @@
 #include "rc4.h"
 
+#define RC4_KEY_SIZE  (16)
+
 typedef struct {
 	int  i;
 	int  j;
 	u8   S[256];
 } RC4_Ctx;
-
-#define RC4_KEY_SIZE  (16)
 
 static void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len);
 static u8 RC4_Byte(RC4_Ctx* ctx);
