@@ -35,12 +35,14 @@ static int isValidIdentifier(const char* str) {
 	return 1;
 }
 
+
 static void printDescription(void) {
 	printf(
 		"Derive a key file from a function.                                              \n"
 		"For DS Protect version 2.05.                                                    \n"
 	);
 }
+
 
 static void printUsage(const char* self_name) {
 	printf(
@@ -57,6 +59,7 @@ static int argCompare(char* arg, char short_letter, char* long_str) {
 	return (arg[1] == short_letter && arg[2] == '\0') || 
 	       (strcmp(arg, long_str) == 0);
 }
+
 
 int ArgParse_CreateTask(FuncHashTask* task, char** argv) {
 	// Defaults
