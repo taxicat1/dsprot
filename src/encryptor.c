@@ -7,6 +7,10 @@
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
 
+// Functions to be encoded (cannot be static)
+void* Encryptor_DecryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
+u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
+
 static void clearDataAndInstructionCache(register void* start_addr, register u32 num_bytes);
 
 
