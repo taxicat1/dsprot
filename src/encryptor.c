@@ -182,51 +182,51 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 
 
 asm u32 Encryptor_DecryptionWrapperFragment(void) {
-	// This is a function intended only to be called from decryption wrappers after special setup.
-	// Calling it in some other context will cause a crash.
+	/* This is a function intended only to be called from decryption wrappers after special setup.
+	   Calling it in some other context will cause a crash. */
 	
-	// This function needs to:
-	// - Decrypt the inner function
-	// - Call the decrypted inner function, with the arguments that were passed to the wrapper
-	// - Save the return value of the inner function
-	// - Re-encrypt the inner function, which changes the key
-	// - Save the new key back to the callee
-	// - Return back the value the inner function returned
-	//
-	// This is nontrivial, because you must preserve `r0`-`r3` and the stack pointer as they were before
-	// this function was called. Preserving register values between calls typically means pushing them
-	// onto the stack, however this is not an option as the stack pointer must be preserved for the inner
-	// function to accept arguments from it.
-	//
-	// Instead, storage space within the instructional memory of the callee is allocated to be a temporary
-	// location for register values. The stack may still be used to prepare arguments for the encryption and
-	// decryption functions, and at any point after the inner function returns.
+	/* This function needs to:
+	   - Decrypt the inner function
+	   - Call the decrypted inner function, with the arguments that were passed to the wrapper
+	   - Save the return value of the inner function
+	   - Re-encrypt the inner function, which changes the key
+	   - Save the new key back to the callee
+	   - Return back the value the inner function returned
+	   
+	   This is nontrivial, because you must preserve `r0`-`r3` and the stack pointer as they were before
+	   this function was called. Preserving register values between calls typically means pushing them
+	   onto the stack, however this is not an option as the stack pointer must be preserved for the inner
+	   function to accept arguments from it.
+	   
+	   Instead, storage space within the instructional memory of the callee is allocated to be a temporary
+	   location for register values. The stack may still be used to prepare arguments for the encryption and
+	   decryption functions, and at any point after the inner function returns.
+	   
+	   Prior to calling, `ip` is set to the pointer of the data structure for the target function:
+	     +0x0   :  Storage space (dummy data initially)
+	     +0x4   :  Decryption key (obfuscated)
+	     +0x8   :  Function address (obfuscated)
+	     +0xC   :  Function size in bytes (obfuscated)
+	     +0x10  :  Storage space */
 	
-	// Prior to calling, `ip` is set to the pointer of the data structure for the target function:
-	//   +0x0   :  Storage space (dummy data initially)
-	//   +0x4   :  Decryption key (obfuscated)
-	//   +0x8   :  Function address (obfuscated)
-	//   +0xC   :  Function size in bytes (obfuscated)
-	//   +0x10  :  Storage space
-	
-	stmfd  sp!, {r0-r3}               // Push inner function arguments onto the stack to save them for after decryption.
-	str    r10, [ip, #0x10]           // `r10` is saved to second storage space.
-	mov    r10, ip                    // `r10` now used for the pointer to the data structure.
-	str    lr, [r10]                  // `lr` (outer return address) saved to first storage space to return later.
-	ldmib  r10, {r0-r2}               // Read function decryptor arguments from data structure (key, addr, size).
-	bl     Encryptor_DecryptFunction  // Call function decryptor, which returns de-obfuscated function address.
-	mov    ip, r0                     // Move returned address to `ip` to free up `r0`.
-	ldmia  sp!, {r0-r3}               // Pop arguments to inner function (`r0`-`r3`) off the stack. Stack is now restored.
-	blx    ip                         // Call inner function. `r0`-`r3` and `sp` are correct for proper arguments.
-	stmdb  sp!, {r4}                  // `r4` about to be used as temporary register, preserve its current value on the stack.
-	mov    r4, r0                     // Preserve the return from the inner function in `r4`, move it back to `r0` later.
-	ldmib  r10, {r0-r2}               // Read function encryptor arguments from data structure (key, addr, size).
-	bl     Encryptor_EncryptFunction  // Call function encryptor, which returns obfuscated new key.
-	str    r0, [r10, #0x4]            // New key is stored back into data structure.
-	mov    r0, r4                     // Return value from inner function is moved back to `r0` to return it.
-	ldmia  sp!, {r4}                  // Original value of `r4` restored from the stack so we can properly return.
-	ldr    lr, [r10]                  // Outer return address read back out from storage space into `lr`.
-	str    sp, [r10]                  // Stack pointer overwrites storage space to hide its value (could be anything here?).
-	ldr    r10, [r10, #0x10]          // `r10` restored from second storage space.
-	bx     lr                         // Return to outer return address with return value of inner function.
+	stmfd  sp!, {r0-r3}               /* Push inner function arguments onto the stack to save them for after decryption. */
+	str    r10, [ip, #0x10]           /* `r10` is saved to second storage space. */
+	mov    r10, ip                    /* `r10` now used for the pointer to the data structure. */
+	str    lr, [r10]                  /* `lr` (outer return address) saved to first storage space to return later. */
+	ldmib  r10, {r0-r2}               /* Read function decryptor arguments from data structure (key, addr, size). */
+	bl     Encryptor_DecryptFunction  /* Call function decryptor, which returns de-obfuscated function address. */
+	mov    ip, r0                     /* Move returned address to `ip` to free up `r0`. */
+	ldmia  sp!, {r0-r3}               /* Pop arguments to inner function (`r0`-`r3`) off the stack. Stack is now restored. */
+	blx    ip                         /* Call inner function. `r0`-`r3` and `sp` are correct for proper arguments. */
+	stmdb  sp!, {r4}                  /* `r4` about to be used as temporary register, preserve its current value on the stack. */
+	mov    r4, r0                     /* Preserve the return from the inner function in `r4`, move it back to `r0` later. */
+	ldmib  r10, {r0-r2}               /* Read function encryptor arguments from data structure (key, addr, size). */
+	bl     Encryptor_EncryptFunction  /* Call function encryptor, which returns obfuscated new key. */
+	str    r0, [r10, #0x4]            /* New key is stored back into data structure. */
+	mov    r0, r4                     /* Return value from inner function is moved back to `r0` to return it. */
+	ldmia  sp!, {r4}                  /* Original value of `r4` restored from the stack so we can properly return. */
+	ldr    lr, [r10]                  /* Outer return address read back out from storage space into `lr`. */
+	str    sp, [r10]                  /* Stack pointer overwrites storage space to hide its value (could be anything here?). */
+	ldr    r10, [r10, #0x10]          /* `r10` restored from second storage space. */
+	bx     lr                         /* Return to outer return address with return value of inner function. */
 }
