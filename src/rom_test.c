@@ -7,23 +7,11 @@
 #include "primes.h"
 #include "rom_util.h"
 
-// Not actually available from standard Nitro includes
+// Custom defs not provided by Nitro
 #define REG_CARD_MASTER_CNT_OFFSET  (0x1A1)
 #define REG_CARDCNT_OFFSET          (0x1A4)
 #define REG_CARD_CMD_OFFSET         (0x1A8)
 #define REG_CARD_DATA_OFFSET        (0x100010)
-
-#define CARDMST_ENABLE      (0x80)
-
-#define CARD_DATA_READY     (0x00800000)
-#define CARD_COMMAND_PAGE   (0x01000000)
-#define CARD_COMMAND_MASK   (0x07000000)
-#define CARD_RESET_HI       (0x20000000)
-#define CARD_ACCESS_MODE    (0x40000000)
-#define CARD_READ_MODE      (0x00000000)
-#define CARD_START          (0x80000000)
-
-#define MROMOP_G_READ_PAGE  (0xB7000000)
 
 // Function to be encrypted (cannot be called directly)
 u32 ROMTest_IsBad(void* __unused);
@@ -179,7 +167,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		
 		// For above 8000h reads, use the SDK `CARDi_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(-1, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Address changes as we loop.
