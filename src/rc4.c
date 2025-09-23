@@ -12,13 +12,21 @@ typedef struct {
 	u8   S[256];
 } RC4_Ctx;
 
-u32 RC4_CategorizeInstruction(u32 instruction);
+static u32 RC4_CategorizeInstruction(u32 instruction);
+
+// Functions to be encoded (cannot be static)
 void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len);
 u8 RC4_Byte(RC4_Ctx* ctx);
 u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size);
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size);
 u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size);
 u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size);
+
+typedef u8  (*FuncType_RC4_Byte)(RC4_Ctx*);
+typedef u32 (*FuncType_RC4_EncryptInstructions)(RC4_Ctx*, void*, void*, u32);
+typedef u32 (*FuncType_RC4_DecryptInstructions)(RC4_Ctx*, void*, void*, u32);
+typedef u32 (*FuncType_RC4_CategorizeInstruction)(u32);
+typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
 
 // These variables must be declared in this exact order to maintain rodata layout.
 // Must also be compiled with `-ipa file`
@@ -33,7 +41,6 @@ u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size);
 //      08  Proxy_RC4_DecryptInstructions
 //      0C  Proxy_RC4_Byte
 //      10  Proxy_RC4_Init
-
 const u32 Proxy_RC4_Byte                       = ADDR_PLUS_ADDEND(RC4_Byte, ENC_VAL_1);
 const u32 Proxy_RC4_DecryptInstructions        = ADDR_PLUS_ADDEND(RC4_DecryptInstructions, ENC_VAL_1);
 const u32 Proxy_RC4_EncryptInstructions        = ADDR_PLUS_ADDEND(RC4_EncryptInstructions, ENC_VAL_1);
@@ -41,12 +48,6 @@ const u32 Proxy_RC4_CategorizeInstruction      = ADDR_PLUS_ADDEND(RC4_Categorize
 const u32 Proxy_RC4_InitAndEncryptInstructions = ADDR_PLUS_ADDEND(RC4_InitAndEncryptInstructions, ENC_VAL_1);
 const u32 Proxy_RC4_InitAndDecryptInstructions = ADDR_PLUS_ADDEND(RC4_InitAndDecryptInstructions, ENC_VAL_1);
 const u32 Proxy_RC4_Init                       = ADDR_PLUS_ADDEND(RC4_Init, ENC_VAL_1);
-
-typedef u8  (*FuncType_RC4_Byte)(RC4_Ctx*);
-typedef u32 (*FuncType_RC4_EncryptInstructions)(RC4_Ctx*, void*, void*, u32);
-typedef u32 (*FuncType_RC4_DecryptInstructions)(RC4_Ctx*, void*, void*, u32);
-typedef u32 (*FuncType_RC4_CategorizeInstruction)(u32);
-typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
 
 enum {
 	INS_TYPE_OTHER = 0,
