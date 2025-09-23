@@ -109,7 +109,7 @@ u32 ROMTest_IsBad(void) {
 				continue;
 			}
 			
-			// Writing to card ROM and SPI control register
+			// Write enable flag to card ROM and SPI control register
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
 			// Read 8-byte command out from gamecard bus, write this back later
@@ -295,7 +295,7 @@ u32 ROMTest_IsGood(void) {
 				continue;
 			}
 			
-			// Writing to card ROM and SPI control register
+			// Write enable flag to card ROM and SPI control register
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
 			// Read 8-byte command out from gamecard bus, write this back later
