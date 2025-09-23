@@ -3,6 +3,7 @@
 
 #include "keydata.h"
 
+
 int KeyData_Write(KeyData* key, char* output_fname) {
 	if (output_fname == NULL) {
 		// No file so print to stdout
