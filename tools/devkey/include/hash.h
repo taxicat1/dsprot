@@ -9,7 +9,6 @@ typedef struct {
 	char*  output_fname;
 } FuncHashTask;
 
-
 void Hash_Instructions(uint32_t* instructions, int num, KeyData* out);
 
 #endif
