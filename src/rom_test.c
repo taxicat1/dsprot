@@ -27,11 +27,12 @@ u32 ROMTest_IsBad(void) {
 	CARD_LockRom(lock_id);
 	
 	for (i = 0; i < 3; i++) {
-		// Use encrypted, obfuscated read for below 0x8000
+		// For below 8000h reads, use manual read
 		RunEncrypted_ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// Use standard ROM reading function for above 0x8000
+		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// This function is patched over on flashcarts, which can be detected
 		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
 		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
