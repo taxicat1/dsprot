@@ -150,15 +150,17 @@ void foo(void) {
 Might generate:
 
 ```
-EB000000    bl  8     R_ARM_PC24:  bar-0x8
-E12FFF1E    bx  lr
+E92D4008    push    {r3, lr}
+EB000000    bl      8 <bar+0x8>     4: R_ARM_PC24   bar-0x8
+E8BD8008    pop     {r3, pc}
 ```
 
 The resulting encoded instructions would then be:
 
 ```
-EA000502    b   5136    R_ARM_PC24:  bar+0x1400
-3147A97B    hvc #0x7a9b
+3945166D    stmdbcc r5, {r0, r2, r3, r5, r6, r9, sl, ip}^
+EA000502    b       1410 <bar+0x1410>       4: R_ARM_PC24   bar+0x1400
+38D5D66D    ldmcc   r5, {r0, r2, r3, r5, r6, r9, sl, ip, lr, pc}^
 ```
 
 Where, as discussed in the previous section, incrementing the relocation by `0x1400` will increment the instruction by `0x502`.
