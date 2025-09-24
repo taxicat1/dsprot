@@ -168,15 +168,17 @@ void foo(void) {
 Might generate:
 
 ```
-EB000000    bl  8     R_ARM_PC24:  bar-0x8
-E12FFF1E    bx  lr
+E92D4008    push    {r3, lr}
+EB000000    bl      8 <bar+0x8>     4: R_ARM_PC24   bar-0x8
+E8BD8008    pop     {r3, pc}
 ```
 
 The resulting encrypted instructions might then be (depending upon key and function size):
 
 ```
-EA0005C2    b   4112    R_ARM_PC24:  bar+0x1700
-E1A3B7E2    <undefined instruction>
+E9FE11D7    ldmib   lr!, {r0, r1, r2, r4, r6, r7, r8, ip}^
+EA0005C2    b       1710 <bar+0x1710>       4: R_ARM_PC24   bar+0x1700
+E81F7079    ldmda   pc, {r0, r3, r4, r5, r6, ip, sp, lr}    @ <UNPREDICTABLE>
 ```
 
 Where, as discussed in the previous section, incrementing the relocation by `0x1700` will increment the instruction by `0x5C2`.
