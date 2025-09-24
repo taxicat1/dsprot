@@ -19,6 +19,18 @@ u32 ROMTest_IsBad(void* __unused);
 
 #define ROM_BLOCK_SIZE  CARD_ROM_PAGE_SIZE
 
+// This checksum value is derived from the first 9 instructions of the `run_encrypted_func` macro in asm_macro.inc:
+//   e18fc00f    orr    ip, pc, pc
+//   e01cc00c    ands   ip, ip, ip
+//   03a0c000    moveq  ip, #0
+//   128cc01c    addne  ip, ip, #28
+//   e59cc014    ldr    ip, [ip, #20]
+//   e24ccc17    sub    ip, ip, #5888  @ 0x1700
+//   e92d1000    stmfd  sp!, {ip}
+//   e18fc00f    orr    ip, pc, pc
+//   e8bd8000    ldmfd  sp!, {pc}
+
+#define ROM_TEST_CHECKSUM_INS       (9)
 #define ROM_TEST_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
@@ -176,7 +188,7 @@ u32 ROMTest_IsBad(void* __unused) {
 			u32  checksum;
 			
 			crc_data_ptr = (u32*)crc_data_addr;
-			i = 9;
+			i = ROM_TEST_CHECKSUM_INS;
 			checksum = 0;
 			do {
 				checksum ^= (*crc_data_ptr >> 5) | (*crc_data_ptr << 27);
@@ -202,7 +214,7 @@ u32 ROMTest_IsBad(void* __unused) {
 			u32  checksum;
 			
 			crc_data_ptr = (u32*)crc_data_addr;
-			i = 9;
+			i = ROM_TEST_CHECKSUM_INS;
 			checksum = 0;
 			do {
 				checksum ^= (*crc_data_ptr >> 5) | (*crc_data_ptr << 27);
