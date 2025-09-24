@@ -171,9 +171,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Run an integrity check on the CRC function
 		{
@@ -378,9 +378,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Run an integrity check on the CRC function
 		{
