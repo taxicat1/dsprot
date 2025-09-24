@@ -21,6 +21,7 @@ DS Protect has two methods of antipiracy detection:
 	- `0x12000 - 0x121FF` (malformed)
 	
 	("mirrored" meaning read starting from the end of the ROM, expecting it will loop back to the beginning)
+	
 	("malformed" meaning using the invalid read command `B7xxxxxxxx110000`, instead of the expected `B7xxxxxxxx000000`)
 	
 	`CARD_ReadRom` then reads these pages:
