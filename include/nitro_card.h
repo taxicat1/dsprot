@@ -62,6 +62,12 @@ extern void CARD_UnlockRom(u16 lock_id);
 extern void CARDi_ReadRom(u32 dma, const void* src, void* dst, u32 len, void* callback, void* arg, BOOL is_async);
 extern const u8* CARD_GetRomHeader(void);
 
+
+static inline void CARD_ReadRom(u32 dma, const void *src, void *dst, u32 len) {
+	CARDi_ReadRom(dma, src, dst, len, NULL, NULL, FALSE);
+}
+
+
 // Not available in all Nitro versions
 #define CARDMST_ENABLE  (0x80)
 

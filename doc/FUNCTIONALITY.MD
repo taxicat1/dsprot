@@ -6,7 +6,7 @@ DS Protect has two methods of antipiracy detection:
 	- A MAC address of `00:00:00:00:00:00` (indicating an emulator that is not emulating a MAC address at all)
 	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of No$GBA)
 
-2. ROM read check. It will conduct sixteen reads of the cartridge ROM, performing eight with a manual read (writing to I/O registers), and eight with the SDK's `CARDi_ReadRom`.
+2. ROM read check. It will conduct sixteen reads of the cartridge ROM, performing eight with a manual read (writing to I/O registers), and eight with the SDK's `CARD_ReadRom`.
 	
 	The manual reads will read these pages:
 	- `0x1000 - 0x11FF` (mirrored)
@@ -20,7 +20,7 @@ DS Protect has two methods of antipiracy detection:
 	
 	("mirrored" meaning read starting from the end of the ROM, expecting it will loop back to the beginning)
 	
-	`CARDi_ReadRom` then reads these pages:
+	`CARD_ReadRom` then reads these pages:
 	- `0x8000 - 0x81FF`
 	- `0x8200 - 0x83FF`
 	- `0x8400 - 0x85FF`
@@ -32,7 +32,7 @@ DS Protect has two methods of antipiracy detection:
 	
 	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first three manual reads will all receive the same data. The other three reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. 
 	
-	Additionally, flashcarts will patch over `CARDi_ReadRom` with their own code in order to properly read from their SD cards. If this was done, then reads using the SDK functions will return different data from the manual reads.
+	Additionally, flashcarts will patch over `CARD_ReadRom` with their own code in order to properly read from their SD cards. If this was done, then reads using the SDK functions will return different data from the manual reads.
 	
 	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 

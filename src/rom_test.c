@@ -178,9 +178,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE);
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Address changes as we loop.
@@ -197,7 +197,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		//   * = redirected to 8000
 		// 
 		// 
-		// CARDi_ReadRom:  i   addr
+		// CARD_ReadRom:   i   addr
 		//                ----------
 		//                 6   8000
 		//                 7   8200
@@ -311,7 +311,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
 		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Two more loops are executed:
@@ -322,7 +322,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		//                 13  2D000
 		// 
 		// 
-		// CARDi_ReadRom:  i   addr
+		// CARD_ReadRom:   i   addr
 		//                ----------
 		//                 14  2C000
 		//                 15  2D000
@@ -534,9 +534,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		// For above 8000h reads, use the SDK `CARDi_ReadRom`
+		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
-		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE);
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Address changes as we loop.
@@ -553,7 +553,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		//   * = redirected to 8000
 		// 
 		// 
-		// CARDi_ReadRom:  i   addr
+		// CARD_ReadRom:   i   addr
 		//                ----------
 		//                 6   8000
 		//                 7   8200
@@ -667,7 +667,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
-		CARDi_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE, NULL, NULL, FALSE);
+		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
 		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Two more loops are executed:
@@ -678,7 +678,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		//                 13  2D000
 		// 
 		// 
-		// CARDi_ReadRom:  i   addr
+		// CARD_ReadRom:   i   addr
 		//                ----------
 		//                 14  2C000
 		//                 15  2D000
