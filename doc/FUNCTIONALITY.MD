@@ -30,7 +30,7 @@ DS Protect has two methods of antipiracy detection:
 	
 	If any mismatch in the expected read data is found, or if reads below address `0x8000` are not redirected properly, the test will report it is running on a flashcart.
 
-Note that modern emulators, such as [MelonDS](https://github.com/melonDS-emu/melonDS) and [DeSmuME](https://github.com/TASEmulators/desmume), correctly emulate both a MAC address and the ROM reading behavior and are therefore undetected by this library. Some flashcarts do correctly emulate the ROM reading behavior, but many still sold today do not.
+Note that modern emulators, such as [MelonDS](https://github.com/melonDS-emu/melonDS) and [DeSmuME](https://github.com/TASEmulators/desmume), correctly emulate both a MAC address and the ROM reading behavior and are therefore undetected by this library. However, due to the way flashcarts work, they cannot evade being detected by the ROM read test. Instead they will, with varying degrees of aggressiveness, seek out DS Protect and patch over its tests, neutralizing them.
 
 ## Exported functions
 
@@ -41,7 +41,7 @@ Two functions are exported:
 
 Additionally, a standard wrapper for these two functions is provided as an inline in the header file.
 
-The crash function, as the name implies, will immediately crash the system by clobbering the stack and then going into an infinite loop via calling `OS_Terminate`. 
+The crash function, as the name implies, will immediately crash the system by clobbering the stack and then calling `OS_Terminate`. 
 
 The detection function takes as argument an optional callback function and two parameters for that callback of type `void*`. The callback will be run if the function fails to detect anything. If it does detect piracy or tampering, it will call the crash function instead. The return value from the callback is passed back as the return value of the detection function, or `NULL` if no callback was provided.
 
