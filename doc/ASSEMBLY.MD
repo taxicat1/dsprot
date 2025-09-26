@@ -110,9 +110,9 @@ The crash function takes the form:
 Crash:
 	mov    r10, pc
 	orrs   r10, r10, r10
-	eorne  lr,  lr,  lr
+	eorne  lr, lr, lr
 	subs   r10, r10, #8
-	ldr    r9, =memClear+0x2100
+	ldr    r9, =MI_CpuClear32+0x2100
 	mov    r0, sp
 	sub    r9, r9, #0x2100
 	mov    r1, #0x100
@@ -125,7 +125,10 @@ Crash:
 	arm_func_end Crash
 ```
 
-Like the other assembly functions, it moves `pc` into another register for manipulation. It also manipulates `lr` directly without preserving its original value. This is intentional here as there is no intent to ever return.
+This has multiple obvious giveaways that it is assembly:
+- It does not preserve any registers on the stack, clobbering `r9`, `r10`, and `lr` as it uses them.
+- It moves `pc` into another register for manipulation.
+- It has no proper return, instead jumping away into another function after overwriting `lr` (though this is very intentional).
 
 ## `clearDataAndInstructionCache` helper inline function
 
