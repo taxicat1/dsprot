@@ -178,8 +178,8 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 					
 					*dst_addr = *src_addr;
 					
-					opcode = ((*dst_addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT));
-					operands = (((*dst_addr & INS_OPERANDS_MASK) + ENC_VAL_2) & INS_OPERANDS_MASK);
+					opcode = (*dst_addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+					operands = ((*dst_addr & INS_OPERANDS_MASK) + ENC_VAL_2) & INS_OPERANDS_MASK;
 					
 					ctx->x += opcode >> INS_OPCODE_SHIFT;
 					
