@@ -64,11 +64,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 				case INS_TYPE_BLXIMM:
 				case INS_TYPE_BL:
 					{
-						u32  opcode;
-						u32  operands;
-						
-						opcode = (*addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
-						operands = ((*addr & INS_OPERANDS_MASK) - ENC_VAL_1) & INS_OPERANDS_MASK;
+						u32 opcode = (*addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+						u32 operands = ((*addr & INS_OPERANDS_MASK) - ENC_VAL_1) & INS_OPERANDS_MASK;
 						
 						*addr = opcode | operands;
 					}
@@ -76,11 +73,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 				
 				case INS_TYPE_B:
 					{
-						u32  opcode;
-						u32  operands;
-						
-						opcode = (*addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
-						operands = ((*addr & INS_OPERANDS_MASK) - ENC_VAL_2) & INS_OPERANDS_MASK;
+						u32 opcode = (*addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+						u32 operands = ((*addr & INS_OPERANDS_MASK) - ENC_VAL_2) & INS_OPERANDS_MASK;
 						
 						*addr = opcode | operands;
 					}
