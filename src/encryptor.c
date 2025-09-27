@@ -33,16 +33,19 @@ static asm void clearDataAndInstructionCache(register void* start_addr, register
 
 
 u32 Encryptor_CategorizeInstruction(u32 instruction) {
-	u8 upper_byte;
+	u8 opcode;
 	
-	upper_byte = (instruction >> 24) & 0xFF;
+	opcode = instruction >> INS_OPCODE_SHIFT;
 	
-	if ((upper_byte & 0x0E) == 0x0A) {
-		if ((upper_byte & 0xF0) == 0xF0) {
+	// Branch instruction
+	if ((opcode & 0x0E) == 0x0A) {
+		// BLX immediate type
+		if ((opcode & 0xF0) == 0xF0) {
 			return INS_TYPE_BLXIMM;
 		}
 		
-		if (upper_byte & 0x01) {
+		// Link bit
+		if (opcode & INS_OPCODE_LINKBIT) {
 			return INS_TYPE_BL;
 		} else {
 			return INS_TYPE_B;
@@ -82,20 +85,24 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 			switch (Encryptor_CategorizeInstruction(*addr)) {
 				case INS_TYPE_BLXIMM:
 				case INS_TYPE_B:
-					*addr = ((*addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
-					        (((*addr & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+					{
+						u32 opcode = (*addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+						u32 operands = ((*addr & INS_OPERANDS_MASK) - ENC_VAL_2) & INS_OPERANDS_MASK;
+						
+						*addr = opcode | operands;
+					}
 					break;
 				
 				case INS_TYPE_BL:
 					// Link bit
-					*addr ^= (ENC_OPCODE_1 << 24);
+					*addr ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 					// Fall through
 				default:
 					*addr ^= xorval;
 					
 					xorval <<= 1;
 					xorval += *addr;
-					xorval &= 0x00FFFFFF;
+					xorval &= ENC_XOR_MASK;
 					break;
 			}
 		}
