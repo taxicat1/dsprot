@@ -2,6 +2,8 @@
 
 #define RC4_KEY_SIZE  (16)
 
+#define RC4_SBOX_XOR  (0x01)
+
 typedef struct {
 	int  i;
 	int  j;
@@ -19,7 +21,7 @@ static void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	u8   tmp1;
 	u8   tmp2;
 	int  Ki;
-	int  Si;
+	u8   Si;
 	int  i;
 	int  j;
 	
@@ -35,7 +37,7 @@ static void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	// Modification to RC4: i = 255 -> 0, instead of 0 -> 255
 	for (i = 255; i >= 0; i--) {
 		tmp1 = ctx->S[i];
-		Si = (Si + ((u8*)key)[Ki] + tmp1) & 0xFF;
+		Si = Si + ((u8*)key)[Ki] + tmp1;
 		tmp2 = ctx->S[Si];
 		
 		ctx->S[Si] = tmp1;
@@ -73,7 +75,7 @@ static u8 RC4_Byte(RC4_Ctx* ctx) {
 static u32 RC4_InitSBox(u8* sbox) {
 	int i;
 	for (i = 0; i < 256; i++) {
-		sbox[i] = (u8)i ^ 1;
+		sbox[i] = (u8)i ^ RC4_SBOX_XOR;
 	}
 	
 	return 0;
