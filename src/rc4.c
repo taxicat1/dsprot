@@ -58,16 +58,19 @@ enum {
 
 
 static u32 RC4_CategorizeInstruction(u32 instruction) {
-	u8 upper_byte;
+	u8 opcode;
 	
-	upper_byte = (instruction >> 24) & 0xFF;
+	opcode = instruction >> INS_OPCODE_SHIFT;
 	
-	if ((upper_byte & 0x0E) == 0x0A) {
-		if ((upper_byte & 0xF0) == 0xF0) {
+	// Branch instruction
+	if ((opcode & 0x0E) == 0x0A) {
+		// BLX immediate type
+		if ((opcode & 0xF0) == 0xF0) {
 			return INS_TYPE_BLXIMM;
 		}
 		
-		if (upper_byte & 0x01) {
+		// Link bit
+		if (opcode & INS_OPCODE_LINKBIT) {
 			return INS_TYPE_BL;
 		} else {
 			return INS_TYPE_B;
@@ -82,7 +85,7 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	u8    tmp1;
 	u8    tmp2;
 	int   i;
-	int   Si;
+	u8    Si;
 	int   Ki;
 	u32*  s_start;
 	u32*  s_end;
@@ -109,7 +112,7 @@ void RC4_Init(RC4_Ctx* ctx, const void* key, u32 key_len) {
 	// Modification to RC4: i = 255 -> 0, instead of 0 -> 255
 	for (i = 255; i >= 0; i--) {
 		tmp1 = ctx->S[i];
-		Si = (Si + ((u8*)key)[Ki] + tmp1) & 0xFF;
+		Si = Si + ((u8*)key)[Ki] + tmp1;
 		tmp2 = ctx->S[Si];
 		
 		ctx->S[Si] = tmp1;
@@ -168,24 +171,25 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			case INS_TYPE_BLXIMM:
 			case INS_TYPE_BL:
 				{
-					u32 upper, lower;
+					u32  opcode;
+					u32  operands;
 					u32* src_addr = (u32*)(src_bytes + idx);
 					u32* dst_addr = (u32*)(dst_bytes + idx);
 					
 					*dst_addr = *src_addr;
 					
-					upper = ((*dst_addr & 0xFF000000) ^ (ENC_OPCODE_1 << 24));
-					lower = (((*dst_addr & 0x00FFFFFF) + ENC_VAL_2) & 0x00FFFFFF);
+					opcode = ((*dst_addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT));
+					operands = (((*dst_addr & INS_OPERANDS_MASK) + ENC_VAL_2) & INS_OPERANDS_MASK);
 					
-					ctx->x += upper >> 24;
+					ctx->x += opcode >> INS_OPCODE_SHIFT;
 					
-					*dst_addr = upper | lower;
+					*dst_addr = opcode | operands;
 				}
 				break;
 			
 			case INS_TYPE_B:
 				// Link bit
-				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
+				*(u32*)(src_bytes + idx) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 				// Fall through
 			default:
 				rc4_byte_addr = Proxy_RC4_Byte;
@@ -256,10 +260,16 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			case INS_TYPE_BLXIMM:
 			case INS_TYPE_B:
 				{
+					u32  opcode;
+					u32  operands;
 					u32* dst_addr = (u32*)(dst_bytes + idx);
-					ctx->x += ins_word >> 24; 
-					*dst_addr = ((ins_word & 0xFF000000) ^ (ENC_OPCODE_1 << 24)) |
-					            (((ins_word & 0x00FFFFFF) - ENC_VAL_2) & 0x00FFFFFF);
+					
+					ctx->x += ins_word >> INS_OPCODE_SHIFT; 
+					
+					opcode = (ins_word & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+					operands = ((ins_word & INS_OPERANDS_MASK) - ENC_VAL_2) & INS_OPERANDS_MASK;
+					
+					*dst_addr = opcode | operands;
 				}
 				break;
 			
@@ -298,7 +308,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				ctx->x -= src_bytes[idx+3];
 				
 				// Link bit
-				*(u32*)(src_bytes + idx) ^= (ENC_OPCODE_1 << 24);
+				*(u32*)(src_bytes + idx) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 				break;
 			
 			default:
