@@ -4,7 +4,7 @@
 #ifndef SDK_ASM
 
 #include <nitro/types.h> // u32
-#include <nitro/os.h> // OS_GetVBlankCount
+#include <nitro/os.h> // OS_GetVBlankCount (inline function)
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,8 +21,8 @@ extern void* DSProt_DetectEmulatorB(void* param1, void* param2);
 
 typedef void* (*DSProt_Callback)(void*, void*);
 
-extern DSProt_Callback DSProt_CallbackTable[2];
-extern u32 DSProt_CallbackIndex;
+extern DSProt_Callback  DSProt_CallbackTable[2];
+extern u32              DSProt_CallbackIndex;
 
 
 static inline void DSProt_RegisterCallbacks(DSProt_Callback success_callback, DSProt_Callback failure_callback) {
@@ -124,6 +124,9 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 #endif
 
 #else /* SDK_ASM */
+
+.public DSProt_CallbackTable
+.public DSProt_CallbackIndex
 
 .public DSProt_DecodeFunctions
 .public DSProt_DetectFlashcartA
