@@ -1,21 +1,68 @@
 #ifndef DSPROT_INSTANT_H
 #define DSPROT_INSTANT_H
 
+/* 
+ * dsprot_instant.h
+ * 
+ * Header file for the DS Protect library
+ * Version 2.00 Instant
+ */
+
 #ifndef SDK_ASM
 
-#include <nitro/types.h> // u32
+#include <nitro/types.h>  // For u32
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void* DSProt_Crash(void* __unused1, void* __unused2);
-extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
-
+// See src/dsprot_main.c for information about this checksum procedure
 #define DSP_CHECKSUM_INS       (9)
 #define DSP_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
+/* 
+ * void* DSProt_Crash(void* __unused1, void* __unused2)
+ * 
+ * Crash the system.
+ * 
+ * @param __unused1:    Unused
+ * @param __unused2:    Unused
+ * 
+ * @returns:    Does not return
+ */
+extern void* DSProt_Crash(void* __unused1, void* __unused2);
+
+
+/* 
+ * void* DSProt_DetectAll(void* callback, void* param1, void* param2)
+ * 
+ * Detect if the current environment is an emulator, or flashcart,
+ * or has otherwise been tampered with. If this is detected, crash the system.
+ * 
+ * @param callback:    Callback function to run if no emulator/flashcart/tampering is detected. May be NULL.
+ * @param param1:      First parameter passed to the callback
+ * @param param2:      Second parameter passed to the callback
+ * 
+ * @returns:    The return value of the callback, or NULL if one was not specified
+ */
+extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
+
+
+/* 
+ * void* DSProt_CheckAndDetectAll(void* callback, void* param1, void* param2)
+ * 
+ * Run a tamper-detection checksum, and then detect if the current
+ * environment is an emulator, or flashcart, or has otherwise been
+ * tampered with. If this is detected, or if the checksum fails,
+ * crash the system.
+ * 
+ * @param callback:    Callback function to run if no emulator/flashcart/tampering is detected. May be NULL.
+ * @param param1:      First parameter passed to the callback
+ * @param param2:      Second parameter passed to the callback
+ * 
+ * @returns:    The return value of the callback, or NULL if one was not specified
+ */
 static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void* param2) {
 	u32*  func_data_ptr;
 	u32   func_data_checksum;
