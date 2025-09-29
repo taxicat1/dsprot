@@ -36,6 +36,7 @@ FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 # C / ASM compilation parameters
 CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -interworking -c -i $(INC_DIR)
 ASM_PARAM  :=  -proc arm5TE -i $(INC_DIR)
+LIB_PARAM  :=  -nostdlib -library
 DEP_PARAM  :=  -gccdep -MD
 
 CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W nounusedarg -W nomissingreturn -W error
@@ -44,7 +45,8 @@ CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W 
 DEPS := $(wildcard $(BUILD_DIR)/*.d)
 
 # Output library file
-LIBRARY_NAME := dsprot.a
+LIBRARY_NAME  :=  dsprot.a
+LIBRARY       :=  $(BUILD_DIR)/$(LIBRARY_NAME)
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
@@ -74,6 +76,7 @@ KEY_DSPROT_MAIN := 946F
 KEY_INTEGRITY   := 998E
 KEY_CORE_TESTS  := C20D
 
+
 .PHONY: all clean tools dsprot install
 .DELETE_ON_ERROR: 
 .NOTPARALLEL: 
@@ -92,7 +95,7 @@ tools:
 	$(MAKE) -C $(FIXDEP_DIR)
 
 dsprot:
-	$(MAKE) $(BUILD_DIR)/$(LIBRARY_NAME)
+	$(MAKE) $(LIBRARY)
 
 ifeq ($(INSTALL_DIR),)
 install:
@@ -101,7 +104,7 @@ else
 install:
 	$(MAKE) all
 	$(shell mkdir -p $(INSTALL_DIR)/lib/)
-	cp $(BUILD_DIR)/$(LIBRARY_NAME) $(INSTALL_DIR)/lib/
+	cp $(LIBRARY) $(INSTALL_DIR)/lib/
 endif
 
 
@@ -117,8 +120,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 
 # Library output
-$(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
-	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
+$(LIBRARY): $(LIBRARY_FILES)
+	$(WINE) $(MWLDARM) $(LIB_PARAM) $^ -o $@
 
 
 # Main module function encoding
@@ -179,7 +182,7 @@ $(BUILD_DIR)/encryptor_decoder.s: $(BUILD_DIR)/encryptor.o $(ELFCODER)
 $(BUILD_DIR)/mac_owner_decrypter_encoded.o \
 $(BUILD_DIR)/rom_util_decrypter_encoded.o  \
 $(BUILD_DIR)/rom_test_decrypter_encoded.o  \
-$(BUILD_DIR)/dummy_decrypter_encoded.o  \
+$(BUILD_DIR)/dummy_decrypter_encoded.o     \
 $(BUILD_DIR)/coretests_decrypter_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/rom_util_decrypter.o $(BUILD_DIR)/rom_test_decrypter.o $(BUILD_DIR)/dummy_decrypter.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR)/mac_owner_decrypter_encoded.o
 	cp $(BUILD_DIR)/rom_util_decrypter.o $(BUILD_DIR)/rom_util_decrypter_encoded.o
@@ -199,7 +202,7 @@ $(BUILD_DIR)/mac_owner_encrypted.o \
 $(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
 	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -k $(KEY_CORE_TESTS) -f \
-		MACOwner_IsBad  \
+		MACOwner_IsBad   \
 		MACOwner_IsGood
 
 $(BUILD_DIR)/rom_util_encrypted.o \
