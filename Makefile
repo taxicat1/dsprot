@@ -38,6 +38,7 @@ FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 # C / ASM compilation parameters
 CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -ipa file -interworking -c -i $(INC_DIR)
 ASM_PARAM  :=  -proc arm5TE -i $(INC_DIR)
+LIB_PARAM  :=  -nostdlib -library
 DEP_PARAM  :=  -gccdep -MD
 
 CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W nounusedarg -W nomissingreturn -W error
@@ -46,7 +47,8 @@ CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W 
 DEPS := $(wildcard $(BUILD_DIR)/*.d)
 
 # Output library file
-LIBRARY_NAME := dsprot.a
+LIBRARY_NAME  :=  dsprot.a
+LIBRARY       :=  $(BUILD_DIR)/$(LIBRARY_NAME)
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
@@ -69,6 +71,9 @@ LIBRARY_FILES := \
 	$(BUILD_DIR)/mac_owner_decrypter_encoded.o    \
 	$(BUILD_DIR)/coretests_decoder.o
 
+# Encryption key file
+ENCRYPTION_KEY := $(BUILD_DIR)/key.bin
+
 
 .PHONY: all clean tools dsprot install
 .DELETE_ON_ERROR: 
@@ -90,7 +95,7 @@ tools:
 	$(MAKE) -C $(FIXDEP_DIR)
 
 dsprot:
-	$(MAKE) $(BUILD_DIR)/$(LIBRARY_NAME)
+	$(MAKE) $(LIBRARY)
 
 ifeq ($(INSTALL_DIR),)
 install:
@@ -99,7 +104,7 @@ else
 install:
 	$(MAKE) all
 	$(shell mkdir -p $(INSTALL_DIR)/lib/)
-	cp $(BUILD_DIR)/$(LIBRARY_NAME) $(INSTALL_DIR)/lib/
+	cp $(LIBRARY) $(INSTALL_DIR)/lib/
 endif
 
 
@@ -115,13 +120,13 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 
 # Library output
-$(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
-	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
+$(LIBRARY): $(LIBRARY_FILES)
+	$(WINE) $(MWLDARM) $(LIB_PARAM) $^ -o $@
 
 
 # Encryption key derivation
-$(BUILD_DIR)/key.bin: $(BUILD_DIR)/encryptor.o $(DEVKEY)
-	$(DEVKEY) -i $(BUILD_DIR)/encryptor.o -f Encryptor_DecryptionWrapperFragment -o $(BUILD_DIR)/key.bin
+$(ENCRYPTION_KEY): $(BUILD_DIR)/encryptor.o $(DEVKEY)
+	$(DEVKEY) -i $(BUILD_DIR)/encryptor.o -f Encryptor_DecryptionWrapperFragment -o $@
 
 
 # Integrity module function encoding
@@ -135,9 +140,9 @@ $(BUILD_DIR)/integrity_decrypter_decoder.s: $(BUILD_DIR)/integrity_decrypter.o $
 		RunEncrypted_Integrity_ROMTest_IsGood
 
 $(BUILD_DIR)/integrity_encrypted.o \
-$(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(BUILD_DIR)/key.bin $(ELFCODER)
+$(BUILD_DIR)/integrity_decrypter.s: $(BUILD_DIR)/integrity.o $(ENCRYPTION_KEY) $(ELFCODER)
 	cp $(BUILD_DIR)/integrity.o $(BUILD_DIR)/integrity_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -K $(BUILD_DIR)/key.bin -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/integrity_encrypted.o -o $(BUILD_DIR)/integrity_decrypter.s -K $(ENCRYPTION_KEY) -f \
 		Integrity_MACOwner_IsBad   \
 		Integrity_MACOwner_IsGood  \
 		Integrity_ROMTest_IsBad    \
@@ -168,18 +173,18 @@ $(BUILD_DIR)/dsprot_main_decrypter_decoder.s: $(BUILD_DIR)/dsprot_main_decrypter
 		DSProt_DetectFlashcartB  \
 		DSProt_DetectEmulatorB   \
 	-P \
-		CoreTests_DecodeFunctions \
-		Encryptor_DecodeFunctions \
-		Integrity_DecodeFunctions \
+		CoreTests_DecodeFunctions  \
+		Encryptor_DecodeFunctions  \
+		Integrity_DecodeFunctions  \
 		RC4_DecodeFunctions
 
 $(BUILD_DIR)/dsprot_main_encrypted.o \
-$(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/key.bin $(ELFCODER)
+$(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ENCRYPTION_KEY) $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -K $(BUILD_DIR)/key.bin -p DSProt_ -f \
-		DetectFlashcartA     \
-		DetectEmulatorA      \
-		DetectFlashcartB     \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -K $(ENCRYPTION_KEY) -p DSProt_ -f \
+		DetectFlashcartA  \
+		DetectEmulatorA   \
+		DetectFlashcartB  \
 		DetectEmulatorB
 
 
@@ -209,16 +214,16 @@ $(BUILD_DIR)/coretests_decoder.s: $(BUILD_DIR)/mac_owner_decrypter.o $(BUILD_DIR
 		ROMUtil_CRC32
 
 $(BUILD_DIR)/mac_owner_encrypted.o \
-$(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/key.bin $(ELFCODER)
+$(BUILD_DIR)/mac_owner_decrypter.s: $(BUILD_DIR)/mac_owner.o $(ENCRYPTION_KEY) $(ELFCODER)
 	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -K $(BUILD_DIR)/key.bin -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/mac_owner_encrypted.o -o $(BUILD_DIR)/mac_owner_decrypter.s -K $(ENCRYPTION_KEY) -f \
 		MACOwner_IsBad   \
 		MACOwner_IsGood
 
 $(BUILD_DIR)/rom_test_encrypted.o \
-$(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/key.bin $(ELFCODER)
+$(BUILD_DIR)/rom_test_decrypter.s: $(BUILD_DIR)/rom_test.o $(ENCRYPTION_KEY) $(ELFCODER)
 	cp $(BUILD_DIR)/rom_test.o $(BUILD_DIR)/rom_test_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -K $(BUILD_DIR)/key.bin -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/rom_test_encrypted.o -o $(BUILD_DIR)/rom_test_decrypter.s -K $(ENCRYPTION_KEY) -f \
 		ROMTest_IsBad   \
 		ROMTest_IsGood
 
