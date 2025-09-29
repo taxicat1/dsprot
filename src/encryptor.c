@@ -83,9 +83,9 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 				default:
 					{
 						u8* addr_bytes = (u8*)addr;
-						*addr =  (addr_bytes[0] ^ ENC_BYTE_A)        |
-						        ((addr_bytes[1] ^ ENC_BYTE_B) <<  8) |
-						        ((addr_bytes[2] ^ ENC_BYTE_C) << 16) |
+						*addr =  (addr_bytes[0] ^ ENC_BYTE_A)        | 
+						        ((addr_bytes[1] ^ ENC_BYTE_B) <<  8) | 
+						        ((addr_bytes[2] ^ ENC_BYTE_C) << 16) | 
 						        ((addr_bytes[3] ^ ENC_BYTE_D) << 24);
 					}
 					break;
