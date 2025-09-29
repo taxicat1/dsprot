@@ -36,6 +36,7 @@ FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 # C / ASM compilation parameters
 CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -interworking -c -i $(INC_DIR)
 ASM_PARAM  :=  -proc arm5TE -i $(INC_DIR)
+LIB_PARAM  :=  -nostdlib -library
 DEP_PARAM  :=  -gccdep -MD
 
 CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W nounusedarg -W nomissingreturn -W error
@@ -44,7 +45,8 @@ CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W 
 DEPS := $(wildcard $(BUILD_DIR)/*.d)
 
 # Output library file
-LIBRARY_NAME := dsprot.a
+LIBRARY_NAME  :=  dsprot.a
+LIBRARY       :=  $(BUILD_DIR)/$(LIBRARY_NAME)
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
@@ -72,6 +74,7 @@ KEY_DSPROT_MAIN := 6AB2
 KEY_INTEGRITY   := 9785
 KEY_CORE_TESTS  := 0982
 
+
 .PHONY: all clean tools dsprot install
 .DELETE_ON_ERROR: 
 .NOTPARALLEL: 
@@ -90,7 +93,7 @@ tools:
 	$(MAKE) -C $(FIXDEP_DIR)
 
 dsprot:
-	$(MAKE) $(BUILD_DIR)/$(LIBRARY_NAME)
+	$(MAKE) $(LIBRARY)
 
 ifeq ($(INSTALL_DIR),)
 install:
@@ -99,7 +102,7 @@ else
 install:
 	$(MAKE) all
 	$(shell mkdir -p $(INSTALL_DIR)/lib/)
-	cp $(BUILD_DIR)/$(LIBRARY_NAME) $(INSTALL_DIR)/lib/
+	cp $(LIBRARY) $(INSTALL_DIR)/lib/
 endif
 
 
@@ -115,8 +118,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 
 # Library output
-$(BUILD_DIR)/$(LIBRARY_NAME): $(LIBRARY_FILES)
-	$(WINE) $(MWLDARM) -nostdlib -library $(LIBRARY_FILES) -o $(BUILD_DIR)/$(LIBRARY_NAME)
+$(LIBRARY): $(LIBRARY_FILES)
+	$(WINE) $(MWLDARM) $(LIB_PARAM) $^ -o $@
 
 
 # Main module function encoding
