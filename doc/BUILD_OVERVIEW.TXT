@@ -1,12 +1,14 @@
 Module 1 (main):
-	Functions:
+	Function:
 		Crash
+	
+	Encrypt and create decryption wrapper (key=0x39F6, prefix=DSProt_):
+		Crash
+	
+	Function:
 		DetectAll
 	
-	Encrypt and create decryption wrappers (key=0x39F6, prefix=DSProt_):
-		Crash
-	
-	Encrypt and create decryption wrappers (key=0x3AB6, prefix=DSProt_):
+	Encrypt and create decryption wrapper (key=0x3AB6, prefix=DSProt_):
 		DetectAll
 	
 	Encode and create decoder function:
