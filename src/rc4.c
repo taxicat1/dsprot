@@ -2,6 +2,7 @@
 
 #include "encoding_constants.h"
 #include "encryptor.h"
+#include "proxy_func.h"
 
 #define RC4_KEY_SIZE  (16)
 
@@ -147,14 +148,28 @@ u8 RC4_Byte(RC4_Ctx* ctx) {
 }
 
 
+static inline void RC4_EncryptByte(RC4_Ctx* ctx, u8* src, u8* dst) {
+	int encrypted_byte;
+	encrypted_byte = PROXY_FUNC(RC4_Byte)(ctx) ^ *src;
+	ctx->x = encrypted_byte;
+	*dst = encrypted_byte;
+}
+
+
+static inline void RC4_DecryptByte(RC4_Ctx* ctx, u8* src, u8* dst) {
+	int encrypted_byte;
+	encrypted_byte = PROXY_FUNC(RC4_Byte)(ctx) ^ *src;
+	ctx->x = *src;
+	*dst = encrypted_byte;
+}
+
+
 u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
-	u32                idx;
-	u32                ins_word;
-	u8*                src_bytes;
-	u8*                dst_bytes;
-	u32                rc4_byte_addr;
-	u8                 prev_opcode;
-	FuncType_RC4_Byte  rc4_byte;
+	u32  idx;
+	u32  ins_word;
+	u8*  src_bytes;
+	u8*  dst_bytes;
+	u8   prev_opcode;
 	
 	prev_opcode = 0x00;
 	
@@ -168,7 +183,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
 		
-		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
+		switch (PROXY_FUNC(RC4_CategorizeInstruction)(ins_word)) {
 			case INS_TYPE_BLXIMM:
 				// Link bit
 				src_bytes[idx+3] ^= INS_OPCODE_LINKBIT;
@@ -194,37 +209,10 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				*(u32*)(src_bytes + idx) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 				// Fall through
 			default:
-				rc4_byte_addr = Proxy_RC4_Byte;
-				rc4_byte_addr -= ENC_VAL_1;
-				rc4_byte = (FuncType_RC4_Byte)rc4_byte_addr;
-				
-				// First byte
-				{
-					int rand_byte = rc4_byte(ctx);
-					int ins_byte = src_bytes[idx];
-					ins_byte ^= rand_byte;
-					ctx->x = ins_byte;
-					dst_bytes[idx] = ins_byte;
-				}
-				
-				// Second byte
-				{
-					int rand_byte = rc4_byte(ctx);
-					int ins_byte = src_bytes[idx+1];
-					ins_byte ^= rand_byte;
-					ctx->x = ins_byte;
-					dst_bytes[idx+1] = ins_byte;
-				}
-				
-				// Third byte
-				{
-					int rand_byte = rc4_byte(ctx);
-					int ins_byte = src_bytes[idx+2];
-					ins_byte ^= rand_byte;
-					ctx->x = ins_byte;
-					dst_bytes[idx+2] = ins_byte;
-				}
-				
+				// First three bytes
+				RC4_EncryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
+				RC4_EncryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
+				RC4_EncryptByte(ctx, src_bytes + idx + 2, dst_bytes + idx + 2);
 				break;
 		}
 		
@@ -242,14 +230,12 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
-	u32                idx;
-	u8                 curr_opcode;
-	u8                 prev_opcode;
-	u32                ins_word;
-	u32                rc4_byte_addr;
-	FuncType_RC4_Byte  rc4_byte;
-	u8*                src_bytes;
-	u8*                dst_bytes;
+	u32  idx;
+	u8   curr_opcode;
+	u8   prev_opcode;
+	u32  ins_word;
+	u8*  src_bytes;
+	u8*  dst_bytes;
 	
 	prev_opcode = 0x00;
 	
@@ -267,7 +253,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 		
 		ins_word = *(u32*)(src_bytes + idx);
 		
-		switch (((FuncType_RC4_CategorizeInstruction)(Proxy_RC4_CategorizeInstruction - ENC_VAL_1))(ins_word)) {
+		switch (PROXY_FUNC(RC4_CategorizeInstruction)(ins_word)) {
 			case INS_TYPE_BLXIMM:
 				// Link bit
 				src_bytes[idx+3] ^= INS_OPCODE_LINKBIT;
@@ -286,67 +272,20 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 			
 			case INS_TYPE_BL:
-				rc4_byte_addr = Proxy_RC4_Byte;
-				rc4_byte_addr -= ENC_VAL_1;
-				
-				// First byte
-				{
-					int ins_byte = src_bytes[idx];
-					int rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx] = ins_byte ^ rand_byte;
-				}
-				
-				// Second byte
-				{
-					int ins_byte = src_bytes[idx+1];
-					int rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-					// Random cast required to match
-					ctx->x = (u8)ins_byte;
-					dst_bytes[idx+1] = ins_byte ^ rand_byte;
-				}
-				
-				// Third byte
-				{
-					int ins_byte = src_bytes[idx+2];
-					int rand_byte = ((FuncType_RC4_Byte)rc4_byte_addr)(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx+2] = ins_byte ^ rand_byte;
-				}
+				// First three bytes
+				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
+				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
+				RC4_DecryptByte(ctx, src_bytes + idx + 2, dst_bytes + idx + 2);
 				
 				// Fourth byte + link bit
 				dst_bytes[idx+3] = src_bytes[idx+3] ^ INS_OPCODE_LINKBIT;
 				break;
 			
 			default:
-				rc4_byte_addr = Proxy_RC4_Byte;
-				rc4_byte_addr -= ENC_VAL_1;
-				rc4_byte = (FuncType_RC4_Byte)rc4_byte_addr;
-				
-				// First byte
-				{
-					int ins_byte = src_bytes[idx];
-					int rand_byte = rc4_byte(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx] = ins_byte ^ rand_byte;
-				}
-				
-				// Second byte
-				{
-					int ins_byte = src_bytes[idx+1];
-					int rand_byte = rc4_byte(ctx);
-					// Random cast required to match
-					ctx->x = (u8)ins_byte;
-					dst_bytes[idx+1] = ins_byte ^ rand_byte;
-				}
-				
-				// Third byte
-				{
-					int ins_byte = src_bytes[idx+2];
-					int rand_byte = rc4_byte(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx+2] = ins_byte ^ rand_byte;
-				}
+				// First three bytes
+				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
+				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
+				RC4_DecryptByte(ctx, src_bytes + idx + 2, dst_bytes + idx + 2);
 				
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
@@ -362,38 +301,16 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 
 u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
-	RC4_Ctx  ctx;
-	u32      rc4_init;
-	u32      rc4_encrypt;
-	u32      enc_ret;
-	
-	rc4_init = Proxy_RC4_Init;
-	rc4_init -= ENC_VAL_1;
-	((FuncType_RC4_Init)rc4_init)(&ctx, key, RC4_KEY_SIZE);
-	
-	rc4_encrypt = Proxy_RC4_EncryptInstructions;
-	rc4_encrypt -= ENC_VAL_1;
-	enc_ret = ((FuncType_RC4_EncryptInstructions)rc4_encrypt)(&ctx, dst, src, size);
-	
+	RC4_Ctx ctx;
+	PROXY_FUNC(RC4_Init)(&ctx, key, RC4_KEY_SIZE);
 	// Must coerce return to -1 or 0
-	return enc_ret == -1 ? -1 : 0;
+	return PROXY_FUNC(RC4_EncryptInstructions)(&ctx, dst, src, size) == -1 ? -1 : 0;
 }
 
 
 u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size) {
-	RC4_Ctx  ctx;
-	u32      rc4_init;
-	u32      rc4_encrypt;
-	u32      enc_ret;
-	
-	rc4_init = Proxy_RC4_Init;
-	rc4_init -= ENC_VAL_1;
-	((FuncType_RC4_Init)rc4_init)(&ctx, key, RC4_KEY_SIZE);
-	
-	rc4_encrypt = Proxy_RC4_DecryptInstructions;
-	rc4_encrypt -= ENC_VAL_1;
-	enc_ret = ((FuncType_RC4_DecryptInstructions)rc4_encrypt)(&ctx, dst, src, size);
-	
+	RC4_Ctx ctx;
+	PROXY_FUNC(RC4_Init)(&ctx, key, RC4_KEY_SIZE);
 	// Must coerce return to -1 or 0
-	return enc_ret == -1 ? -1 : 0;
+	return PROXY_FUNC(RC4_DecryptInstructions)(&ctx, dst, src, size) == -1 ? -1 : 0;
 }
