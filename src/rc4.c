@@ -216,7 +216,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 		}
 		
-		// Fourth byte decoded separately
+		// Fourth byte (opcode) encoded separately
 		dst_bytes[idx+3] = src_bytes[idx+3] + prev_opcode;
 		
 		prev_opcode = dst_bytes[idx+3];
@@ -247,6 +247,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	dst_bytes = (u8*)dst;
 	
 	for (idx = 0; idx < size; idx += 4) {
+		// Decode opcode first
 		curr_opcode = src_bytes[idx+3];
 		src_bytes[idx+3] -= prev_opcode;
 		prev_opcode = curr_opcode;
