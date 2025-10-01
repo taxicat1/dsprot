@@ -11,6 +11,8 @@
 // Function to be encrypted (cannot be called directly)
 void* DetectAll(void* callback, void* param1, void* param2);
 
+#define FUNC_QUEUE_END  (0)
+
 // This checksum value is derived from the first 28 instructions of the `run_encrypted_func` macro in asm_macro.inc:
 //   e18fc00f    orr      ip, pc, pc
 //   e01cc00c    ands     ip, ip, ip
@@ -63,7 +65,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
 	func_queue[2] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
 	func_queue[3] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
-	func_queue[4] = 0;
+	func_queue[4] = FUNC_QUEUE_END;
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
@@ -98,7 +100,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		
 		func_ret_total += func_ret;
 		func_queue_ptr++;
-	} while (*func_queue_ptr != 0);
+	} while (*func_queue_ptr != FUNC_QUEUE_END);
 	
 	if (!(func_ret_total % PRIME_FALSE)) {
 		if (callback != NULL) {
