@@ -167,7 +167,7 @@ void* DetectFlashcartA(void* param1, void* param2) {
 
 void* DetectFlashcartB(void* param1, void* param2) {
 	u32 func_queue[32];
-
+	
 	func_queue[2] = 0;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsGood, ENC_VAL_1);
