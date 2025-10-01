@@ -3,6 +3,7 @@
 #include "bss.h"
 #include "encoding_constants.h"
 #include "nitro_os.h"
+#include "proxy_func.h"
 #include "rc4.h"
 
 #define ROTL(x, a)  ((a) == 0 ? (x) : (((x) << (a)) | ((x) >> (32 - (a)))))
@@ -13,6 +14,8 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size);
 
 const u32 Proxy_Encryptor_DecryptFunction = ADDR_PLUS_ADDEND(Encryptor_DecryptFunction, ENC_VAL_1);
 const u32 Proxy_Encryptor_EncryptFunction = ADDR_PLUS_ADDEND(Encryptor_EncryptFunction, ENC_VAL_1);
+
+// FuncTypes omitted since these are only called via assembly
 
 
 static inline void clearDataAndInstructionCache(void) {
@@ -89,10 +92,6 @@ void* Encryptor_DecryptFunction(u32 key, u32 obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    size;
 	void*  func_addr;
-	u32    rc4_dec;
-	
-	rc4_dec = Proxy_RC4_InitAndDecryptInstructions;
-	rc4_dec -= ENC_VAL_1;
 	
 	size = obfs_size;
 	size -= (u32)&BSS + ENC_VAL_1;
@@ -105,7 +104,7 @@ void* Encryptor_DecryptFunction(u32 key, u32 obfs_func_addr, u32 obfs_size) {
 	func_addr = (void*)obfs_func_addr;
 	func_addr -= ENC_VAL_1;
 	
-	((FuncType_RC4_InitAndDecryptInstructions)rc4_dec)(&expanded_key[0], func_addr, func_addr, size);
+	PROXY_FUNC(RC4_InitAndDecryptInstructions)(&expanded_key[0], func_addr, func_addr, size);
 	
 	clearDataAndInstructionCache();
 	
@@ -117,16 +116,9 @@ u32 Encryptor_EncryptFunction(u32 key, u32 obfs_func_addr, u32 obfs_size) {
 	u32    expanded_key[4];
 	u32    size;
 	void*  func_addr;
-	u32    rc4_enc;
-	u32    bss_addr;
-	
-	bss_addr = (u32)&BSS;
-	
-	rc4_enc = Proxy_RC4_InitAndEncryptInstructions;
-	rc4_enc -= ENC_VAL_1;
 	
 	size = obfs_size;
-	size -= bss_addr + ENC_VAL_1;
+	size -= (u32)&BSS + ENC_VAL_1;
 	
 	expanded_key[0] = ROTL(key,  0) ^ size;
 	expanded_key[1] = ROTL(key,  8) ^ size;
@@ -136,7 +128,7 @@ u32 Encryptor_EncryptFunction(u32 key, u32 obfs_func_addr, u32 obfs_size) {
 	func_addr = (void*)obfs_func_addr;
 	func_addr -= ENC_VAL_1;
 	
-	((FuncType_RC4_InitAndEncryptInstructions)rc4_enc)(&expanded_key[0], func_addr, func_addr, size);
+	PROXY_FUNC(RC4_InitAndEncryptInstructions)(&expanded_key[0], func_addr, func_addr, size);
 	
 	clearDataAndInstructionCache();
 	
