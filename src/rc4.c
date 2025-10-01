@@ -176,7 +176,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				// Fourth byte
 				dst_bytes[idx+3] = src_bytes[idx+3];
 				
-				// Update x
+				// Update `x`
 				ctx->x = (ctx->x * dst_bytes[idx+2]) - dst_bytes[idx+3];
 				break;
 		}
@@ -226,7 +226,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
 				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
 				
-				// Update x
+				// Update `x`
 				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
 				
 				// Third byte
@@ -244,7 +244,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
 				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
 				
-				// Update x
+				// Update `x`
 				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
 				
 				// Third byte
