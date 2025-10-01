@@ -87,6 +87,22 @@ u8 RC4_Byte(RC4_Ctx* ctx) {
 }
 
 
+static inline void RC4_EncryptByte(RC4_Ctx* ctx, u8* src, u8* dst) {
+	int encrypted_byte;
+	encrypted_byte = RC4_Byte(ctx) ^ *src;
+	ctx->x = encrypted_byte;
+	*dst = encrypted_byte;
+}
+
+
+static inline void RC4_DecryptByte(RC4_Ctx* ctx, u8* src, u8* dst) {
+	int encrypted_byte;
+	encrypted_byte = RC4_Byte(ctx) ^ *src;
+	ctx->x = *src;
+	*dst = encrypted_byte;
+}
+
+
 u32 RC4_InitSBox(u8* sbox) {
 	// S[i] = i ^ 0xFF (optimized to write 4 bytes at a time)
 	u32   x;
@@ -150,23 +166,9 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				*(u32*)(src_bytes + idx) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 				// Fall through
 			default:
-				// First byte
-				{
-					int rand_byte = RC4_Byte(ctx);
-					int ins_byte = src_bytes[idx];
-					ins_byte ^= rand_byte;
-					ctx->x = ins_byte;
-					dst_bytes[idx] = ins_byte;
-				}
-				
-				// Second byte
-				{
-					int rand_byte = RC4_Byte(ctx);
-					int ins_byte = src_bytes[idx+1];
-					ins_byte ^= rand_byte;
-					ctx->x = ins_byte;
-					dst_bytes[idx+1] = ins_byte;
-				}
+				// First two bytes
+				RC4_EncryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
+				RC4_EncryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
 				
 				// Third byte
 				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
@@ -220,21 +222,9 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 			
 			case INS_TYPE_BL:
-				// First byte
-				{
-					int ins_byte = src_bytes[idx];
-					int rand_byte = RC4_Byte(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx] = ins_byte ^ rand_byte;
-				}
-				
-				// Second byte
-				{
-					int ins_byte = src_bytes[idx+1];
-					int rand_byte = RC4_Byte(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx+1] = ins_byte ^ rand_byte;
-				}
+				// First two bytes
+				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
+				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
 				
 				// Update x
 				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
@@ -250,21 +240,9 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				break;
 			
 			default:
-				// First byte
-				{
-					int ins_byte = src_bytes[idx];
-					int rand_byte = RC4_Byte(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx] = ins_byte ^ rand_byte;
-				}
-				
-				// Second byte
-				{
-					int ins_byte = src_bytes[idx+1];
-					int rand_byte = RC4_Byte(ctx);
-					ctx->x = ins_byte;
-					dst_bytes[idx+1] = ins_byte ^ rand_byte;
-				}
+				// First two bytes
+				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
+				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
 				
 				// Update x
 				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
