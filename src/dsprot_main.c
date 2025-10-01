@@ -58,24 +58,24 @@ enum {
 };
 
 
-static inline void populateCallbacks(DSProt_Ctx* work) {
-	// This part is very strange to match. May be a better way to do this
-	void*             tmp;
-	DSProt_Callback*  callback_tbl;
-	u32               callback_idx;
+static inline void populateCallbacks(DSProt_Ctx* ctx) {
+	DSProt_Callback*  callback_tbl_ptr;
+	u32*              callback_idx_ptr;
+	u32               addr;
+	u32               idx;
 	
-	tmp = (void*)ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
-	tmp -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
+	addr = ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
+	addr -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
+	callback_idx_ptr = (u32*)(addr - DSP_OBFS_OFFSET);
 	
-	callback_tbl = (DSProt_Callback*)(ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1) - ENC_VAL_1);
-	callback_idx = *(u32*)(tmp - DSP_OBFS_OFFSET);
+	addr = ADDR_PLUS_ADDEND(DSProt_CallbackTable, ENC_VAL_1);
+	addr -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
+	callback_tbl_ptr = (DSProt_Callback*)(addr - DSP_OBFS_OFFSET);
 	
-	// Temporary assignment required to match
-	tmp = callback_tbl[callback_idx];
-	work->success_callback = tmp;
+	idx = *callback_idx_ptr;
 	
-	tmp = callback_tbl[callback_idx ^ 1];
-	work->failure_callback = tmp;
+	ctx->success_callback = callback_tbl_ptr[idx];
+	ctx->failure_callback = callback_tbl_ptr[idx ^ 1];
 }
 
 
