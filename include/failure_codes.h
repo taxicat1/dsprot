@@ -1,6 +1,8 @@
 #ifndef FAILURE_CODE_H
 #define FAILURE_CODE_H
 
+#define FAILURE_CODE_NONE         (0)
+
 #define FAILURE_CODE_MAC_OWNER_1  (251)
 #define FAILURE_CODE_MAC_OWNER_2  (482)
 #define FAILURE_CODE_MAC_OWNER_3  (120)
