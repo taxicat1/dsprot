@@ -17,6 +17,8 @@ u32 DSProt_DetectNotDummy(void* callback);
 
 #define DSP_OBFS_OFFSET  (0x320)
 
+#define FUNC_QUEUE_END  (0)
+
 typedef u32 (*TaskFunc)(void);
 typedef void (*CallbackFunc)(void);
 
@@ -32,18 +34,18 @@ u32 DSProt_DetectFlashcart(void* callback) {
 	
 	func_queue[0] = (u32)&ROMTest_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_ROMTest_IsBad + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	
 	compare_sum = 0;
 	func_result_sum = 0;
 	
-	for (i = 0; func_queue[i] != 0; i++) {
+	for (i = 0; func_queue[i] != FUNC_QUEUE_END; i++) {
 		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
 		
-		compare_sum += 1;
+		compare_sum += TRUE;
 		compare_sum <<= 1;
 	}
 	
@@ -71,18 +73,18 @@ u32 DSProt_DetectNotFlashcart(void* callback) {
 	
 	func_queue[0] = (u32)&ROMTest_IsGood + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_ROMTest_IsGood + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	
 	compare_sum = 0;
 	func_result_sum = 0;
 	
-	for (i = 0; func_queue[i] != 0; i++) {
+	for (i = 0; func_queue[i] != FUNC_QUEUE_END; i++) {
 		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
 		
-		compare_sum += 1;
+		compare_sum += TRUE;
 		compare_sum <<= 1;
 	}
 	
@@ -110,18 +112,18 @@ u32 DSProt_DetectEmulator(void* callback) {
 	
 	func_queue[0] = (u32)&MACOwner_IsBad + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_MACOwner_IsBad + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	
 	compare_sum = 0;
 	func_result_sum = 0;
 	
-	for (i = 0; func_queue[i] != 0; i++) {
+	for (i = 0; func_queue[i] != FUNC_QUEUE_END; i++) {
 		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
 		
-		compare_sum += 1;
+		compare_sum += TRUE;
 		compare_sum <<= 1;
 	}
 	
@@ -149,18 +151,18 @@ u32 DSProt_DetectNotEmulator(void* callback) {
 	
 	func_queue[0] = (u32)&MACOwner_IsGood + DSP_OBFS_OFFSET;
 	func_queue[1] = (u32)&Integrity_MACOwner_IsGood + DSP_OBFS_OFFSET;
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	
 	compare_sum = 0;
 	func_result_sum = 0;
 	
-	for (i = 0; func_queue[i] != 0; i++) {
+	for (i = 0; func_queue[i] != FUNC_QUEUE_END; i++) {
 		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
 		
-		compare_sum += 1;
+		compare_sum += TRUE;
 		compare_sum <<= 1;
 	}
 	
@@ -187,18 +189,18 @@ u32 DSProt_DetectDummy(void* callback) {
 	ENCRYPTION_START(KEY_DSPROT_MAIN_5);
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
-	func_queue[0] = 0;
+	func_queue[0] = FUNC_QUEUE_END;
 	
 	compare_sum = 0;
 	func_result_sum = 0;
 	
-	for (i = 0; func_queue[i] != 0; i++) {
+	for (i = 0; func_queue[i] != FUNC_QUEUE_END; i++) {
 		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
 		
-		compare_sum += 1;
+		compare_sum += TRUE;
 		compare_sum <<= 1;
 	}
 	
@@ -225,18 +227,18 @@ u32 DSProt_DetectNotDummy(void* callback) {
 	ENCRYPTION_START(KEY_DSPROT_MAIN_6);
 	
 	// Not optimized out here due to the asm inlines produced by the encryption macros
-	func_queue[0] = 0;
+	func_queue[0] = FUNC_QUEUE_END;
 	
 	compare_sum = 0;
 	func_result_sum = 0;
 	
-	for (i = 0; func_queue[i] != 0; i++) {
+	for (i = 0; func_queue[i] != FUNC_QUEUE_END; i++) {
 		func_result = ((TaskFunc)(func_queue[i] - DSP_OBFS_OFFSET))() != 0;
 		
 		func_result_sum += func_result;
 		func_result_sum <<= 1;
 		
-		compare_sum += 1;
+		compare_sum += TRUE;
 		compare_sum <<= 1;
 	}
 	
