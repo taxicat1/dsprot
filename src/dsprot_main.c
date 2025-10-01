@@ -3,9 +3,10 @@
 #include "callback.h"
 #include "dsprot_types.h"
 #include "encoding_constants.h"
+#include "failure_codes.h"
 #include "integrity.h"
-#include "nitro_types.h"
 #include "mac_owner.h"
+#include "nitro_types.h"
 #include "primes.h"
 #include "rom_test.h"
 
@@ -16,6 +17,8 @@ void* DetectEmulatorA(void* param1, void* param2);
 void* DetectEmulatorB(void* param1, void* param2);
 
 #define DSP_OBFS_OFFSET  (ENC_VAL_1 & 0xFFF)
+
+#define FUNC_QUEUE_END  (0)
 
 // This checksum value is derived from the first 28 instructions of the `run_encrypted_func` macro in asm_macro.inc:
 //   e18fc00f    orr      ip, pc, pc
@@ -93,8 +96,8 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 	
 	work.callback_param_1        = param1;
 	work.callback_param_2        = param2;
-	work.failure_callback_return = 0;
-	work.failure_code            = 0;
+	work.failure_callback_return = NULL;
+	work.failure_code            = FAILURE_CODE_NONE;
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
@@ -111,7 +114,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		} while (--i);
 		
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
-			if (work.failure_callback_return) {
+			if (work.failure_callback_return != NULL) {
 				return work.failure_callback_return;
 			} else {
 				return work.failure_callback(param1, param2);
@@ -123,8 +126,8 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		
 		// `func_ret` should always be a prime-encoded Boolean
 		// 0 would indicate tampering
-		if (func_ret == 0 && work.failure_code == 0) {
-			if (work.failure_callback_return) {
+		if (func_ret == 0 && work.failure_code == FAILURE_CODE_NONE) {
+			if (work.failure_callback_return != NULL) {
 				return work.failure_callback_return;
 			} else {
 				return work.failure_callback(param1, param2);
@@ -133,7 +136,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		
 		func_ret_total += func_ret;
 		func_queue_ptr++;
-	} while (*func_queue_ptr != 0);
+	} while (*func_queue_ptr != FUNC_QUEUE_END);
 	
 	// Check if total matches expected result
 	if (expected_result == EXPECT_TRUE) {
@@ -145,7 +148,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 	if (!(func_ret_total % prime_bool)) {
 		return work.success_callback(param1, param2);
 	} else {
-		if (work.failure_code) {
+		if (work.failure_code != FAILURE_CODE_NONE) {
 			return work.failure_callback_return;
 		} else {
 			return work.failure_callback(param1, param2);
@@ -157,7 +160,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 void* DetectFlashcartA(void* param1, void* param2) {
 	u32 func_queue[32];
 	
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
 	
@@ -168,7 +171,7 @@ void* DetectFlashcartA(void* param1, void* param2) {
 void* DetectFlashcartB(void* param1, void* param2) {
 	u32 func_queue[32];
 	
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsGood, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsGood, ENC_VAL_1);
 	
@@ -179,7 +182,7 @@ void* DetectFlashcartB(void* param1, void* param2) {
 void* DetectEmulatorA(void* param1, void* param2) {
 	u32 func_queue[32];
 	
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1);
 	
@@ -190,7 +193,7 @@ void* DetectEmulatorA(void* param1, void* param2) {
 void* DetectEmulatorB(void* param1, void* param2) {
 	u32 func_queue[32];
 	
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsGood, ENC_VAL_1);
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsGood, ENC_VAL_1);
 	
