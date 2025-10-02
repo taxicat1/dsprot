@@ -22,7 +22,7 @@ static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
 
 u32 MACOwner_IsBad(void) {
 	// Oddly the MAC address buffer is offset like this. Obfuscation?
-	u8           mac_addr[MAC_ADDR_OFFSET+MAC_ADDR_SIZE+MAC_ADDR_OFFSET];
+	u8           mac_addr[MAC_ADDR_OFFSET + MAC_ADDR_SIZE + MAC_ADDR_OFFSET];
 	OSOwnerInfo  owner_info;
 	int          i;
 	u32          ret;
@@ -32,7 +32,7 @@ u32 MACOwner_IsBad(void) {
 	ENCRYPTION_START(KEY_MAC_OWNER_1);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET+i] ^ ENC_MAC_ADDR_BYTE)) {
+		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET + i] ^ ENC_MAC_ADDR_BYTE)) {
 			break;
 		}
 	}
@@ -54,7 +54,7 @@ u32 MACOwner_IsBad(void) {
 	}
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (mac_addr[MAC_ADDR_OFFSET+i] != 0x00) {
+		if (mac_addr[MAC_ADDR_OFFSET + i] != 0x00) {
 			ret = 0;
 			goto EXIT;
 		}
@@ -71,7 +71,7 @@ EXIT:
 
 u32 MACOwner_IsGood(void) {
 	// Oddly the MAC address buffer is offset like this. Obfuscation?
-	u8           mac_addr[MAC_ADDR_OFFSET+MAC_ADDR_SIZE+MAC_ADDR_OFFSET];
+	u8           mac_addr[MAC_ADDR_OFFSET + MAC_ADDR_SIZE + MAC_ADDR_OFFSET];
 	OSOwnerInfo  owner_info;
 	int          i;
 	u32          ret;
@@ -81,7 +81,7 @@ u32 MACOwner_IsGood(void) {
 	ENCRYPTION_START(KEY_MAC_OWNER_3);
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET+i] ^ ENC_MAC_ADDR_BYTE)) {
+		if (bad_mac_addr[i] != (mac_addr[MAC_ADDR_OFFSET + i] ^ ENC_MAC_ADDR_BYTE)) {
 			break;
 		}
 	}
@@ -103,7 +103,7 @@ u32 MACOwner_IsGood(void) {
 	}
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (mac_addr[MAC_ADDR_OFFSET+i] != 0x00) {
+		if (mac_addr[MAC_ADDR_OFFSET + i] != 0x00) {
 			ret = 1;
 			goto EXIT;
 		}

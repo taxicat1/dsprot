@@ -26,20 +26,20 @@ u32 Integrity_MACOwner_IsBad(void) {
 		//   e92d4ff8    push  {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
 		//   e24dd060    sub   sp, sp, #96  @ 0x60
 		//   e28d0002    add   r0, sp, #2
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF8 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF8 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x60 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xD0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x60 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xD0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x02 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0x00 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0x8D && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE2
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x02 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0x00 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0x8D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE2
 		
 		// Only three instructions are checked here because the 4th instruction is a function call
 	) {
@@ -68,20 +68,20 @@ u32 Integrity_MACOwner_IsGood(void) {
 		//   e92d4ff8    push  {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
 		//   e24dd060    sub   sp, sp, #96  @ 0x60
 		//   e28d0002    add   r0, sp, #2
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF8 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF8 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x60 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xD0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x60 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xD0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x02 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0x00 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0x8D && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE2
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x02 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0x00 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0x8D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE2
 		
 		// Only three instructions are checked here because the 4th instruction is a function call
 	) {
@@ -109,25 +109,25 @@ u32 Integrity_ROMTest_IsBad(void) {
 		//   e24ddf89    sub   sp, sp, #548  @ 0x224
 		//   e3a0c001    mov   ip, #1
 		//   e1a0c78c    lsl   ip, ip, #15
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x89 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xDF && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x89 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xDF && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x01 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0xC0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE3 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x01 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0xC0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE3 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0xC] == 0x8C && 
-		addr[INTEGRITY_OBFS_OFFSET+0xD] == 0xC7 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xE] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xF] == 0xE1
+		addr[INTEGRITY_OBFS_OFFSET + 0xC] == 0x8C && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xD] == 0xC7 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xE] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xF] == 0xE1
 	) {
 		// x ^ x == 0, but must be like this to match
 		ret = (u32)addr ^ (u32)addr;
@@ -155,25 +155,25 @@ u32 Integrity_ROMTest_IsGood(void) {
 		//   e24ddf89    sub   sp, sp, #548  @ 0x224
 		//   e3a0c001    mov   ip, #1
 		//   e1a0c78c    lsl   ip, ip, #15
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x89 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xDF && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x89 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xDF && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x01 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0xC0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE3 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x01 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0xC0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE3 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0xC] == 0x8C && 
-		addr[INTEGRITY_OBFS_OFFSET+0xD] == 0xC7 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xE] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xF] == 0xE1
+		addr[INTEGRITY_OBFS_OFFSET + 0xC] == 0x8C && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xD] == 0xC7 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xE] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xF] == 0xE1
 	) {
 		ret = (u32)addr + 1;
 	}
