@@ -185,8 +185,8 @@ u32 Encryptor_EncryptFunction(u32 obfs_key, u32 obfs_func_addr, u32 obfs_size) {
 
 
 asm u32 Encryptor_DecryptionWrapperFragment(void) {
-	/* This is a function intended only to be called from decryption wrappers after special setup.
-	   Calling it in some other context will cause a crash. */
+	/* This is a function intended only to be called from decryption wrappers after special setup. */
+	/* Calling it in some other context will cause a crash. */
 	
 	/* This function needs to:
 	   - Decrypt the inner function
@@ -206,14 +206,15 @@ asm u32 Encryptor_DecryptionWrapperFragment(void) {
 	   decryption functions, and at any point after the inner function returns.
 	   
 	   Prior to calling, `ip` is set to the pointer of the data structure for the target function:
-	     +0x0   :  Storage space (dummy data initially)
-	     +0x4   :  Decryption key (obfuscated)
-	     +0x8   :  Function address (obfuscated)
-	     +0xC   :  Function size in bytes (obfuscated)
-	     +0x10  :  Storage space */
+	       [00]  Storage space (dummy data initially)
+	       [04]  Decryption key (obfuscated)
+	       [08]  Function address (obfuscated)
+	       [0C]  Function size in bytes (obfuscated)
+	       [10]  Storage space
+	*/
 	
 	stmfd  sp!, {r0-r3}               /* Push inner function arguments onto the stack to save them for after decryption. */
-	str    r10, [ip, #0x10]           /* `r10` is saved to second storage space. */
+	str    r10, [ip, #0x10]           /* `r10` about to be used as temporary register, save it to second storage space. */
 	mov    r10, ip                    /* `r10` now used for the pointer to the data structure. */
 	str    lr, [r10]                  /* `lr` (outer return address) saved to first storage space to return later. */
 	ldmib  r10, {r0-r2}               /* Read function decryptor arguments from data structure (key, addr, size). */
