@@ -50,9 +50,9 @@ u32 ROMTest_IsBad(void* __unused) {
 			
 			// This is executing an obfuscated manual cartridge ROM read.
 			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
-			//
+			// 
 			// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
-			//
+			// 
 			// Most/all convoluted syntax here must be that way to match.
 			// Some of the comment documentation may be inaccurate here.
 			u32         register_base_1;
@@ -185,7 +185,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Address changes as we loop.
-		//
+		// 
 		// Manual read:    i   addr
 		//                ----------
 		//                 0   1000*
@@ -194,7 +194,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		//                 3   1600*
 		//                 4   A000
 		//                 5   D000
-		//
+		// 
 		//   * = redirected to 8000
 		// 
 		// 
@@ -316,7 +316,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Two more loops are executed:
-		//
+		// 
 		// Manual read:    i   addr
 		//                ----------
 		//                 12  2C000 
