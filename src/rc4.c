@@ -30,7 +30,7 @@ typedef u32 (*FuncType_RC4_Init)(RC4_Ctx*, void*, u32);
 
 // These variables must be declared in this exact order to maintain rodata layout.
 // Must also be compiled with `-ipa file`
-//
+// 
 //  [5] .rodata
 //      00  Proxy_RC4_InitAndEncryptInstructions
 //  [7] .rodata
