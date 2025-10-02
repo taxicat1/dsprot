@@ -125,7 +125,7 @@ u32 RC4_InitSBox(u8* sbox) {
 
 u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
-	u32  idx;
+	u32  offset;
 	u32  ins_word;
 	u8*  src_bytes;
 	u8*  dst_bytes;
@@ -139,8 +139,8 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	RC4_InitSBox(&sbox[0]);
 	
-	for (idx = 0; idx < size; idx += 4) {
-		ins_word = *(u32*)(src_bytes + idx);
+	for (offset = 0; offset < size; offset += 4) {
+		ins_word = *(u32*)(src_bytes + offset);
 		
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case INS_TYPE_BLXIMM:
@@ -148,8 +148,8 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				{
 					u32  opcode;
 					u32  operands;
-					u32* src_addr = (u32*)(src_bytes + idx);
-					u32* dst_addr = (u32*)(dst_bytes + idx);
+					u32* src_addr = (u32*)(src_bytes + offset);
+					u32* dst_addr = (u32*)(dst_bytes + offset);
 					
 					*dst_addr = *src_addr;
 					
@@ -164,21 +164,21 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			
 			case INS_TYPE_B:
 				// Link bit
-				*(u32*)(src_bytes + idx) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+				*(u32*)(src_bytes + offset) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 				// Fall through
 			default:
 				// First two bytes
-				RC4_EncryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
-				RC4_EncryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
+				RC4_EncryptByte(ctx, src_bytes + offset,     dst_bytes + offset);
+				RC4_EncryptByte(ctx, src_bytes + offset + 1, dst_bytes + offset + 1);
 				
 				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				dst_bytes[offset + 2] = sbox[ src_bytes[offset + 2] ];
 				
 				// Fourth byte
-				dst_bytes[idx+3] = src_bytes[idx+3];
+				dst_bytes[offset + 3] = src_bytes[offset + 3];
 				
 				// Update `x`
-				ctx->x = (ctx->x * dst_bytes[idx+2]) - dst_bytes[idx+3];
+				ctx->x = (ctx->x * dst_bytes[offset + 2]) - dst_bytes[offset + 3];
 				break;
 		}
 	}
@@ -189,7 +189,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
-	u32  idx;
+	u32  offset;
 	u32  ins_word;
 	u8*  src_bytes;
 	u8*  dst_bytes;
@@ -203,8 +203,8 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	RC4_InitSBox(&sbox[0]);
 	
-	for (idx = 0; idx < size; idx += 4) {
-		ins_word = *(u32*)(src_bytes + idx);
+	for (offset = 0; offset < size; offset += 4) {
+		ins_word = *(u32*)(src_bytes + offset);
 		
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case INS_TYPE_BLXIMM:
@@ -212,7 +212,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				{
 					u32  opcode;
 					u32  operands;
-					u32* dst_addr = (u32*)(dst_bytes + idx);
+					u32* dst_addr = (u32*)(dst_bytes + offset);
 					
 					ctx->x += (ins_word >> INS_OPCODE_SHIFT);
 					
@@ -225,35 +225,35 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 			
 			case INS_TYPE_BL:
 				// First two bytes
-				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
-				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
+				RC4_DecryptByte(ctx, src_bytes + offset,     dst_bytes + offset);
+				RC4_DecryptByte(ctx, src_bytes + offset + 1, dst_bytes + offset + 1);
 				
 				// Update `x`
-				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
+				ctx->x = (src_bytes[offset + 2] * ctx->x) - src_bytes[offset + 3];
 				
 				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				dst_bytes[offset + 2] = sbox[ src_bytes[offset + 2] ];
 				
 				// Fourth byte
-				dst_bytes[idx+3] = src_bytes[idx+3];
+				dst_bytes[offset + 3] = src_bytes[offset + 3];
 				
 				// Link bit
-				*(u32*)(src_bytes + idx) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+				*(u32*)(src_bytes + offset) ^= (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
 				break;
 			
 			default:
 				// First two bytes
-				RC4_DecryptByte(ctx, src_bytes + idx,     dst_bytes + idx);
-				RC4_DecryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
+				RC4_DecryptByte(ctx, src_bytes + offset,     dst_bytes + offset);
+				RC4_DecryptByte(ctx, src_bytes + offset + 1, dst_bytes + offset + 1);
 				
 				// Update `x`
-				ctx->x = (src_bytes[idx+2] * ctx->x) - src_bytes[idx+3];
+				ctx->x = (src_bytes[offset + 2] * ctx->x) - src_bytes[offset + 3];
 				
 				// Third byte
-				dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
+				dst_bytes[offset + 2] = sbox[ src_bytes[offset + 2] ];
 				
 				// Fourth byte
-				dst_bytes[idx+3] = src_bytes[idx+3];
+				dst_bytes[offset + 3] = src_bytes[offset + 3];
 				break;
 		}
 	}
