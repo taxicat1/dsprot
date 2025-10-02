@@ -27,25 +27,25 @@ u32 Integrity_MACOwner_IsBad(void) {
 		//   e24dd05c    sub   sp, sp, #92  @ 0x5c
 		//   e28d0000    add   r0, sp, #0
 		//   eb000000    bl    OS_GetMacAddress
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x5C && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xD0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x5C && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xD0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x00 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0x00 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0x8D && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x00 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0x00 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0x8D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE2 && 
 		
 		// Only one byte of the last instruction is checked because it is a function call to `OS_GetMacAddress`.
 		// BUG: If the Thumb version of Nitro SDK is used, this instruction may be replaced by a `blx`
 		//      instruction at link time, causing this check to fail.
-		addr[INTEGRITY_OBFS_OFFSET+0xF] == 0xEB
+		addr[INTEGRITY_OBFS_OFFSET + 0xF] == 0xEB
 	) {
 		// x ^ x == 0, but must be like this to match
 		ret = (u32)addr ^ (u32)addr;
@@ -73,25 +73,25 @@ u32 Integrity_MACOwner_IsGood(void) {
 		//   e24dd05c    sub   sp, sp, #92  @ 0x5c
 		//   e28d0000    add   r0, sp, #0
 		//   eb000000    bl    OS_GetMacAddress
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x5C && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xD0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x5C && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xD0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x00 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0x00 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0x8D && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x00 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0x00 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0x8D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE2 && 
 		
 		// Only one byte of the last instruction is checked because it is a function call to `OS_GetMacAddress`.
 		// BUG: If the Thumb version of Nitro SDK is used, this instruction may be replaced by a `blx`
 		//      instruction at link time, causing this check to fail.
-		addr[INTEGRITY_OBFS_OFFSET+0xF] == 0xEB
+		addr[INTEGRITY_OBFS_OFFSET + 0xF] == 0xEB
 	) {
 		ret = (u32)addr + 1;
 	}
@@ -117,25 +117,25 @@ u32 Integrity_ROMTest_IsBad(void) {
 		//   e24dde22    sub   sp, sp, #544  @ 0x220
 		//   e3a0c001    mov   ip, #1
 		//   e1a0c78c    lsl   ip, ip, #15
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF8 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF8 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x22 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xDE && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x22 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xDE && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x01 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0xC0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE3 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x01 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0xC0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE3 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0xC] == 0x8C && 
-		addr[INTEGRITY_OBFS_OFFSET+0xD] == 0xC7 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xE] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xF] == 0xE1
+		addr[INTEGRITY_OBFS_OFFSET + 0xC] == 0x8C && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xD] == 0xC7 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xE] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xF] == 0xE1
 	) {
 		// x ^ x == 0, but must be like this to match
 		ret = (u32)addr ^ (u32)addr;
@@ -163,25 +163,25 @@ u32 Integrity_ROMTest_IsGood(void) {
 		//   e24dde22    sub   sp, sp, #544  @ 0x220
 		//   e3a0c001    mov   ip, #1
 		//   e1a0c78c    lsl   ip, ip, #15
-		addr[INTEGRITY_OBFS_OFFSET+0x0] == 0xF8 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x1] == 0x4F && 
-		addr[INTEGRITY_OBFS_OFFSET+0x2] == 0x2D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x3] == 0xE9 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x0] == 0xF8 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x1] == 0x4F && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x2] == 0x2D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x3] == 0xE9 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x4] == 0x22 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x5] == 0xDE && 
-		addr[INTEGRITY_OBFS_OFFSET+0x6] == 0x4D && 
-		addr[INTEGRITY_OBFS_OFFSET+0x7] == 0xE2 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x4] == 0x22 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x5] == 0xDE && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x6] == 0x4D && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x7] == 0xE2 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0x8] == 0x01 && 
-		addr[INTEGRITY_OBFS_OFFSET+0x9] == 0xC0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xA] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xB] == 0xE3 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x8] == 0x01 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0x9] == 0xC0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xA] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xB] == 0xE3 && 
 		
-		addr[INTEGRITY_OBFS_OFFSET+0xC] == 0x8C && 
-		addr[INTEGRITY_OBFS_OFFSET+0xD] == 0xC7 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xE] == 0xA0 && 
-		addr[INTEGRITY_OBFS_OFFSET+0xF] == 0xE1
+		addr[INTEGRITY_OBFS_OFFSET + 0xC] == 0x8C && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xD] == 0xC7 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xE] == 0xA0 && 
+		addr[INTEGRITY_OBFS_OFFSET + 0xF] == 0xE1
 	) {
 		ret = (u32)addr + 1;
 	}
