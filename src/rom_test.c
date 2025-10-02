@@ -208,7 +208,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			}
 		}
 		
-		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		rom_addr += ROM_BLOCK_SIZE;
 	}
@@ -415,7 +415,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			}
 		}
 		
-		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		rom_addr += ROM_BLOCK_SIZE;
 	}
