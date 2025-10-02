@@ -170,7 +170,6 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u32  ins_word;
 	u8*  src_bytes;
 	u8*  dst_bytes;
-	u8   ins_byte;
 	
 	if (size & 3) {
 		return -1;
@@ -212,12 +211,11 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 				RC4_EncryptByte(ctx, src_bytes + idx + 1, dst_bytes + idx + 1);
 				RC4_EncryptByte(ctx, src_bytes + idx + 2, dst_bytes + idx + 2);
 				
-				// Fourth byte (temporary assignment is required to match)
-				ins_byte = src_bytes[idx+3];
-				dst_bytes[idx+3] = ins_byte;
+				// Fourth byte
+				dst_bytes[idx+3] = src_bytes[idx+3];
 				
 				// Update `x`
-				ctx->x -= ins_byte;
+				ctx->x -= dst_bytes[idx+3];
 				break;
 		}
 	}
