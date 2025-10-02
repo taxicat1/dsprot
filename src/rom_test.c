@@ -170,7 +170,7 @@ u32 ROMTest_IsBad(void) {
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		rom_addr += ROM_BLOCK_SIZE;
 	}
@@ -356,7 +356,7 @@ u32 ROMTest_IsGood(void) {
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		rom_addr += ROM_BLOCK_SIZE;
 	}
