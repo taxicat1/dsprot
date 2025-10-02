@@ -84,7 +84,7 @@ static u32 RC4_InitSBox(u8* sbox) {
 
 static u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
-	u32  idx;
+	u32  offset;
 	u8*  src_bytes;
 	u8*  dst_bytes;
 	
@@ -97,11 +97,11 @@ static u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size)
 	
 	RC4_InitSBox(&sbox[0]);
 	
-	for (idx = 0; idx < size; idx += 4) {
-		dst_bytes[idx]   = src_bytes[idx]   ^ RC4_Byte(ctx);
-		dst_bytes[idx+1] = src_bytes[idx+1] ^ RC4_Byte(ctx);
-		dst_bytes[idx+2] = sbox[ src_bytes[idx+2] ];
-		dst_bytes[idx+3] = src_bytes[idx+3];
+	for (offset = 0; offset < size; offset += 4) {
+		dst_bytes[offset]     = src_bytes[offset]     ^ RC4_Byte(ctx);
+		dst_bytes[offset + 1] = src_bytes[offset + 1] ^ RC4_Byte(ctx);
+		dst_bytes[offset + 2] = sbox[ src_bytes[offset + 2] ];
+		dst_bytes[offset + 3] = src_bytes[offset + 3];
 	}
 	
 	return 0;
