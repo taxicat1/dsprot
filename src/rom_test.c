@@ -212,7 +212,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	
 	// Checking the ROM reading results were as expected:
 	//   0 == 1 == 2 == 6
-	//   3 == 9 (not checked)
+	//   3 == 6 (not checked)
 	//   4 == 10
 	//   5 == 11
 	//   6 != 7 and 6 != 8
@@ -432,7 +432,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	
 	// Checking the ROM reading results were as expected:
 	//   0 == 1 == 2 == 6
-	//   3 == 9 (not checked)
+	//   3 == 6 (not checked)
 	//   4 == 10
 	//   5 == 11
 	//   6 != 7 and 6 != 8
