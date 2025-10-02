@@ -16,9 +16,9 @@
 void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
-	//
+	// 
 	// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
-	//
+	// 
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
@@ -54,13 +54,13 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	ext_mem_register_val_original = *(REGType16v*)reg_mi_exmemcnt;
 	
 	// Set current processor accessing the gamecard bus to the ARM9
-	*(REGType16v*)reg_mi_exmemcnt = (*(REGType16v*)reg_mi_exmemcnt & ~REG_MI_EXMEMCNT_MP_MASK) |
+	*(REGType16v*)reg_mi_exmemcnt = (*(REGType16v*)reg_mi_exmemcnt & ~REG_MI_EXMEMCNT_MP_MASK) | 
 	                                (MI_PROCESSOR_ARM9 << REG_MI_EXMEMCNT_MP_SHIFT);
 	
 	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 	// This address must instead be 0x02FFFE60 if in DSi mode, which is unsupported here
 	// Read port setting and set page read flags
-	card_ctrl_cmd = (*(vs32*)0x027FFE60 & ~CARD_COMMAND_MASK) |
+	card_ctrl_cmd = (*(vs32*)0x027FFE60 & ~CARD_COMMAND_MASK) | 
 	                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 	
 	// Calculate offset to round back to nearest 0x200-byte block.
