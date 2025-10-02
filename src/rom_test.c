@@ -177,7 +177,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		//                 0   1000*
 		//                 1   1200*
 		//                 2   1400*
-		//                 3   1600
+		//                 3   1600*
 		//                 4   A000
 		//                 5   D000
 		// 
@@ -212,7 +212,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	
 	// Checking the ROM reading results were as expected:
 	//   0 == 1 == 2 == 6
-	//   3 == 9 (not checked)
+	//   3 == 6 (not checked)
 	//   4 == 10
 	//   5 == 11
 	//   6 != 7 and 6 != 8
