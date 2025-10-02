@@ -183,7 +183,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Address changes as we loop.
 		// 
@@ -309,10 +309,10 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
 		}
 		
-		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Two more loops are executed:
 		// 
@@ -422,10 +422,10 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
 		}
 		
-		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Final two loops are executed:
 		// 
@@ -659,7 +659,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
 		// This function is patched over on flashcarts, which can be detected
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + rom_addr_offset), &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Address changes as we loop.
 		// 
@@ -785,10 +785,10 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
 		}
 		
-		crcs[i+6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Two more loops are executed:
 		// 
@@ -898,10 +898,10 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
 		}
 		
-		crcs[i+8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i+10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
+		crcs[i + 10] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Final two loops are executed:
 		// 
