@@ -31,7 +31,7 @@ void Encryptor_StartRange(u32* addr) {
 	}
 	
 	size *= 4;
-	if (size) {
+	if (size > 0) {
 		RC4_InitAndDecryptInstructions(&key[0], addr, addr, size);
 	}
 	
@@ -75,7 +75,7 @@ void Encryptor_EndRange(u32* addr) {
 	}
 	
 	size *= 4;
-	if (size) {
+	if (size > 0) {
 		RC4_InitAndEncryptInstructions(&key[0], addr, addr, size);
 	}
 	
