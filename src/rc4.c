@@ -125,10 +125,10 @@ u32 RC4_InitSBox(u8* sbox) {
 
 u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
-	u8*  src_bytes;
-	u8*  dst_bytes;
 	u32  idx;
 	u32  ins_word;
+	u8*  src_bytes;
+	u8*  dst_bytes;
 	
 	if (size & 3) {
 		return -1;
@@ -141,6 +141,7 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
+		
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case INS_TYPE_BLXIMM:
 			case INS_TYPE_BL:
@@ -183,10 +184,10 @@ u32 RC4_EncryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 
 u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	u8   sbox[256];
-	u8*  src_bytes;
-	u8*  dst_bytes;
 	u32  idx;
 	u32  ins_word;
+	u8*  src_bytes;
+	u8*  dst_bytes;
 	
 	if (size & 3) {
 		return -1;
@@ -199,6 +200,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 	
 	for (idx = 0; idx < size; idx += 4) {
 		ins_word = *(u32*)(src_bytes + idx);
+		
 		switch (Encryptor_CategorizeInstruction(ins_word)) {
 			case INS_TYPE_BLXIMM:
 			case INS_TYPE_B:
