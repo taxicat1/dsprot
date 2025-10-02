@@ -17,9 +17,9 @@ u32 ROMUtil_CRC32(void* buf, u32 size);
 void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
-	//
+	// 
 	// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
-	//
+	// 
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
