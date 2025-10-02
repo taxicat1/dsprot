@@ -18,9 +18,9 @@ u32 ROMUtil_CRC32(void* buf, u32 size);
 void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
-	//
+	// 
 	// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
-	//
+	// 
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
@@ -55,7 +55,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	ext_mem_register_val_original = reg_MI_EXMEMCNT;
 	
 	// Set current processor accessing the gamecard bus to the ARM9
-	reg_MI_EXMEMCNT = (reg_MI_EXMEMCNT & ~REG_MI_EXMEMCNT_MP_MASK) |
+	reg_MI_EXMEMCNT = (reg_MI_EXMEMCNT & ~REG_MI_EXMEMCNT_MP_MASK) | 
 	                  (MI_PROCESSOR_ARM9 << REG_MI_EXMEMCNT_MP_SHIFT);
 	
 	// Obfuscated, create address 0x027FFE60
