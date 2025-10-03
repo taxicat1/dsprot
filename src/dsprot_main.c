@@ -18,13 +18,13 @@ u32 DetectNotDummy(void* callback);
 
 #define FUNC_QUEUE_END  (0)
 
+typedef u32 (*TaskFunc)(void);
+typedef void (*CallbackFunc)(void);
+
 enum {
 	EXPECT_FALSE,
 	EXPECT_TRUE
 };
-
-typedef u32 (*TaskFunc)(void);
-typedef void (*CallbackFunc)(void);
 
 
 // This was likely not originally an inline, but an inline is able to match here nicely
