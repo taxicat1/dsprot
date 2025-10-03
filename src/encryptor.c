@@ -167,20 +167,20 @@ asm u32 Encryptor_DecryptionWrapperFragment(void) {
 	stmfd  sp!, {r0-r3}                          /* Push inner function arguments onto the stack to save them for after decryption. */
 	str    r10, [ip, #0x10]                      /* `r10` about to be used as temporary register, save it to second storage space. */
 	mov    r10, ip                               /* `r10` now used for the pointer to the data structure. */
-	ldr    ip, =Proxy_Encryptor_DecryptFunction  /* Load address for function decryptor proxy */
+	ldr    ip, =Proxy_Encryptor_DecryptFunction  /* Load address for function decryptor proxy. */
 	str    lr, [r10]                             /* `lr` (outer return address) saved to first storage space to return later. */
-	ldr    ip, [ip]                              /* Load value of function decryptor proxy */
+	ldr    ip, [ip]                              /* Load value of function decryptor proxy. */
 	ldmib  r10, {r0-r2}                          /* Read function decryptor arguments from data structure (key, addr, size). */
-	sub    ip, ip, #ENC_VAL_1                    /* Deobfuscate function decryptor address */
+	sub    ip, ip, #ENC_VAL_1                    /* Deobfuscate function decryptor address. */
 	blx    ip                                    /* Call function decryptor, which returns de-obfuscated function address. */
 	mov    ip, r0                                /* Move returned address to `ip` to free up `r0`. */
 	ldmia  sp!, {r0-r3}                          /* Pop arguments to inner function (`r0`-`r3`) off the stack. Stack is now restored. */
 	blx    ip                                    /* Call inner function. `r0`-`r3` and `sp` are correct for proper arguments. */
-	ldr    ip, =Proxy_Encryptor_EncryptFunction  /* Load address for function encryptor proxy */
+	ldr    ip, =Proxy_Encryptor_EncryptFunction  /* Load address for function encryptor proxy. */
 	stmdb  sp!, {r4}                             /* `r4` about to be used as temporary register, preserve its current value on the stack. */
-	ldr    ip, [ip]                              /* Load value of function encryptor proxy */
+	ldr    ip, [ip]                              /* Load value of function encryptor proxy. */
 	mov    r4, r0                                /* Preserve the return from the inner function in `r4`, move it back to `r0` later. */
-	sub    ip, ip, #ENC_VAL_1                    /* Deobfuscate function decryptor address */
+	sub    ip, ip, #ENC_VAL_1                    /* Deobfuscate function decryptor address. */
 	ldmib  r10, {r0-r2}                          /* Read function encryptor arguments from data structure (key, addr, size). */
 	blx    ip                                    /* Call function encryptor, which returns obfuscated new key (unused). */
 	str    r0, [r10, #0x4]                       /* New key is stored back into data structure. */
