@@ -207,6 +207,7 @@ asm u32 Encryptor_DecryptionWrapperFragment(void) {
 	       [0C]  Function size in bytes (obfuscated)
 	       [10]  Storage space
 	*/
+	
 	stmfd  sp!, {r0-r3}               /* Push inner function arguments onto the stack to save them for after decryption. */
 	str    r10, [ip, #0x10]           /* `r10` about to be used as temporary register, save it to second storage space. */
 	mov    r10, ip                    /* `r10` now used for the pointer to the data structure. */
