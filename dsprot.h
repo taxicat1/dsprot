@@ -50,7 +50,7 @@ extern u32 DSProt_DetectFlashcart(void* callback, void* param, u32 __unused);
  * @param param:       Parameter to be passed to the callback
  * @param __unused:    Unused
  * 
- * @returns:     If the callback was run, the return of the callback. If an emulator was not detected, DSP_DETECTEMULATOR_OK. Otherwise, some other value
+ * @returns:    If the callback was run, the return of the callback. If an emulator was not detected, DSP_DETECTEMULATOR_OK. Otherwise, some other value
  */
 extern u32 DSProt_DetectEmulator(void* callback, void* param, u32 __unused);
 
