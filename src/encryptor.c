@@ -57,10 +57,10 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) {
 
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
+	u32*  addr;
 	u32   size;
 	u32*  end_addr;
 	u32   xorval;
-	u32*  addr;
 	
 	if (functions == NULL || functions->obfs_addr == 0) {
 		return;
@@ -106,6 +106,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		}
 		
 		clearDataAndInstructionCache((void*)(functions->obfs_addr - ENC_VAL_1), size);
+		
 		functions++;
 	} while (functions->obfs_addr != 0);
 }
