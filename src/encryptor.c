@@ -54,10 +54,10 @@ static inline void clearDataAndInstructionCache(void) {
 
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
-	u32*  prevmem;
 	u32*  addr;
 	u32   size;
 	u32*  end_addr;
+	u32*  prevmem;
 	u32   xorval;
 	
 	// Zero memory in the function callee
