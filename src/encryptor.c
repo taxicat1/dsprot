@@ -107,6 +107,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 					// Fall through
 				default:
 					*addr ^= xorval;
+					
 					xorval ^= *addr;
 					xorval ^= *addr >> 8;
 					xorval &= ENC_XOR_MASK;
