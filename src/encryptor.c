@@ -114,6 +114,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 					xorval ^= *addr;
 					xorval ^= *addr >> 8;
 					xorval &= ENC_XOR_MASK;
+					break;
 			}
 		}
 		
