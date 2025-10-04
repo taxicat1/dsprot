@@ -83,12 +83,12 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	prevmem[0] = prevmem[1] = prevmem[2] = 0;
 	
 	do {
+		xorval = ENC_XOR_START;
+		
 		addr = (u32*)(functions->obfs_addr - ENC_VAL_1);
 		size = functions->obfs_size - (u32)&BSS - ENC_VAL_1;
 		
 		end_addr = addr + (size / 4);
-		
-		xorval = ENC_XOR_START;
 		
 		for (; addr < end_addr; addr++) {
 			switch (Encryptor_CategorizeInstruction(*addr)) {
