@@ -69,9 +69,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	
 	bss_addr = (u32)&BSS;
 	
-	// This overwrites the instructions in the callee, erasing them
+	// Zero memory in the function callee
 	prevmem = (u32*)functions - 3;
-	// Must be in this compound assignment to match
 	prevmem[0] = prevmem[1] = prevmem[2] = 0;
 	
 	do {
@@ -110,8 +109,9 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		}
 		
 		clearDataAndInstructionCache((void*)(functions->obfs_addr - ENC_VAL_1), size);
-		functions->obfs_size = 0;
-		functions->obfs_addr = 0;
+		
+		// Zero memory in the argument data structure
+		functions->obfs_addr = functions->obfs_size = 0;
 		
 		functions++;
 	} while (functions->obfs_addr != 0);
