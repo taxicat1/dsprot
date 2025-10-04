@@ -78,8 +78,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		}
 		
 		// Zero memory in the argument data structure
-		functions->obfs_size = 0;
-		functions->obfs_addr = 0;
+		functions->obfs_addr = functions->obfs_size = 0;
 		
 		functions++;
 	} while (functions->obfs_addr != 0);
