@@ -63,23 +63,28 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32   size;
 	u32*  end_addr;
 	u32   xorval;
-	u32   bss_addr;
 	u32*  addr;
 	u32*  prevmem;
-	
-	bss_addr = (u32)&BSS;
 	
 	// Zero memory in the function callee
 	prevmem = (u32*)functions - 3;
 	prevmem[0] = prevmem[1] = prevmem[2] = 0;
 	
 	do {
-		addr = (u32*)(functions->obfs_addr - ENC_VAL_1);
-		size = functions->obfs_size - bss_addr - ENC_VAL_1;
-		
-		end_addr = addr + (size / 4);
-		
 		xorval = ENC_XOR_START;
+		
+		addr = (u32*)functions->obfs_addr;
+		size = functions->obfs_size - (u32)&BSS - ENC_VAL_1;
+		
+		// This check used to be here in previous versions (and was never actually needed)
+		//if (addr == NULL) {
+		//	break;
+		//}
+		
+		// The address is loaded and deobfuscated in two separate steps
+		// as a remnant of this. This was refactored out in version 1.28.
+		addr = (void*)addr - ENC_VAL_1;
+		end_addr = addr + (size / 4);
 		
 		for (; addr < end_addr; addr++) {
 			switch (Encryptor_CategorizeInstruction(*addr)) {
