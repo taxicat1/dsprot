@@ -129,7 +129,7 @@ u32 Encryptor_EncryptFunction(u32 key, u32 func_addr, u32 size) {
 	clearDataAndInstructionCache();
 	
 	// Change and obfuscate key (unused)
-	key += ((u32)&BSS + ENC_VAL_1) + (func_addr & 0x0000FFFF);
+	key += (u32)&BSS + ENC_VAL_1 + (func_addr & 0x0000FFFF);
 	
 	return key;
 }
