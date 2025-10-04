@@ -73,9 +73,9 @@ u32 Encryptor_CategorizeInstruction(u32 instruction) {
 
 void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32*  addr;
+	u32   size;
 	u32*  end_addr;
 	u32   xorval;
-	u32   size;
 	u32*  prevmem;
 	
 	// Zero memory in the function callee
