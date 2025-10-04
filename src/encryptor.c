@@ -118,7 +118,8 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 		}
 		
 		clearDataAndInstructionCache();
-		// Must be like this to match
+		
+		// Zero memory in the argument data structure
 		functions->obfs_addr = functions->obfs_size = 0;
 		
 		functions++;
