@@ -60,25 +60,23 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32   size;
 	u32*  end_addr;
 	u32   xorval;
-	u32   bss_addr;
 	u32*  addr;
 	
 	if (functions == NULL || functions->obfs_addr == 0) {
 		return;
 	}
 	
-	bss_addr = (u32)&BSS;
-	
 	do {
 		xorval = ENC_XOR_START;
 		
-		size = functions->obfs_size - bss_addr - ENC_VAL_1;
+		addr = (u32*)functions->obfs_addr;
+		size = functions->obfs_size - (u32)&BSS - ENC_VAL_1;
 		
-		if (functions->obfs_addr == 0) {
-			return;
+		if (addr == NULL) {
+			break;
 		}
 		
-		addr = (u32*)(functions->obfs_addr - ENC_VAL_1);
+		addr = (void*)addr - ENC_VAL_1;
 		end_addr = addr + (size / 4);
 		
 		for (; addr < end_addr; addr++) {
