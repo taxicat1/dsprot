@@ -100,10 +100,10 @@ void* Encryptor_DecryptFunction(u32 key, u32 func_addr, u32 size) {
 	void*  func_ptr;
 	
 	// Deobfuscate arguments (key is not obfuscated)
-	size -= (u32)&BSS + ENC_VAL_1;
-	
 	func_ptr = (void*)func_addr;
 	func_ptr -= ENC_VAL_1;
+	
+	size -= (u32)&BSS + ENC_VAL_1;
 	
 	expandRC4Key(key, size, &expanded_key[0]);
 	PROXY_FUNC(RC4_InitAndDecryptInstructions)(&expanded_key[0], func_ptr, func_ptr, size);
@@ -118,10 +118,10 @@ u32 Encryptor_EncryptFunction(u32 key, u32 func_addr, u32 size) {
 	void*  func_ptr;
 	
 	// Deobfuscate arguments (key is not obfuscated)
-	size -= (u32)&BSS + ENC_VAL_1;
-	
 	func_ptr = (void*)func_addr;
 	func_ptr -= ENC_VAL_1;
+	
+	size -= (u32)&BSS + ENC_VAL_1;
 	
 	expandRC4Key(key, size, &expanded_key[0]);
 	PROXY_FUNC(RC4_InitAndEncryptInstructions)(&expanded_key[0], func_ptr, func_ptr, size);
