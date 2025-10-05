@@ -2,8 +2,8 @@
 
 #include "failure_codes.h"
 #include "nitro_card.h"
-#include "nitro_os.h"
 #include "nitro_io_reg.h"
+#include "nitro_os.h"
 #include "primes.h"
 #include "rom_util.h"
 
