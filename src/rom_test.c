@@ -23,8 +23,8 @@ u32 ROMTest_IsBad(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
-	u32  rom_addr;
 	u16  lock_id;
+	u32  rom_addr;
 	u32  mul;
 	int  i;
 	
@@ -209,8 +209,8 @@ u32 ROMTest_IsGood(void) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
-	u32  rom_addr;
 	u16  lock_id;
+	u32  rom_addr;
 	u32  mul;
 	int  i;
 	
