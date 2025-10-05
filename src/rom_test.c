@@ -219,7 +219,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	
 	rom_addr += 0x1E000;
 	
-	for (i = i; i < 8; i++) {
+	for (; i < 8; i++) {
 		{
 			void* dest      = buf_ptr;
 			u32   addr      = rom_addr;
@@ -695,7 +695,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	
 	rom_addr += 0x1E000;
 	
-	for (i = i; i < 8; i++) {
+	for (; i < 8; i++) {
 		{
 			void* dest      = buf_ptr;
 			u32   addr      = rom_addr;
