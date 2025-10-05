@@ -1,5 +1,6 @@
 #include "rom_test.h"
 
+#include "dsprot_types.h"
 #include "failure_codes.h"
 #include "nitro_card.h"
 #include "nitro_io_reg.h"
