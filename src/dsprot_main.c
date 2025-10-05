@@ -84,7 +84,7 @@ u32 DetectEmulator(void* callback, void* param, u32 __unused) {
 	
 	u32 func_queue[32];
 	
-	func_queue[2] = 0;
+	func_queue[2] = FUNC_QUEUE_END;
 	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1) + DSP_OBFS_OFFSET;
 	
