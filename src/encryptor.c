@@ -142,11 +142,10 @@ void* Encryptor_DecryptFunction(u32 key, u32 func_addr, u32 size) {
 	void*  func_ptr;
 	
 	// Deobfuscate arguments
-	size -= (u32)&BSS + ENC_VAL_1;
-	
 	func_ptr = (void*)func_addr;
 	func_ptr -= ENC_VAL_1;
 	
+	size -= (u32)&BSS + ENC_VAL_1;
 	key -= (u32)&BSS + ENC_VAL_1;
 	
 	expandRC4Key(key, size, &expanded_key[0]);
@@ -161,13 +160,14 @@ u32 Encryptor_EncryptFunction(u32 key, u32 func_addr, u32 size) {
 	u32    expanded_key[4];
 	void*  func_ptr;
 	
-	// Deobfuscate arguments and change key
-	size -= (u32)&BSS + ENC_VAL_1;
-	
+	// Deobfuscate arguments
 	func_ptr = (void*)func_addr;
 	func_ptr -= ENC_VAL_1;
 	
+	size -= (u32)&BSS + ENC_VAL_1;
 	key -= (u32)&BSS + ENC_VAL_1;
+	
+	// Change key
 	key += func_addr & 0x0000FFFF;
 	
 	expandRC4Key(key, size, &expanded_key[0]);
