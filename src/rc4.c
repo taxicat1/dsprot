@@ -209,10 +209,8 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 					u32  operands;
 					u32* dst_addr = (u32*)(dst_bytes + offset);
 					
-					*dst_addr = ins_word;
-					
-					opcode = (*dst_addr & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
-					operands = ((*dst_addr & INS_OPERANDS_MASK) - ENC_VAL_2) & INS_OPERANDS_MASK;
+					opcode = (ins_word & INS_OPCODE_MASK) ^ (INS_OPCODE_LINKBIT << INS_OPCODE_SHIFT);
+					operands = ((ins_word & INS_OPERANDS_MASK) - ENC_VAL_2) & INS_OPERANDS_MASK;
 					
 					*dst_addr = opcode | operands;
 				}
