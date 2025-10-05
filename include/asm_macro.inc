@@ -40,26 +40,26 @@ hash_loop_\@:                           ;
 	mov      r4, r2, lsr #24            ; Checking its opcode, shift by 24 to extract upper byte
 	cmp      r4, #0xEA                  ; Compare opcode to EA and EB, which are branches (possible relocations)
 	cmpne    r4, #0xEB                  ; 
-	eorne    r3, r3, r2, ror #17        ; If not a branch, add to hash
+	eorne    r3, r3, r2, ror #17        ; If not a branch, add to hash:
 	addne    r3, r3, r2, ror #28        ; hash = ((hash ^ (ins >>> 17)) + (ins >>> 28)) ^ (ins >>> i)
 	eorne    r3, r3, r2, ror r1         ; 
 	subs     r1, r1, #1                 ; Decrement size
 	add      r0, r0, #4                 ; Increment address
 	bne      hash_loop_\@               ; Continue hash loop until remaining size is 0
-	mov      r0, #0x02000000            ; Create addresses 0x02000800 and 0x04004000
+	mov      r0, #0x02000000            ; Create address 0x02000800 (DS mode) or 0x02004800 (DSi mode). This is the region reserved for libsyscall
 	orr      r1, r0, #0x800             ; 
-	mov      r0, #0x04000000            ; 
+	mov      r0, #0x04000000            ; Creating address 0x04004000 which is used to detect DSi mode
 	orr      r0, r0, #0x4000            ; 
-	ldr      r0, [r0]                   ; Read value from 0x04004000 (should always be zero)
-	ands     r0, r0, #1                 ; If LSB is set, will clobber stuff
-	orrne    r1, r1, #0x4000            ; If not set, update other address to 0x02004800
-	cmp      ip, r1,                    ; Comparing `ip` (Encryptor_DecryptionWrapperFragment) to other address
+	ldr      r0, [r0]                   ; Read and check DSi flag
+	ands     r0, r0, #1                 ; 
+	orrne    r1, r1, #0x4000            ; If set, update address to 0x02004800
+	cmp      ip, r1,                    ; Comparing `ip` (Encryptor_DecryptionWrapperFragment) to libsyscall region. `ip` should always be greater
 	strge    r3, [pc, #0x18]            ; If address is higher, save the proper decryption key to pool
-	movlt    ip, lr                     ; Else, Return to `lr` instead of running Encryptor_DecryptionWrapperFragment (why?)
+	movlt    ip, lr                     ; Else, Return to `lr` instead of running Encryptor_DecryptionWrapperFragment, aborting running the encrypted function
 	ldmgefd  sp!, {r0, r1, r2, r3, r4}  ; Correct pop if address is higher
-	ldmltfd  sp!, {r5, r6, r7, r8, sb}  ; Incorrect pop, ruining registers if address is lower
+	ldmltfd  sp!, {r5, r6, r7, r8, sb}  ; Incorrect pop, seemingly ruining registers if address is lower
 	stmgedb  sp!, {ip}                  ; Stash address of decryption wrapper fragment onto stack
-	orr      ip, pc, pc                 ; Re-get `pc`, which now points to the data structure in the pool
+	orr      ip, pc, pc                 ; Re-get `pc`, which now points to the data structure below
 	ldmia    sp!, {pc}                  ; Pop decryption wrapper fragment address off stack to `pc`
 	.word    BSS + 1
 	.word    BSS + 3
