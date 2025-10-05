@@ -127,7 +127,7 @@ void* Encryptor_DecryptFunction(u32 key, u32 func_addr, u32 size) {
 	u32    expanded_key[4];
 	void*  func_ptr;
 	
-	// Deobfuscate arguments 
+	// Deobfuscate arguments
 	size -= (u32)&BSS + ENC_VAL_1;
 	
 	key -= (u32)&BSS + ENC_VAL_1;
