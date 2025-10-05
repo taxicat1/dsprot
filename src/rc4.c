@@ -304,7 +304,7 @@ u32 RC4_DecryptInstructions(RC4_Ctx* ctx, void* src, void* dst, u32 size) {
 u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
 	RC4_Ctx ctx;
 	PROXY_FUNC(RC4_Init)(&ctx, key, RC4_KEY_SIZE);
-	// Must coerce return to -1 or 0
+	// Must coerce output to -1 or 0 like this to match
 	return PROXY_FUNC(RC4_EncryptInstructions)(&ctx, dst, src, size) == -1 ? -1 : 0;
 }
 
@@ -312,6 +312,6 @@ u32 RC4_InitAndEncryptInstructions(void* key, void* dst, void* src, u32 size) {
 u32 RC4_InitAndDecryptInstructions(void* key, void* dst, void* src, u32 size) {
 	RC4_Ctx ctx;
 	PROXY_FUNC(RC4_Init)(&ctx, key, RC4_KEY_SIZE);
-	// Must coerce return to -1 or 0
+	// Must coerce output to -1 or 0 like this to match
 	return PROXY_FUNC(RC4_DecryptInstructions)(&ctx, dst, src, size) == -1 ? -1 : 0;
 }
