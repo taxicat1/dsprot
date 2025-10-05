@@ -219,7 +219,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	
 	rom_addr += 0x1E000;
 	
-	for (i = i; i < 8; i++) {
+	for (; i < 8; i++) {
 		{
 			void* dest      = buf_ptr;
 			u32   addr      = rom_addr;
