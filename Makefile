@@ -39,7 +39,6 @@ FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -ipa file -interworking -c -i $(INC_DIR)
 ASM_PARAM  :=  -proc arm5TE -i $(INC_DIR)
 LIB_PARAM  :=  -nostdlib -library
-
 DEP_PARAM  :=  -gccdep -MD
 
 CC_PARAM   +=  -W all -W pedantic -W noimpl_signedunsigned -W noimplicitconv -W nounusedarg -W nomissingreturn -W error
