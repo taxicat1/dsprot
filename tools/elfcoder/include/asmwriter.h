@@ -7,16 +7,16 @@
 #include "keydata.h"
 
 typedef struct {
-	char*    output_fname;
-	char**   symbols;
-	char*    wrapper_prefix;
-	char*    decoder_name;
-	char**   children;
-	char*    garbage;
-	int*     symbol_sizes;
-	int      key_mode;
-	KeyData  key_data;
-	int      valid;
+	char*   output_fname;
+	char**  symbols;
+	char*   wrapper_prefix;
+	char*   decoder_name;
+	char**  children;
+	char*   garbage;
+	int*    symbol_sizes;
+	int     key_mode;
+	int     hashed_ins;
+	int     valid;
 } ASMWriter_Ctx;
 
 void ASMWriter_Init(ASMWriter_Ctx* asmw, EncodingTask* task);

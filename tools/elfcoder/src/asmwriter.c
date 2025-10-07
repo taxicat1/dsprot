@@ -77,12 +77,12 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 			fprintf(output,
 				"\tarm_func_start %s%s\n"
 				"%s%s:\n"
-				"\trun_encrypted_func %s, 0x%x, 0x%x, 0x%x\n"
+				"\trun_encrypted_func %s, 0x%x, 0x%x\n"
 				"\tarm_func_end %s%s\n"
 				"\n",
 				asmw->wrapper_prefix, asmw->symbols[symbol_idx],
 				asmw->wrapper_prefix, asmw->symbols[symbol_idx],
-				asmw->symbols[symbol_idx], asmw->symbol_sizes[symbol_idx], asmw->key_data.key, asmw->key_data.hashed_instructions,
+				asmw->symbols[symbol_idx], asmw->symbol_sizes[symbol_idx], asmw->hashed_ins,
 				asmw->wrapper_prefix, asmw->symbols[symbol_idx]
 			);
 		}
@@ -157,7 +157,7 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 
 
 void ASMWriter_Init(ASMWriter_Ctx* asmw, EncodingTask* task) {
-	asmw->key_data       = task->key_data;
+	asmw->hashed_ins     = task->key_data.hashed_instructions;
 	asmw->key_mode       = task->key_mode;
 	asmw->output_fname   = task->output_fname;
 	asmw->symbols        = task->symbols;
