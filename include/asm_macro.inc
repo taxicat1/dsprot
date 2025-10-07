@@ -22,32 +22,34 @@
 	.public BSS
 	.public Encryptor_DecryptionWrapperFragment
 
-	.macro run_encrypted_func func, length, key
-	; Obfuscated: copy `pc` into `ip`, then add +0x1C and +0x14 for total +0x30.
-	; `pc + 0x30` from the first line is the line with `Encryptor_DecryptionWrapperFragment + ENC_VAL_1`.
-	; Subtract `ENC_VAL_1` (0x1700) from that, store it on the stack.
-	; Then set `ip` back to `pc`, which now points at the start of the data structure.
-	; Finally pop the address to `Encryptor_DecryptionWrapperFragment` off the stack onto `pc` to jump.
-	orr    ip, pc, pc
-	ands   ip, ip, ip
-	moveq  ip, #0
-	addne  ip, ip, #0x1C
-	ldr    ip, [ip, #0x14]
-	sub    ip, ip, #ENC_VAL_1
-	stmfd  sp!, {ip}
-	orr    ip, pc, pc
-	ldmfd  sp!, {pc}
-	.word  BSS + 0x1                  ; Storage space
+	.macro encrypted_func_data func, length, key
+	.word  BSS + 1                    ; Storage space
 	.word  BSS + \key + ENC_VAL_1     ; Encryption key
 	.word  \func + ENC_VAL_1          ; Function address
 	.word  BSS + \length + ENC_VAL_1  ; Length
 	.word  0                          ; Storage space
+	; Pointer to wrapper fragment
 	.word  Encryptor_DecryptionWrapperFragment + ENC_VAL_1
 	.endm
 
+	.macro run_encrypted_func func, length, key
+	orr    ip, pc, pc          ; Copy `pc` into `ip`
+	ands   ip, ip, ip          ; Checking if `pc` was zero (??)
+	moveq  ip, #0              ; 
+	addne  ip, ip, #0x1C       ; Set `ip` to point at encrypted_func_data struct below
+	ldr    ip, [ip, #0x14]     ; Load encrypted_func_data[0x14] (address of Encryptor_DecryptionWrapperFragment)
+	sub    ip, ip, #ENC_VAL_1  ; Deobfuscate address
+	stmfd  sp!, {ip}           ; Stash address of decryption wrapper fragment onto stack
+	orr    ip, pc, pc          ; Re-get `pc`, which now points to encrypted_func_data struct
+	ldmfd  sp!, {pc}           ; Pop decryption wrapper fragment address off stack to `pc`
+	
+	; Data structure
+	encrypted_func_data \func, \length, \key
+	.endm
 
-	.macro overwrite_instructions self
-	ldr    r0, =\self+ENC_VAL_1
+
+	.macro overwrite_instructions target
+	ldr    r0, =\target + ENC_VAL_1
 	ldr    r1, =0xE12FFF1E       ; <bx lr> command
 	sub    r0, r0, #ENC_VAL_1
 	stmia  r0!, {r1-r10}         ; Writes <bx lr> followed by whatever garbage happened to be in `r2`-`r10`
@@ -58,8 +60,8 @@
 
 	.macro decode_following_func_table
 	; This does not take a reference, instead always uses a manual `[pc #4]`
-	orr   r0, pc, #0x0
-	adds  r0, r0, #0x4
+	orr   r0, pc, #0
+	adds  r0, r0, #4
 	bne   Encryptor_DecodeFunctionTable
 	.endm
 
