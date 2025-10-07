@@ -32,6 +32,9 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | BD2E | Deca Sports DS | USA | Overlay 2 |
 | BD2J | Deca Sporta - DS de Sports '10' Shumoku! | Japan | Overlay 2 |
 | BD2P | Sports Island DS | Europe | Overlay 2 |
+| BDBE | Dragon Ball - Origins 2 | USA | Overlays 2, 3 |
+| BDBJ | Dragon Ball DS 2 - Totsugeki! Red Ribbon Gun | Japan | Overlays 2, 3 |
+| BDBP | Dragon Ball - Origins 2 | Europe | Overlays 2, 3 |
 | BDGJ | Dear Girl - Stories - Hibiki - Hibiki Tokkun Daisakusen! | Japan | Overlay 0 |
 | BEKJ | 5-kyuu kara 1-kyuu Kanzen Taiou Saishin Kako Mondai - Nijishiken Taisaku - Eiken Kanzenban (v01) | Japan | Overlay 22 |
 | BIPJ | Pen1 Grand Prix - Penguin no Mondai Special | Japan | Overlay 13 |
