@@ -98,9 +98,8 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 			card_ctrl_13 = 5;
 			
-			// Obfuscated 0x1FF to mask address
+			// Obfuscated 0x1FF to mask address later
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			// Creating address 0x027FFE60 cont.
 			// If the system is in DSi mode, the address is changed to 0x02FFFE60
@@ -117,7 +116,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			// E.G. if we want to read starting from 0x1208, we actually need to
 			// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 			// This would set `addr_offset` to -8.
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			// Wait for card to not be busy
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
@@ -221,12 +220,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	
 	for (; i < 8; i++) {
 		{
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
 			// Another round of manual cartridge reading here
 			// It is exactly the same as the above block, but without adding the total size of the ROM
+			// Comments have been omitted for brevity
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
@@ -239,6 +235,10 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			u32         reading_addr;
 			u32         output;
 			int         i;
+			
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			vnull = (REGType8v*)NULL;
 			
@@ -254,7 +254,6 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			card_ctrl_13 = 5;
 			
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 			card_ctrl_13 <<= 18;
@@ -264,7 +263,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
 			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 			
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
 			
@@ -333,13 +332,10 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	
 	for (; i < 10; i++) {
 		{
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
 			// Third round of manual cartridge reading.
 			// It is exactly the same as the above block, but now it sends a malformed read command:
 			// Instead of the expected B7XXXXXXXX000000, it sends B7XXXXXXXX110000
+			// Comments have been omitted for brevity
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
@@ -352,6 +348,10 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			u32         reading_addr;
 			u32         output;
 			int         i;
+			
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			vnull = (REGType8v*)NULL;
 			
@@ -367,7 +367,6 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			card_ctrl_13 = 5;
 			
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 			card_ctrl_13 <<= 18;
@@ -377,7 +376,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
 			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 			
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
 			
@@ -574,9 +573,8 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 			card_ctrl_13 = 5;
 			
-			// Obfuscated 0x1FF to mask address
+			// Obfuscated 0x1FF to mask address later
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			// Creating address 0x027FFE60 cont.
 			// If the system is in DSi mode, the address is changed to 0x02FFFE60
@@ -593,7 +591,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			// E.G. if we want to read starting from 0x1208, we actually need to
 			// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 			// This would set `addr_offset` to -8.
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			// Wait for card to not be busy
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
@@ -697,12 +695,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	
 	for (; i < 8; i++) {
 		{
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
 			// Another round of manual cartridge reading here
 			// It is exactly the same as the above block, but without adding the total size of the ROM
+			// Comments have been omitted for brevity
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
@@ -715,6 +710,10 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			u32         reading_addr;
 			u32         output;
 			int         i;
+			
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			vnull = (REGType8v*)NULL;
 			
@@ -730,7 +729,6 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			card_ctrl_13 = 5;
 			
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 			card_ctrl_13 <<= 18;
@@ -740,7 +738,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
 			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 			
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
 			
@@ -809,13 +807,10 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	
 	for (; i < 10; i++) {
 		{
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
 			// Third round of manual cartridge reading.
 			// It is exactly the same as the above block, but now it sends a malformed read command:
 			// Instead of the expected B7XXXXXXXX000000, it sends B7XXXXXXXX110000
+			// Comments have been omitted for brevity
 			
 			u32         register_base_1;
 			REGType8v*  vnull;
@@ -828,6 +823,10 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			u32         reading_addr;
 			u32         output;
 			int         i;
+			
+			void* dest      = buf_ptr;
+			u32   addr      = rom_addr;
+			s32   num_bytes = ROM_BLOCK_SIZE;
 			
 			vnull = (REGType8v*)NULL;
 			
@@ -843,7 +842,6 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			card_ctrl_13 = 5;
 			
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 			card_ctrl_13 <<= 18;
@@ -853,7 +851,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
 			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 			
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
 			
