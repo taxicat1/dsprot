@@ -101,9 +101,8 @@ u32 ROMTest_IsBad(void* __unused) {
 			// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
 			card_ctrl_13 = 5;
 			
-			// Obfuscated 0x1FF to mask address
+			// Obfuscated 0x1FF to mask address later
 			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			addr_offset = addr & addr_mask;
 			
 			// Creating address 0x027FFE60 cont.
 			// If the system is in DSi mode, the address is changed to 0x02FFFE60
@@ -120,7 +119,7 @@ u32 ROMTest_IsBad(void* __unused) {
 			// E.G. if we want to read starting from 0x1208, we actually need to
 			// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 			// This would set `addr_offset` to -8.
-			addr_offset = 0 - addr_offset;
+			addr_offset = 0 - (addr & addr_mask);
 			
 			// Wait for card to not be busy
 			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
