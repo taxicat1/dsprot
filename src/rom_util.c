@@ -75,8 +75,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// E.G. if we want to read starting from 0x1208, we actually need to
 	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 	// This would set `addr_offset` to -8.
-	addr_offset = addr & addr_mask;
-	addr_offset = 0 - addr_offset;
+	addr_offset = 0 - (addr & addr_mask);
 	
 	// Wait for card to not be busy
 	while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
