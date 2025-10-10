@@ -49,7 +49,7 @@ u32 ROMTest_IsBad(void) {
 			// Most/all convoluted syntax here must be that way to match.
 			// Some of the comment documentation may be inaccurate here.
 			u8          buffer[8];
-			u8*         bufptr;
+			u8*         buf_ptr;
 			u32         register_base_1;
 			REGType8v*  vnull;
 			REGType8v*  register_base_2;
@@ -112,9 +112,9 @@ u32 ROMTest_IsBad(void) {
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
 			// Read 8-byte command out from gamecard bus, write this back later
-			bufptr = &buffer[0];
+			buf_ptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
-				*bufptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
+				*buf_ptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
 			}
 			
 			reading_addr = addr + addr_offset;
@@ -155,9 +155,9 @@ u32 ROMTest_IsBad(void) {
 			// Done reading, restore everything how it was before
 			
 			// Write original command back to gamecard bus
-			bufptr = &buffer[0];
+			buf_ptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *bufptr++;
+				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *buf_ptr++;
 			}
 			
 			// Write original value back to to external memory control register
@@ -234,7 +234,7 @@ u32 ROMTest_IsGood(void) {
 			// Most/all convoluted syntax here must be that way to match.
 			// Some of the comment documentation may be inaccurate here.
 			u8          buffer[8];
-			u8*         bufptr;
+			u8*         buf_ptr;
 			u32         register_base_1;
 			REGType8v*  vnull;
 			REGType8v*  register_base_2;
@@ -297,9 +297,9 @@ u32 ROMTest_IsGood(void) {
 			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 			
 			// Read 8-byte command out from gamecard bus, write this back later
-			bufptr = &buffer[0];
+			buf_ptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
-				*bufptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
+				*buf_ptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
 			}
 			
 			reading_addr = addr + addr_offset;
@@ -340,9 +340,9 @@ u32 ROMTest_IsGood(void) {
 			// Done reading, restore everything how it was before
 			
 			// Write original command back to gamecard bus
-			bufptr = &buffer[0];
+			buf_ptr = &buffer[0];
 			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *bufptr++;
+				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *buf_ptr++;
 			}
 			
 			// Write original value back to to external memory control register
