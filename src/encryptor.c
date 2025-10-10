@@ -8,20 +8,20 @@ void Encryptor_StartRange(u32* addr) {
 	u8   key[16];
 	int  i;
 	u32  key_ins;
-	u8*  keyptr;
+	u8*  key_ptr;
 	u32  size;
 	
 	// First key is immediately prior to start address
 	key_ins = addr[-1];
 	
 	// Derive RC4 key
-	keyptr = &key[0];
+	key_ptr = &key[0];
 	for (i = 0; i < 16; i++) {
-		*keyptr = key_ins >> ((i % 4) * 8);
+		*key_ptr = key_ins >> ((i % 4) * 8);
 		if (i % 15 == 0) {
-			*keyptr ^= 0xFF;
+			*key_ptr ^= 0xFF;
 		}
-		keyptr++;
+		key_ptr++;
 	}
 	
 	// Search forward for second key to determine size
@@ -43,20 +43,20 @@ void Encryptor_EndRange(u32* addr) {
 	u8   key[16];
 	int  i;
 	u32  key_ins;
-	u8*  keyptr;
+	u8*  key_ptr;
 	u32  size;
 	
 	// Second key is immediately following the end address
 	key_ins = addr[1];
 	
 	// Derive RC4 key
-	keyptr = &key[0];
+	key_ptr = &key[0];
 	for (i = 0; i < 16; i++) {
-		*keyptr = key_ins >> ((i % 4) * 8);
+		*key_ptr = key_ins >> ((i % 4) * 8);
 		if (i % 15 == 0) {
-			*keyptr ^= 0xFF;
+			*key_ptr ^= 0xFF;
 		}
-		keyptr++;
+		key_ptr++;
 	}
 	
 	// Search backward for first key
