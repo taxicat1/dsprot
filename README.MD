@@ -20,6 +20,7 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | --- | --- | --- | --- |
 | AEYK | TOEIC - Test DS Training | Korea | Static region |
 | AWIK | Hotel Dusk - Secrets | Korea | Static region |
+| CCUJ | Tomodachi Collection | Japan | Static region |
 | CFIE | Final Fantasy Crystal Chronicles - Echoes of Time | USA | Static region |
 | CFIJ | Final Fantasy Crystal Chronicles - Echoes of Time | Japan | Static region |
 | CFIP | Final Fantasy Crystal Chronicles - Echoes of Time | Europe | Static region |
