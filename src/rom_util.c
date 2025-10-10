@@ -138,14 +138,14 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 u32 ROMUtil_CRC32(void* buf, u32 size) {
 	int  i;
 	u32  crc;
-	u8*  byteptr;
+	u8*  byte_ptr;
 	
 	ENCRYPTION_START(KEY_ROM_UTIL_CRC_1);
 	
-	byteptr = (u8*)buf;
+	byte_ptr = (u8*)buf;
 	crc = 0xFFFFFFFF;
 	while (size-- != 0) {
-		crc ^= *byteptr++;
+		crc ^= *byte_ptr++;
 		for (i = 0; i < 8; i++) {
 			if (crc & 1) {
 				crc = (crc >> 1);
