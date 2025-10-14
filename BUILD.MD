@@ -29,8 +29,6 @@ libdsprot:
 The exported functions are (these are actually macros provided by the header file):
 - `u32 DSProt_DetectFlashcart(void* callback);`
 - `u32 DSProt_DetectNotFlashcart(void* callback);`
-- `u32 DSProt_DetectEmulator(void* callback);`
-- `u32 DSProt_DetectNotEmulator(void* callback);`
 - `u32 DSProt_DetectDummy(void* callback);`
 - `u32 DSProt_DetectNotDummy(void* callback);`
 
@@ -45,6 +43,7 @@ These Nitro SDK functions are required for linking. If your decomp does not incl
 - `DC_StoreAll`
 - `IC_Disable`
 - `IC_Enable`
+- `MI_CpuFill8`
 - `OS_GetLockID`
 - `OS_GetMacAddress`
 - `OS_GetOwnerInfo`

@@ -49,12 +49,11 @@ LIBRARY       :=  $(BUILD_DIR)/$(LIBRARY_NAME)
 
 # Files (in this specific order) that will go into the library
 LIBRARY_FILES := \
-	$(BUILD_DIR)/encryptor.o              \
-	$(BUILD_DIR)/rc4.o                    \
-	$(BUILD_DIR)/mac_owner_encrypted.o    \
+	$(BUILD_DIR)/dsprot_main_encrypted.o  \
 	$(BUILD_DIR)/rom_util_encrypted.o     \
 	$(BUILD_DIR)/rom_test_encrypted.o     \
-	$(BUILD_DIR)/dsprot_main_encrypted.o
+	$(BUILD_DIR)/encryptor.o              \
+	$(BUILD_DIR)/rc4.o
 
 
 .PHONY: all clean tools dsprot install
@@ -103,11 +102,7 @@ $(LIBRARY): $(LIBRARY_FILES)
 	$(WINE) $(MWLDARM) $(LIB_PARAM) $^ -o $@
 
 
-# Core tests module: MAC/Owner, ROM utilities, ROM tests function encoding
-$(BUILD_DIR)/mac_owner_encrypted.o: $(BUILD_DIR)/mac_owner.o $(ELFCODER)
-	cp $(BUILD_DIR)/mac_owner.o $(BUILD_DIR)/mac_owner_encrypted.o
-	$(ELFCODER) $(ELFCODER_PARAM) -i $(BUILD_DIR)/mac_owner_encrypted.o
-
+# Core tests module: ROM utilities, ROM tests function encoding
 $(BUILD_DIR)/rom_util_encrypted.o: $(BUILD_DIR)/rom_util.o $(ELFCODER)
 	cp $(BUILD_DIR)/rom_util.o $(BUILD_DIR)/rom_util_encrypted.o
 	$(ELFCODER) $(ELFCODER_PARAM) -i $(BUILD_DIR)/rom_util_encrypted.o

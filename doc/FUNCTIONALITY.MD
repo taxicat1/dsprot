@@ -1,33 +1,25 @@
 # Core functionality
 
-DS Protect has two methods of antipiracy detection:
+DS Protect uses ROM read checks for piracy detection. It will conduct six reads of the cartridge ROM at these locations:
+- `0x0000 - 0x01FF`
+- `0x0200 - 0x03FF`
+- `0x0400 - 0x05FF`
+- `0x8000 - 0x81FF`
+- `0x8200 - 0x83FF`
+- `0x8400 - 0x85FF`
 
-1. System info check. It will check the DS's MAC address and the system owner information for either of these situations:
-	- A MAC address of `00:00:00:00:00:00` (indicating an emulator that is not emulating a MAC address at all)
-	- A MAC address of `00:09:BF:00:00:31`, coupled with an owner birthday of 1/1 and an empty owner name (indicating the use of No$GBA)
+Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first four reads will all receive the same data. The last two reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. If the expected read pattern is not matched (`1 == 2 == 3 == 4` and `4 != 5 != 6`) it will report it is running on a flashcart.
 
-2. ROM read check. It will conduct six reads of the cartridge ROM at these locations:
-	- `0x0000 - 0x01FF`
-	- `0x0200 - 0x03FF`
-	- `0x0400 - 0x05FF`
-	- `0x8000 - 0x81FF`
-	- `0x8200 - 0x83FF`
-	- `0x8400 - 0x85FF`
-	
-	Because a DS cartridge will redirect ROM reads below address `0x8000` to `0x8000 + (address & 0x1FF)`, the first four reads will all receive the same data. The last two reads, not receiving any redirection, will be different. A flashcart or low-effort reproduction cartridge meanwhile has no such behavior, and can read from any address. If the expected read pattern is not matched (`1 == 2 == 3 == 4` and `4 != 5 != 6`) it will report it is running on a flashcart.
+Additionally, there is a second "dummy" method which does not actually do any antipiracy detection. This is apparently purely to confuse reverse engineering.
 
-3. Additionally, there is a third "dummy" method which does not actually do any antipiracy detection. This is apparently purely to confuse reverse engineering.
-
-Note that modern emulators, such as [MelonDS](https://github.com/melonDS-emu/melonDS) and [DeSmuME](https://github.com/TASEmulators/desmume), correctly emulate both a MAC address and the ROM reading behavior and are therefore undetected by this library. However, due to the way flashcarts work, they cannot evade being detected by the ROM read test. Instead they will, with varying degrees of aggressiveness, seek out DS Protect and patch over its tests, neutralizing them.
+Note that modern emulators, such as [MelonDS](https://github.com/melonDS-emu/melonDS) and [DeSmuME](https://github.com/TASEmulators/desmume), correctly emulate the ROM reading behavior and are therefore undetected by this library. However, due to the way flashcarts work, they cannot evade being detected. Instead they will, with varying degrees of aggressiveness, seek out DS Protect and patch over its tests, neutralizing them.
 
 ## Exported functions
 
-Each of the three methods exists as two copies, which are identical except for reversed return values. That is, there are six functions in total with these purposes:
+Each of the two methods exists as two copies, which are identical except for reversed return values. That is, there are four functions in total with these purposes:
 
 - Detect flashcart
 - Detect not flashcart
-- Detect emulator
-- Detect not emulator
 - Detect dummy (always fails)
 - Detect not dummy (always succeeds)
 

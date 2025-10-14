@@ -5,7 +5,7 @@
  * dsprot.h
  * 
  * Header file for the DS Protect library
- * Version 1.05
+ * Version 1.00/2 (unknown)
  */
 
 #ifndef SDK_ASM
@@ -21,15 +21,13 @@ extern "C" {
  */
 extern u32 __DSProt_DetectFlashcart(u32 callback_addr);
 extern u32 __DSProt_DetectNotFlashcart(u32 callback_addr);
-extern u32 __DSProt_DetectEmulator(u32 callback_addr);
-extern u32 __DSProt_DetectNotEmulator(u32 callback_addr);
 extern u32 __DSProt_DetectDummy(u32 callback_addr);
 extern u32 __DSProt_DetectNotDummy(u32 callback_addr);
 
 /* 
  * Internal macros for function pointer preparation as the internal functions expect
  */
-#define __DSP_OBFS_OFFSET  (0x320)
+#define __DSP_OBFS_OFFSET  (0x190)
 #define __DSP_OBFS_PTR(p)  (((u32)(p)) ^ __DSP_OBFS_OFFSET)
 
 
@@ -55,30 +53,6 @@ extern u32 __DSProt_DetectNotDummy(u32 callback_addr);
  * @returns:    1 if the environment is determined to NOT be a flashcart, 0 otherwise
  */
 #define DSProt_DetectNotFlashcart(callback)  (__DSProt_DetectNotFlashcart(__DSP_OBFS_PTR(callback)))
-
-
-/* 
- * u32 DSProt_DetectEmulator(void* callback)
- * 
- * Detect if the current environment is an emulator.
- * 
- * @param callback:    Function to be called if the environment is determined to be an emulator. May be NULL.
- * 
- * @returns:    1 if the environment is determined to be an emulator, 0 otherwise
- */
-#define DSProt_DetectEmulator(callback)  (__DSProt_DetectEmulator(__DSP_OBFS_PTR(callback)))
-
-
-/* 
- * u32 DSProt_DetectNotEmulator(void* callback)
- * 
- * Detect if the current environment is NOT an emulator.
- * 
- * @param callback:    Function to be called if the environment is determined to NOT be an emulator. May be NULL.
- * 
- * @returns:    1 if the environment is determined to NOT be an emulator, 0 otherwise
- */
-#define DSProt_DetectNotEmulator(callback)  (__DSProt_DetectNotEmulator(__DSP_OBFS_PTR(callback)))
 
 
 /* 
@@ -115,8 +89,6 @@ extern u32 __DSProt_DetectNotDummy(u32 callback_addr);
 
 .public __DSProt_DetectFlashcart
 .public __DSProt_DetectNotFlashcart
-.public __DSProt_DetectEmulator
-.public __DSProt_DetectNotEmulator
 .public __DSProt_DetectDummy
 .public __DSProt_DetectNotDummy
 

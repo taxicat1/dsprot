@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version **1.05** (unconfirmed). See below for a list of games that use this version, and see other branches for alternate versions.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version **1.00** or **1.02** (very low information about this version!). See below for a list of games that use this version, and see other branches for alternate versions.
 
 See [dsdetect](https://github.com/taxicat1/dsdetect) to analyze a ROM file for DS Protect, as the lists here are not comprehensive.
 
@@ -18,11 +18,6 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 
 | Serial | Title | Region | Location |
 | --- | --- | --- | --- |
-| C24J | Phantasy Star 0 | Japan | Static region |
-| C3JJ | Layton Kyouju to Saigo no Jikan Ryokou | Japan | Overlay 10 |
-| C5YJ | Chocobo to Mahou no Ehon - Majo to Shoujo to 5-Nin no Yuusha | Japan | Static region |
-| CCTJ | Cid to Chocobo no Fushigi na Dungeon - Tokiwasure no Meikyuu DS+ | Japan | Static region |
-| CT5K | TOEIC DS - Haru 10-Bun Yakjeomgeukbog | Korea | Static region |
-| YQUE | Chrono Trigger | USA | Static region |
-| YQUJ | Chrono Trigger | Japan | Static region |
-| YQUP | Chrono Trigger | Europe | Static region |
+| YFTK | Pokemon Mystery Dungeon - Explorers of Time | Korea | Static region |
+| YFYK | Pokemon Mystery Dungeon - Explorers of Darkness | Korea | Static region |
+

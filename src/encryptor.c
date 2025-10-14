@@ -18,24 +18,18 @@ static void setCacheDisabled(BOOL disable) {
 
 
 void Encryptor_StartRange(u32* addr) {
-	u8   key[16];
-	int  i;
-	u32  key_ins;
-	u8*  key_ptr;
+	u32  key[4];
 	u32  size;
+	u32  key_ins;
 	
 	// First key is immediately prior to start address
 	key_ins = addr[-1];
 	
 	// Derive RC4 key
-	key_ptr = &key[0];
-	for (i = 0; i < 16; i++) {
-		*key_ptr = key_ins >> ((i % 4) * 8);
-		if (i % 15 == 0) {
-			*key_ptr ^= 0xFF;
-		}
-		key_ptr++;
-	}
+	key[0] = key_ins ^ 0x000000FF;
+	key[1] = key_ins;
+	key[2] = key_ins;
+	key[3] = key_ins ^ 0xFF000000;
 	
 	// Search forward for second key to determine size
 	size = 0;
@@ -52,24 +46,18 @@ void Encryptor_StartRange(u32* addr) {
 
 
 void Encryptor_EndRange(u32* addr) {
-	u8   key[16];
-	int  i;
-	u32  key_ins;
-	u8*  key_ptr;
+	u32  key[4];
 	u32  size;
+	u32  key_ins;
 	
 	// Second key is immediately following the end address
 	key_ins = addr[1];
 	
 	// Derive RC4 key
-	key_ptr = &key[0];
-	for (i = 0; i < 16; i++) {
-		*key_ptr = key_ins >> ((i % 4) * 8);
-		if (i % 15 == 0) {
-			*key_ptr ^= 0xFF;
-		}
-		key_ptr++;
-	}
+	key[0] = key_ins ^ 0x000000FF;
+	key[1] = key_ins;
+	key[2] = key_ins;
+	key[3] = key_ins ^ 0xFF000000;
 	
 	// Search backward for first key
 	while (*addr != key_ins) {

@@ -68,7 +68,7 @@ The key size is always 128 bits.
 
 The 128-bit RC4 key is derived from a 16-bit seed key, prepended with `0xEB00` to create a 32-bit value.
 
-This 32-bit value is then treated as a little-endian set of four bytes. These four bytes are repeated four times to create a 16-byte value in total. Finally, the first and last byte are exclusive-ored with `0xFF` to produce the final 16-byte key.
+This 32-bit value is then repeated four times, with the first repetition being exclusive-ored with the value `0x000000FF`, and the fourth being exclusive-ored with the value `0xFF000000`. This array of 32-bit values is then interpreted as an array of 16 byte values in little-endian, producing the final key.
 
 For example, the seed key `0x1234` would become the 32-bit value `0xEB001234`, which would then produce the key:
 
