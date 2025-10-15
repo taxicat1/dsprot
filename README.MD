@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version **1.00** or **1.02** (very low information about this version!). See below for a list of games that use this version, and see other branches for alternate versions.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version **1.00** or **1.02** (unknown). See below for a list of games that use this version, and see other branches for alternate versions.
 
 See [dsdetect](https://github.com/taxicat1/dsdetect) to analyze a ROM file for DS Protect, as the lists here are not comprehensive.
 
@@ -18,6 +18,11 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 
 | Serial | Title | Region | Location |
 | --- | --- | --- | --- |
+| ANMK | Maeilmaeil Deoukdeo! DS Dunoe Training | Korea | Static region |
 | YFTK | Pokemon Mystery Dungeon - Explorers of Time | Korea | Static region |
 | YFYK | Pokemon Mystery Dungeon - Explorers of Darkness | Korea | Static region |
+| YV5E | Dragon Quest V - Hand of the Heavenly Bride | USA | Static region |
+| YV5J | Dragon Quest V - Tenkuu no Hanayome | Japan | Static region |
+| YV5P | Dragon Quest - The Hand of the Heavenly Bride | Europe | Static region |
+| YVKK | DS Vitamin - Health Food Guide! | Korea | Static region |
 
