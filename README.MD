@@ -24,6 +24,7 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | CFIE | Final Fantasy Crystal Chronicles - Echoes of Time | USA | Static region |
 | CFIJ | Final Fantasy Crystal Chronicles - Echoes of Time | Japan | Static region |
 | CFIP | Final Fantasy Crystal Chronicles - Echoes of Time | Europe | Static region |
+| CLJJ | Mario & Luigi RPG 3!!! | Japan | Overlay 4 |
 | CP4K | Princess Maker 4 - Special Edition | Korea | Static region |
 | CYJJ | Blood of Bahamut | Japan | Overlay 2 |
 | YW4K | Spectral Force - Genesis | Korea | Overlay 0 |
