@@ -19,11 +19,13 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | Serial | Title | Region | Location |
 | --- | --- | --- | --- |
 | A3YK | Sonic Rush Adventures | Korea | Overlay 6 |
+| B89J | Pro Yakyuu Team o Tsukurou! 2 | Japan | Static region |
+| BYOJ | Puyo Puyo 7 | Japan | Overlays 9, 12, 14, 15, 19 |
 | C29J | Pro Yakyuu Famista DS 2009 | Japan | Static region |
 | C36J | Sloane to MacHale no Nazo no Story | Japan | Overlay 0 |
 | C4WK | Princess Bakery | Korea | Overlay 0 |
 | CBEJ | Saibanin Suiri Game - Yuuzai x Muzai | Japan | Static region |
 | YG4K | Genso Suikoden Tierkreis | Korea | Overlay 2 |
-| YKGJ | Kingdom Hearts - 358/2 Days | Japan | Overlay 28 |
+| YKGJ | Kingdom Hearts - 358/2 Days (Rev 0) | Japan | Overlay 28 |
 | YNOK | Magic Hanja 1000 DS | Korea | Overlay 90 |
 | YRBK | Ragnarok DS | Korea | Overlay 64 |
