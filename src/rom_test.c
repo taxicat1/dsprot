@@ -27,7 +27,7 @@ u32 ROMTest_IsBad(void) {
 			// Add 0, 0x200, or 0x400 depending on residue mod 3
 			rom_addr += ((i - 1) % 3) * 0x200;
 			
-			// In total (with no read at 0):
+			// In total (with no read at i = 0):
 			//   i   addr
 			//  ----------
 			//   1      0*

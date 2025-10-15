@@ -52,7 +52,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 		(*(REGType16v*)(HW_REG_BASE + REG_EXMEMCNT_OFFSET) & ~REG_MI_EXMEMCNT_MP_MASK) | 
 		(MI_PROCESSOR_ARM9 << REG_MI_EXMEMCNT_MP_SHIFT);
 	
-	// Read port setting and set page read flags
+	// Create page read cartridge command
 	card_ctrl_cmd = (card_port_setting & ~CARD_COMMAND_MASK) | 
 	                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 	
