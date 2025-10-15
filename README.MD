@@ -31,5 +31,6 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | CSGJ | SaGa 2 - Hihou Densetsu - Goddess of Destiny | Japan | Overlay 2 |
 | YDQJ | Dragon Quest IX - Hoshizora no Mamoribito | Japan | Overlay 29 |
 | YKGE | Kingdom Hearts - 358/2 Days | USA | Overlay 28 |
+| YKGJ | Kingdom Hearts - 358/2 Days (Rev 1) | Japan | Overlay 26 |
 | YKGP | Kingdom Hearts - 358/2 Days | Europe | Overlay 28 |
 | YLZK | Rhythm World | Korea | Overlay 166 |
