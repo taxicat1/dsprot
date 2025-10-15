@@ -11,7 +11,7 @@ void Encryptor_EndRange(u32* addr);
 	asm {                              \
 	    stmfd  sp!, {r0-r7};           \
 	    mov    r0, pc;                 \
-	    add    r0, r0, #16;            \
+	    add    r0, r0, #0x10;          \
 	    bl     Encryptor_StartRange;   \
 	    ldmia  sp!, {r0-r7};           \
 	    b      @_encstart ## enc_key;  \
@@ -26,7 +26,7 @@ void Encryptor_EndRange(u32* addr);
 	@_encend ## enc_key:              \
 	    stmfd  sp!, {r0};             \
 	    mov    r0, pc;                \
-	    sub    r0, r0, #20;           \
+	    sub    r0, r0, #0x14;         \
 	    bl     Encryptor_EndRange;    \
 	    ldmfd  sp!, {r0};             \
 	}
