@@ -20,17 +20,160 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx);
 
 #define ROM_BLOCK_SIZE  CARD_ROM_PAGE_SIZE
 
+#define CARD_CMD_BYTE_NORMAL     (0x00)
+#define CARD_CMD_BYTE_MALFORMED  (0x11)
+
+
+static inline u32 getROMSize(void) {
+	const CARDRomHeader*  header;
+	u32                   rom_size;
+	
+	header = (const CARDRomHeader*)CARD_GetRomHeader();
+	
+	// This field is `x` for the size of the ROM as `128KB << x`
+	// 128KB = 2^17, hence the addition of 17 before shifting
+	rom_size = (1 << (header->device_size + 17));
+	
+	return rom_size;
+}
+
+
+static inline void localReadROM(void* dest, u32 addr, s32 num_bytes, u8 card_cmd_extra_byte, u8* buffer) {
+	// This function is executing an obfuscated manual cartridge ROM read.
+	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
+	// 
+	// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
+	// 
+	// Most/all convoluted syntax here must be that way to match.
+	// Some of the comment documentation may be inaccurate here.
+	
+	//u8          buffer[8]; // TODO
+	REGType8v*  vnull;
+	REGType8v*  register_base_2;
+	u32         card_ctrl_13;
+	u32         addr_mask;
+	u32         reading_addr;
+	u16         ext_mem_register_val_original;
+	s32         addr_offset;
+	s32         card_ctrl_cmd;
+	u32         register_base_1;
+	u32         output;
+	int         i;
+	
+	// Alias for volatile null pointer
+	vnull = (REGType8v*)NULL;
+	
+	// Alias for register base (0x04000000)
+	register_base_1 = 1;
+	register_base_1 <<= 26;
+	
+	// Another alias for register base (0x04000000)
+	register_base_2 = (REGType8v*)HW_REG_BASE;
+	
+	// External memory control register (0x04000204)
+	// Save value to rewrite later
+	ext_mem_register_val_original = reg_MI_EXMEMCNT;
+	
+	// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
+	reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
+	
+	// Obfuscated, create address 0x027FFE60
+	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
+	card_ctrl_13 = 5;
+	
+	// Obfuscated 0x1FF to mask address later
+	addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
+	
+	// Creating address 0x027FFE60 cont.
+	// If the system is in DSi mode, the address is changed to 0x02FFFE60
+	card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
+	card_ctrl_13 <<= 18;
+	card_ctrl_13 -= 13;
+	card_ctrl_13 <<= 5;
+	
+	// Read port setting and set page read flags
+	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
+	                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
+	
+	// Setting offset to round back to nearest 0x200-byte block.
+	// E.G. if we want to read starting from 0x1208, we actually need to
+	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
+	// This would set `addr_offset` to -8.
+	addr_offset = 0 - (addr & addr_mask);
+	
+	// Wait for card to not be busy
+	while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
+		continue;
+	}
+	
+	// Write enable flag to card ROM and SPI control register
+	*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
+	
+	// Read 8-byte command out from gamecard bus, write this back later
+	for (i = 0; i < 8; i++) {
+		buffer[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
+	}
+	
+	reading_addr = addr + addr_offset;
+	while (addr_offset < num_bytes) {
+		// Read a 0x200-byte data block from ROM
+		
+		// Write 8-byte command to registers
+		// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
+		// Added option to change the first byte after the address to something else
+		register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
+		register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
+		register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
+		register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
+		register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
+		register_base_2[REG_CARD_CMD_OFFSET + 5] = card_cmd_extra_byte;
+		register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
+		register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
+		
+		// Submit command
+		*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
+		
+		// Copy the output into the destination buffer, within the bounds of num_bytes
+		// (Must read the output out of the I/O register regardless)
+		do {
+			if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
+				output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
+				if (addr_offset >= 0 && addr_offset < num_bytes) {
+					*(u32*)(dest + addr_offset) = output;
+				}
+				
+				addr_offset += 4;
+			}
+		} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
+		
+		// Advance address to next block
+		reading_addr += CARD_ROM_PAGE_SIZE;
+	}
+	
+	// Done reading, restore everything how it was before
+	
+	// Write original command back to gamecard bus
+	for (i = 0; i < 8; i++) {
+		*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = buffer[i];
+	}
+	
+	// Write original value back to to external memory control register
+	*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
+}
+
 
 u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
-	u8    rom_buf[ROM_BLOCK_SIZE];
-	u32   crcs[20];
-	u16   lock_id;
-	u32   rom_addr;
-	u32   rom_addr_offset;
-	int   i;
-	void* buf_ptr;
+	u8     rom_buf[ROM_BLOCK_SIZE];
+	u32    crcs[20];
+	u16    lock_id;
+	u32    rom_addr;
+	u32    rom_addr_offset;
+	int    i;
+	void*  buf_ptr;
+	u32    rom_size;
 	
 	// These must be declared in reverse order outside of their blocks to match
+	// TODO: this should not be necessary
 	u8  tmp_buf_3[8];
 	u8  tmp_buf_2[8];
 	u8  tmp_buf_1[8];
@@ -44,139 +187,11 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	buf_ptr = &rom_buf[0];
 	
 	for (i = 0; i < 6; i++) {
-		{
-			// This is executing an obfuscated manual cartridge ROM read.
-			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
-			// 
-			// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
-			// 
-			// Most/all convoluted syntax here must be that way to match.
-			// Some of the comment documentation may be inaccurate here.
-			u32         register_base_1;
-			REGType8v*  vnull;
-			REGType8v*  register_base_2;
-			s32         card_ctrl_cmd;
-			u32         card_ctrl_13;
-			u32         addr_mask;
-			s32         addr_offset;
-			u16         ext_mem_register_val_original;
-			u32         reading_addr;
-			u32         output;
-			int         i;
-			u8          device_size;
-			
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
-			// `device_size` is checked from the ROM header and used to offset the address.
-			// This field is `x` for the size of the ROM as `128KB << x`
-			// 128KB = 2^17, hence the addition of 17 before shifting
-			// Therefore, this increases the address by the size of the ROM.
-			// The ROM should mirror when this happens.
-			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
-			addr += (1 << (device_size + 17));
-			
-			// Alias for volatile null pointer
-			vnull = (REGType8v*)NULL;
-			
-			// Alias for register base (0x04000000)
-			register_base_1 = 1;
-			register_base_1 <<= 26;
-			
-			// Another alias for register base (0x04000000)
-			register_base_2 = (REGType8v*)HW_REG_BASE;
-			
-			// External memory control register (0x04000204)
-			// Save value to rewrite later
-			ext_mem_register_val_original = reg_MI_EXMEMCNT;
-			
-			// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
-			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
-			
-			// Obfuscated, create address 0x027FFE60
-			// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
-			card_ctrl_13 = 5;
-			
-			// Obfuscated 0x1FF to mask address later
-			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			
-			// Creating address 0x027FFE60 cont.
-			// If the system is in DSi mode, the address is changed to 0x02FFFE60
-			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
-			card_ctrl_13 <<= 18;
-			card_ctrl_13 -= 13;
-			card_ctrl_13 <<= 5;
-			
-			// Read port setting and set page read flags
-			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
-			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
-			
-			// Setting offset to round back to nearest 0x200-byte block.
-			// E.G. if we want to read starting from 0x1208, we actually need to
-			// request the block at 0x1200 and then ignore the first 8 bytes of the result.
-			// This would set `addr_offset` to -8.
-			addr_offset = 0 - (addr & addr_mask);
-			
-			// Wait for card to not be busy
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
-				continue;
-			}
-			
-			// Write enable flag to card ROM and SPI control register
-			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
-			
-			// Read 8-byte command out from gamecard bus, write this back later
-			for (i = 0; i < 8; i++) {
-				tmp_buf_1[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
-			}
-			
-			reading_addr = addr + addr_offset;
-			while (addr_offset < num_bytes) {
-				// Read a 0x200-byte data block from ROM
-				
-				// Write 8-byte command to registers
-				// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
-				register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
-				register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
-				register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-				register_base_2[REG_CARD_CMD_OFFSET + 5] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
-				
-				// Submit command
-				*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
-				
-				// Copy the output into the destination buffer, within the bounds of num_bytes
-				// (Must read the output out of the I/O register regardless)
-				do {
-					if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
-						output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
-						if (addr_offset >= 0 && addr_offset < num_bytes) {
-							*(u32*)(dest + addr_offset) = output;
-						}
-						
-						addr_offset += 4;
-					}
-				} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
-				
-				// Advance address to next block
-				reading_addr += CARD_ROM_PAGE_SIZE;
-			}
-			
-			// Done reading, restore everything how it was before
-			
-			// Write original command back to gamecard bus
-			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_1[i];
-			}
-			
-			// Write original value back to to external memory control register
-			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		}
+		rom_size = getROMSize();
 		
+		// Offset the address by the size of the ROM, reading past its end
+		// The ROM should mirror when this happens
+		localReadROM(buf_ptr, rom_addr + rom_size, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL, &tmp_buf_1[0]);
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
@@ -219,95 +234,7 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	rom_addr += 0x1E000;
 	
 	for (; i < 8; i++) {
-		{
-			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but without adding the total size of the ROM
-			// Comments have been omitted for brevity
-			
-			u32         register_base_1;
-			REGType8v*  vnull;
-			REGType8v*  register_base_2;
-			s32         card_ctrl_cmd;
-			u32         card_ctrl_13;
-			u32         addr_mask;
-			s32         addr_offset;
-			u16         ext_mem_register_val_original;
-			u32         reading_addr;
-			u32         output;
-			int         i;
-			
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
-			vnull = (REGType8v*)NULL;
-			
-			register_base_1 = 1;
-			register_base_1 <<= 26;
-			
-			register_base_2 = (REGType8v*)HW_REG_BASE;
-			
-			ext_mem_register_val_original = reg_MI_EXMEMCNT;
-			
-			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
-			
-			card_ctrl_13 = 5;
-			
-			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			
-			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
-			card_ctrl_13 <<= 18;
-			card_ctrl_13 -= 13;
-			card_ctrl_13 <<= 5;
-			
-			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
-			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
-			
-			addr_offset = 0 - (addr & addr_mask);
-			
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
-			
-			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
-			
-			for (i = 0; i < 8; i++) {
-				tmp_buf_2[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
-			}
-			
-			reading_addr = addr + addr_offset;
-			while (addr_offset < num_bytes) {
-				
-				register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
-				register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
-				register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-				register_base_2[REG_CARD_CMD_OFFSET + 5] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
-				
-				*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
-				
-				do {
-					if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
-						output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
-						if (addr_offset >= 0 && addr_offset < num_bytes) {
-							*(u32*)(dest + addr_offset) = output;
-						}
-						
-						addr_offset += 4;
-					}
-				} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
-				
-				reading_addr += CARD_ROM_PAGE_SIZE;
-			}
-			
-			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_2[i];
-			}
-			
-			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		}
-		
+		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL, &tmp_buf_2[0]);
 		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
@@ -331,96 +258,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	rom_addr -= 0x1D000;
 	
 	for (; i < 10; i++) {
-		{
-			// Third round of manual cartridge reading.
-			// It is exactly the same as the above block, but now it sends a malformed read command:
-			// Instead of the expected B7XXXXXXXX000000, it sends B7XXXXXXXX110000
-			// Comments have been omitted for brevity
-			
-			u32         register_base_1;
-			REGType8v*  vnull;
-			REGType8v*  register_base_2;
-			s32         card_ctrl_cmd;
-			u32         card_ctrl_13;
-			u32         addr_mask;
-			s32         addr_offset;
-			u16         ext_mem_register_val_original;
-			u32         reading_addr;
-			u32         output;
-			int         i;
-			
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
-			vnull = (REGType8v*)NULL;
-			
-			register_base_1 = 1;
-			register_base_1 <<= 26;
-			
-			register_base_2 = (REGType8v*)HW_REG_BASE;
-			
-			ext_mem_register_val_original = reg_MI_EXMEMCNT;
-			
-			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
-			
-			card_ctrl_13 = 5;
-			
-			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			
-			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
-			card_ctrl_13 <<= 18;
-			card_ctrl_13 -= 13;
-			card_ctrl_13 <<= 5;
-			
-			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
-			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
-			
-			addr_offset = 0 - (addr & addr_mask);
-			
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
-			
-			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
-			
-			for (i = 0; i < 8; i++) {
-				tmp_buf_3[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
-			}
-			
-			reading_addr = addr + addr_offset;
-			while (addr_offset < num_bytes) {
-				
-				register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
-				register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
-				register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-				register_base_2[REG_CARD_CMD_OFFSET + 5] = 0x11;
-				register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
-				
-				*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
-				
-				do {
-					if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
-						output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
-						if (addr_offset >= 0 && addr_offset < num_bytes) {
-							*(u32*)(dest + addr_offset) = output;
-						}
-						
-						addr_offset += 4;
-					}
-				} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
-				
-				reading_addr += CARD_ROM_PAGE_SIZE;
-			}
-			
-			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_3[i];
-			}
-			
-			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		}
-		
+		// Set the byte following the address to 0x11
+		// This is technically a malformed read command, but this is ignored in normal operation
+		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_MALFORMED, &tmp_buf_3[0]);
 		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
@@ -497,15 +337,17 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 
 
 u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
-	u8    rom_buf[ROM_BLOCK_SIZE];
-	u32   crcs[20];
-	u16   lock_id;
-	u32   rom_addr;
-	u32   rom_addr_offset;
-	int   i;
-	void* buf_ptr;
+	u8     rom_buf[ROM_BLOCK_SIZE];
+	u32    crcs[20];
+	u16    lock_id;
+	u32    rom_addr;
+	u32    rom_addr_offset;
+	int    i;
+	void*  buf_ptr;
+	u32    rom_size;
 	
 	// These must be declared in reverse order outside of their blocks to match
+	// TODO: this should not be necessary
 	u8  tmp_buf_3[8];
 	u8  tmp_buf_2[8];
 	u8  tmp_buf_1[8];
@@ -519,139 +361,11 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	buf_ptr = &rom_buf[0];
 	
 	for (i = 0; i < 6; i++) {
-		{
-			// This is executing an obfuscated manual cartridge ROM read.
-			// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
-			// 
-			// https://problemkaputt.de/gbatek-ds-cartridge-protocol.htm
-			// 
-			// Most/all convoluted syntax here must be that way to match.
-			// Some of the comment documentation may be inaccurate here.
-			u32         register_base_1;
-			REGType8v*  vnull;
-			REGType8v*  register_base_2;
-			s32         card_ctrl_cmd;
-			u32         card_ctrl_13;
-			u32         addr_mask;
-			s32         addr_offset;
-			u16         ext_mem_register_val_original;
-			u32         reading_addr;
-			u32         output;
-			int         i;
-			u8          device_size;
-			
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
-			// `device_size` is checked from the ROM header and used to offset the address.
-			// This field is `x` for the size of the ROM as `128KB << x`
-			// 128KB = 2^17, hence the addition of 17 before shifting
-			// Therefore, this increases the address by the size of the ROM.
-			// The ROM should mirror when this happens.
-			device_size = ((const CARDRomHeader*)CARD_GetRomHeader())->device_size;
-			addr += (1 << (device_size + 17));
-			
-			// Alias for volatile null pointer
-			vnull = (REGType8v*)NULL;
-			
-			// Alias for register base (0x04000000)
-			register_base_1 = 1;
-			register_base_1 <<= 26;
-			
-			// Another alias for register base (0x04000000)
-			register_base_2 = (REGType8v*)HW_REG_BASE;
-			
-			// External memory control register (0x04000204)
-			// Save value to rewrite later
-			ext_mem_register_val_original = reg_MI_EXMEMCNT;
-			
-			// Set current processor accessing the gamecard bus to the ARM9 (clearing bit that is set for ARM7)
-			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
-			
-			// Obfuscated, create address 0x027FFE60
-			// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
-			card_ctrl_13 = 5;
-			
-			// Obfuscated 0x1FF to mask address later
-			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			
-			// Creating address 0x027FFE60 cont.
-			// If the system is in DSi mode, the address is changed to 0x02FFFE60
-			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
-			card_ctrl_13 <<= 18;
-			card_ctrl_13 -= 13;
-			card_ctrl_13 <<= 5;
-			
-			// Read port setting and set page read flags
-			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
-			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
-			
-			// Setting offset to round back to nearest 0x200-byte block.
-			// E.G. if we want to read starting from 0x1208, we actually need to
-			// request the block at 0x1200 and then ignore the first 8 bytes of the result.
-			// This would set `addr_offset` to -8.
-			addr_offset = 0 - (addr & addr_mask);
-			
-			// Wait for card to not be busy
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
-				continue;
-			}
-			
-			// Write enable flag to card ROM and SPI control register
-			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
-			
-			// Read 8-byte command out from gamecard bus, write this back later
-			for (i = 0; i < 8; i++) {
-				tmp_buf_1[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
-			}
-			
-			reading_addr = addr + addr_offset;
-			while (addr_offset < num_bytes) {
-				// Read a 0x200-byte data block from ROM
-				
-				// Write 8-byte command to registers
-				// B7XXXXXXXX000000 -> 0x200-byte encrypted data read from address XXXXXXXX
-				register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
-				register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
-				register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-				register_base_2[REG_CARD_CMD_OFFSET + 5] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
-				
-				// Submit command
-				*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
-				
-				// Copy the output into the destination buffer, within the bounds of num_bytes
-				// (Must read the output out of the I/O register regardless)
-				do {
-					if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
-						output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
-						if (addr_offset >= 0 && addr_offset < num_bytes) {
-							*(u32*)(dest + addr_offset) = output;
-						}
-						
-						addr_offset += 4;
-					}
-				} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
-				
-				// Advance address to next block
-				reading_addr += CARD_ROM_PAGE_SIZE;
-			}
-			
-			// Done reading, restore everything how it was before
-			
-			// Write original command back to gamecard bus
-			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_1[i];
-			}
-			
-			// Write original value back to to external memory control register
-			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		}
+		rom_size = getROMSize();
 		
+		// Offset the address by the size of the ROM, reading past its end
+		// The ROM should mirror when this happens
+		localReadROM(buf_ptr, rom_addr + rom_size, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL, &tmp_buf_1[0]);
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
@@ -694,95 +408,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	rom_addr += 0x1E000;
 	
 	for (; i < 8; i++) {
-		{
-			// Another round of manual cartridge reading here
-			// It is exactly the same as the above block, but without adding the total size of the ROM
-			// Comments have been omitted for brevity
-			
-			u32         register_base_1;
-			REGType8v*  vnull;
-			REGType8v*  register_base_2;
-			s32         card_ctrl_cmd;
-			u32         card_ctrl_13;
-			u32         addr_mask;
-			s32         addr_offset;
-			u16         ext_mem_register_val_original;
-			u32         reading_addr;
-			u32         output;
-			int         i;
-			
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
-			vnull = (REGType8v*)NULL;
-			
-			register_base_1 = 1;
-			register_base_1 <<= 26;
-			
-			register_base_2 = (REGType8v*)HW_REG_BASE;
-			
-			ext_mem_register_val_original = reg_MI_EXMEMCNT;
-			
-			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
-			
-			card_ctrl_13 = 5;
-			
-			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			
-			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
-			card_ctrl_13 <<= 18;
-			card_ctrl_13 -= 13;
-			card_ctrl_13 <<= 5;
-			
-			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
-			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
-			
-			addr_offset = 0 - (addr & addr_mask);
-			
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
-			
-			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
-			
-			for (i = 0; i < 8; i++) {
-				tmp_buf_2[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
-			}
-			
-			reading_addr = addr + addr_offset;
-			while (addr_offset < num_bytes) {
-				
-				register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
-				register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
-				register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-				register_base_2[REG_CARD_CMD_OFFSET + 5] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
-				
-				*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
-				
-				do {
-					if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
-						output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
-						if (addr_offset >= 0 && addr_offset < num_bytes) {
-							*(u32*)(dest + addr_offset) = output;
-						}
-						
-						addr_offset += 4;
-					}
-				} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
-				
-				reading_addr += CARD_ROM_PAGE_SIZE;
-			}
-			
-			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_2[i];
-			}
-			
-			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		}
-		
+		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL, &tmp_buf_2[0]);
 		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
@@ -806,96 +432,9 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	rom_addr -= 0x1D000;
 	
 	for (; i < 10; i++) {
-		{
-			// Third round of manual cartridge reading.
-			// It is exactly the same as the above block, but now it sends a malformed read command:
-			// Instead of the expected B7XXXXXXXX000000, it sends B7XXXXXXXX110000
-			// Comments have been omitted for brevity
-			
-			u32         register_base_1;
-			REGType8v*  vnull;
-			REGType8v*  register_base_2;
-			s32         card_ctrl_cmd;
-			u32         card_ctrl_13;
-			u32         addr_mask;
-			s32         addr_offset;
-			u16         ext_mem_register_val_original;
-			u32         reading_addr;
-			u32         output;
-			int         i;
-			
-			void* dest      = buf_ptr;
-			u32   addr      = rom_addr;
-			s32   num_bytes = ROM_BLOCK_SIZE;
-			
-			vnull = (REGType8v*)NULL;
-			
-			register_base_1 = 1;
-			register_base_1 <<= 26;
-			
-			register_base_2 = (REGType8v*)HW_REG_BASE;
-			
-			ext_mem_register_val_original = reg_MI_EXMEMCNT;
-			
-			reg_MI_EXMEMCNT &= ~REG_MI_EXMEMCNT_MP_MASK;
-			
-			card_ctrl_13 = 5;
-			
-			addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-			
-			card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
-			card_ctrl_13 <<= 18;
-			card_ctrl_13 -= 13;
-			card_ctrl_13 <<= 5;
-			
-			card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
-			                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
-			
-			addr_offset = 0 - (addr & addr_mask);
-			
-			while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) { }
-			
-			*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
-			
-			for (i = 0; i < 8; i++) {
-				tmp_buf_3[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
-			}
-			
-			reading_addr = addr + addr_offset;
-			while (addr_offset < num_bytes) {
-				
-				register_base_2[REG_CARD_CMD_OFFSET + 0] = MROMOP_G_READ_PAGE >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 1] = reading_addr >> 24;
-				register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
-				register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
-				register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-				register_base_2[REG_CARD_CMD_OFFSET + 5] = 0x11;
-				register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
-				register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
-				
-				*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) = card_ctrl_cmd;
-				
-				do {
-					if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
-						output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
-						if (addr_offset >= 0 && addr_offset < num_bytes) {
-							*(u32*)(dest + addr_offset) = output;
-						}
-						
-						addr_offset += 4;
-					}
-				} while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START);
-				
-				reading_addr += CARD_ROM_PAGE_SIZE;
-			}
-			
-			for (i = 0; i < 8; i++) {
-				*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = tmp_buf_3[i];
-			}
-			
-			*(REGType16v*)(register_base_1 + REG_EXMEMCNT_OFFSET) = ext_mem_register_val_original;
-		}
-		
+		// Set the byte following the address to 0x11
+		// This is technically a malformed read command, but this is ignored in normal operation
+		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_MALFORMED, &tmp_buf_3[0]);
 		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
