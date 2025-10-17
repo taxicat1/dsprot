@@ -36,7 +36,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx);
 #define ROM_TEST_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
-static inline BOOL checkDecryptionWrapper(void* addr) {
+static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 	u32   i;
 	u32*  func_data_ptr;
 	u32   checksum;
@@ -212,7 +212,7 @@ static inline u32 testROM(
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Run an integrity check on the CRC function's decryption wrapper
-		if (!checkDecryptionWrapper(crc_func_addr)) {
+		if (!decryptionWrapperChecksumMatches(crc_func_addr)) {
 			ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
 			ctx->failure_code = failure_code_checksum;
 			return fail_ret;
