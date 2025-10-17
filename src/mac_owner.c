@@ -23,11 +23,17 @@ static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
 };
 
 
-u32 MACOwner_IsBad(DSProt_Ctx* ctx) {
+static inline u32 testMACOwner(
+	DSProt_Ctx*  ctx,
+	u32          pass_ret,
+	u32          fail_ret,
+	u32          failure_code_nocashgba,
+	u32          failure_code_zero_mac
+) {
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
 	int          i;
-	u32          mul;
+	u32          ret;
 	
 	OS_GetMacAddress(&mac_addr[0]);
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
@@ -44,64 +50,40 @@ u32 MACOwner_IsBad(DSProt_Ctx* ctx) {
 		owner_info.nickNameLength == 0
 	) {
 		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-		mul = PRIME_TRUE;
-		ctx->failure_code = FAILURE_CODE_MAC_OWNER_1;
+		ret = fail_ret;
+		ctx->failure_code = failure_code_nocashgba;
 		goto EXIT;
 	}
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (mac_addr[i] != 0x00) {
-			mul = PRIME_FALSE;
+			ret = pass_ret;
 			goto EXIT;
 		}
 	}
 	
 	ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-	mul = PRIME_TRUE;
-	ctx->failure_code = FAILURE_CODE_MAC_OWNER_1;
+	ret = fail_ret;
+	ctx->failure_code = failure_code_zero_mac;
 	
 EXIT:
-	return mul * PRIME_MAC_OWNER_1;
+	return ret;
+}
+
+
+u32 MACOwner_IsBad(DSProt_Ctx* ctx) {
+	return testMACOwner(ctx,
+	                    PRIME_FALSE,
+	                    PRIME_TRUE,
+	                    FAILURE_CODE_MAC_OWNER_1,
+	                    FAILURE_CODE_MAC_OWNER_1) * PRIME_MAC_OWNER_1;
 }
 
 
 u32 MACOwner_IsGood(DSProt_Ctx* ctx) {
-	u8           mac_addr[MAC_ADDR_SIZE];
-	OSOwnerInfo  owner_info;
-	int          i;
-	u32          mul;
-	
-	OS_GetMacAddress(&mac_addr[0]);
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[i] ^ ENC_MAC_ADDR_BYTE)) {
-			break;
-		}
-	}
-	
-	OS_GetOwnerInfo(&owner_info);
-	if (
-		i == MAC_ADDR_SIZE && 
-		owner_info.birthday.month == 1 && 
-		owner_info.birthday.day   == 1 && 
-		owner_info.nickNameLength == 0
-	) {
-		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-		mul = PRIME_FALSE;
-		ctx->failure_code = FAILURE_CODE_MAC_OWNER_2;
-		goto EXIT;
-	}
-	
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (mac_addr[i] != 0x00) {
-			mul = PRIME_TRUE;
-			goto EXIT;
-		}
-	}
-	
-	ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-	mul = PRIME_FALSE;
-	ctx->failure_code = FAILURE_CODE_MAC_OWNER_3;
-	
-EXIT:
-	return mul * PRIME_MAC_OWNER_2;
+	return testMACOwner(ctx,
+	                    PRIME_TRUE,
+	                    PRIME_FALSE,
+	                    FAILURE_CODE_MAC_OWNER_2,
+	                    FAILURE_CODE_MAC_OWNER_3) * PRIME_MAC_OWNER_2;
 }
