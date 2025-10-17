@@ -24,9 +24,9 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Some of the comment documentation may be inaccurate here.
 	
 	u8          buffer[8];
+	REGType8v*  vnull;
 	u32         register_base_1;
 	REGType8v*  register_base_2;
-	REGType8v*  vnull;
 	u32         card_ctrl_13;
 	s32         card_ctrl_cmd;
 	s32         addr_offset;

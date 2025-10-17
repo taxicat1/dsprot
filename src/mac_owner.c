@@ -22,11 +22,11 @@ static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
 };
 
 
-u32 MACOwner_IsBad(void) {
+static inline u32 testMACOwner(u32 pass_ret, u32 fail_ret) {
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
 	int          i;
-	u32          mul;
+	u32          ret;
 	
 	OS_GetMacAddress(&mac_addr[0]);
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
@@ -42,57 +42,29 @@ u32 MACOwner_IsBad(void) {
 		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
-		mul = PRIME_TRUE;
+		ret = fail_ret;
 		goto EXIT;
 	}
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (mac_addr[i] != 0x00) {
-			mul = PRIME_FALSE;
+			ret = pass_ret;
 			goto EXIT;
 		}
 	}
 	
-	mul = PRIME_TRUE;
+	ret = fail_ret;
 	
 EXIT:
-	return mul * PRIME_MAC_OWNER_1;
+	return ret;
+}
+
+
+u32 MACOwner_IsBad(void) {
+	return testMACOwner(PRIME_FALSE, PRIME_TRUE) * PRIME_MAC_OWNER_1;
 }
 
 
 u32 MACOwner_IsGood(void) {
-	u8           mac_addr[MAC_ADDR_SIZE];
-	OSOwnerInfo  owner_info;
-	int          i;
-	u32          mul;
-	
-	OS_GetMacAddress(&mac_addr[0]);
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (bad_mac_addr[i] != (mac_addr[i] ^ ENC_MAC_ADDR_BYTE)) {
-			break;
-		}
-	}
-	
-	OS_GetOwnerInfo(&owner_info);
-	if (
-		i == MAC_ADDR_SIZE && 
-		owner_info.birthday.month == 1 && 
-		owner_info.birthday.day   == 1 && 
-		owner_info.nickNameLength == 0
-	) {
-		mul = PRIME_FALSE;
-		goto EXIT;
-	}
-	
-	for (i = 0; i < MAC_ADDR_SIZE; i++) {
-		if (mac_addr[i] != 0x00) {
-			mul = PRIME_TRUE;
-			goto EXIT;
-		}
-	}
-	
-	mul = PRIME_FALSE;
-	
-EXIT:
-	return mul * PRIME_MAC_OWNER_2;
+	return testMACOwner(PRIME_TRUE, PRIME_FALSE) * PRIME_MAC_OWNER_2;
 }

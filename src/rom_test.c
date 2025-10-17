@@ -12,14 +12,14 @@ u32 ROMTest_IsGood(void);
 #define ROM_BLOCK_SIZE  CARD_ROM_PAGE_SIZE
 
 
-u32 ROMTest_IsBad(void) {
+static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
-	u16  lock_id;
-	u32  rom_addr;
-	u32  mul;
 	int  i;
+	u32  rom_addr;
+	u16  lock_id;
+	u32  ret;
 	
 	rom_addr = 0x1000;
 	
@@ -48,15 +48,15 @@ u32 ROMTest_IsBad(void) {
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
-			mul = PRIME_TRUE;
+			ret = fail_ret;
 			goto EXIT;
 		}
 	}
 	
 	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
-		mul = PRIME_TRUE;
+		ret = fail_ret;
 	} else {
-		mul = PRIME_FALSE;
+		ret = pass_ret;
 	}
 	
 EXIT:
@@ -65,62 +65,15 @@ EXIT:
 		((u32*)&rom_buf[0])[i] = i;
 	}
 	
-	return mul * PRIME_ROM_TEST_1;
+	return ret;
+}
+
+
+u32 ROMTest_IsBad(void) {
+	return testROM(PRIME_FALSE, PRIME_TRUE) * PRIME_ROM_TEST_1;
 }
 
 
 u32 ROMTest_IsGood(void) {
-	// Extra CRC entry is required to match
-	u32  crcs[7];
-	u8   rom_buf[ROM_BLOCK_SIZE];
-	u16  lock_id;
-	u32  rom_addr;
-	u32  mul;
-	int  i;
-	
-	rom_addr = 0x1000;
-	
-	lock_id = OS_GetLockID();
-	CARD_LockRom(lock_id);
-	
-	for (i = 0; i < 3; i++) {
-		// For below 8000h reads, use manual read
-		RunEncrypted_ROMUtil_Read(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
-		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
-		
-		// For above 8000h reads, use the SDK `CARD_ReadRom`
-		// This function is patched over on flashcarts, which can be detected
-		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
-		crcs[i + 3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
-		
-		rom_addr += ROM_BLOCK_SIZE;
-	}
-	
-	CARD_UnlockRom(lock_id);
-	OS_ReleaseLockID(lock_id);
-	
-	// Checking the ROM reading results were as expected:
-	//   0 == 1 == 2 == 3
-	//   3 != 4 and 3 != 5
-	
-	for (i = 0; i < 3; i++) {
-		if (crcs[i] != crcs[3]) {
-			mul = PRIME_FALSE;
-			goto EXIT;
-		}
-	}
-	
-	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
-		mul = PRIME_FALSE;
-	} else {
-		mul = PRIME_TRUE;
-	}
-	
-EXIT:
-	// Erasing read buffer
-	for (i = 0; i < ROM_BLOCK_SIZE/4; i++) {
-		((u32*)&rom_buf[0])[i] = i;
-	}
-	
-	return mul * PRIME_ROM_TEST_2;
+	return testROM(PRIME_TRUE, PRIME_FALSE) * PRIME_ROM_TEST_2;
 }
