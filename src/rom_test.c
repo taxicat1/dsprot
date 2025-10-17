@@ -257,9 +257,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	return testROM(ctx,
 	               PRIME_FALSE * PRIME_ROM_TEST_1,
 	               PRIME_TRUE * PRIME_ROM_TEST_1,
-	               FAILURE_CODE_ROM_TEST_4,
-	               FAILURE_CODE_ROM_TEST_3,
-	               FAILURE_CODE_ROM_TEST_3);
+	               FAILURE_CODE_ROM_TEST_1,
+	               FAILURE_CODE_ROM_TEST_2,
+	               FAILURE_CODE_ROM_TEST_2);
 }
 
 
@@ -267,7 +267,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	return testROM(ctx,
 	               PRIME_TRUE * PRIME_ROM_TEST_2,
 	               PRIME_FALSE * PRIME_ROM_TEST_2,
-	               FAILURE_CODE_ROM_TEST_1,
-	               FAILURE_CODE_ROM_TEST_2,
-	               FAILURE_CODE_ROM_TEST_2);
+	               FAILURE_CODE_ROM_TEST_4,
+	               FAILURE_CODE_ROM_TEST_3,
+	               FAILURE_CODE_ROM_TEST_3);
 }
