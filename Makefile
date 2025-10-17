@@ -34,7 +34,7 @@ ELFCODER  :=  $(ELFCODER_DIR)/build/elfcoder$(EXE)
 FIXDEP    :=  $(FIXDEP_DIR)/build/fixdep$(EXE)
 
 # C / ASM compilation parameters
-CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -interworking -c -i $(INC_DIR)
+CC_PARAM   :=  -O4,p -enum int -proc arm946E -gccext,on -fp soft -lang c99 -char signed -inline on,noauto -Cpp_exceptions off -ipa file -interworking -c -i $(INC_DIR)
 ASM_PARAM  :=  -proc arm5TE -i $(INC_DIR)
 LIB_PARAM  :=  -nostdlib -library
 DEP_PARAM  :=  -gccdep -MD
