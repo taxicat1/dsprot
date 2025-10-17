@@ -35,9 +35,9 @@ u32 ROMTest_IsBad(void* __unused);
 
 
 static inline BOOL checkDecryptionWrapper(void* addr) {
-	u32   checksum;
-	u32*  func_data_ptr;
 	u32   i;
+	u32*  func_data_ptr;
+	u32   checksum;
 	
 	func_data_ptr = (u32*)addr;
 	i = ROM_TEST_CHECKSUM_INS;
@@ -63,14 +63,14 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 	
 	u8          buffer[8];
 	REGType8v*  vnull;
+	u32         register_base_1;
 	REGType8v*  register_base_2;
 	u32         card_ctrl_13;
 	u32         addr_mask;
-	u32         reading_addr;
-	u16         ext_mem_register_val_original;
-	s32         addr_offset;
 	s32         card_ctrl_cmd;
-	u32         register_base_1;
+	s32         addr_offset;
+	u16         ext_mem_register_val_original;
+	u32         reading_addr;
 	u32         output;
 	int         i;
 	
@@ -175,16 +175,15 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 }
 
 
-u32 ROMTest_IsBad(void* __unused) {
-	#pragma unused(__unused)
-	
+static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
+	// Extra CRC entry is required to match
 	u32    crcs[7];
 	u8     rom_buf[ROM_BLOCK_SIZE];
-	u16    lock_id;
-	u32    rom_addr;
 	void*  buf_ptr;
-	s32    i;
+	int    i;
+	u32    rom_addr;
 	void*  crc_func_addr;
+	u16    lock_id;
 	
 	rom_addr = 0x1000;
 	
@@ -201,7 +200,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		// First CRC integrity check
 		if (!checkDecryptionWrapper(crc_func_addr)) {
 			DSProt_Crash(NULL, NULL);
-			return PRIME_TRUE * PRIME_ROM_TEST;
+			return fail_ret;
 		}
 		
 		crcs[i] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
@@ -213,7 +212,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		// Second CRC integrity check
 		if (!checkDecryptionWrapper(crc_func_addr)) {
 			DSProt_Crash(NULL, NULL);
-			return PRIME_TRUE * PRIME_ROM_TEST;
+			return fail_ret;
 		}
 		
 		crcs[i + 3] = RunEncrypted_ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
@@ -236,14 +235,21 @@ u32 ROMTest_IsBad(void* __unused) {
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[3]) {
 			DSProt_Crash(NULL, NULL);
-			return PRIME_TRUE * PRIME_ROM_TEST;
+			return fail_ret;
 		}
 	}
 	
 	if (crcs[3] == crcs[4] && crcs[3] == crcs[5]) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 	
-	return PRIME_FALSE * PRIME_ROM_TEST;
+	return pass_ret;
+}
+
+
+u32 ROMTest_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
+	return testROM(PRIME_FALSE * PRIME_ROM_TEST, PRIME_TRUE * PRIME_ROM_TEST);
 }
