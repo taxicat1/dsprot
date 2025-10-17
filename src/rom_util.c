@@ -25,13 +25,13 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	
 	u8          buffer[8];
 	u8*         buf_ptr;
+	REGType8v*  vnull;
 	u32         register_base_1;
 	REGType8v*  register_base_2;
-	REGType8v*  vnull;
 	u32         card_ctrl_13;
+	u32         addr_mask;
 	s32         card_ctrl_cmd;
 	s32         addr_offset;
-	u32         addr_mask;
 	u16         ext_mem_register_val_original;
 	u32         output;
 	int         i;
