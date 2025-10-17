@@ -34,7 +34,7 @@ The exported functions are:
 - `void* DSProt_DetectEmulatorB(void* param1, void* param2);`
 
 Plus inline functions within the header:
-- `void DSProt_RegisterCallbacks(DSProt_Callback success_callback, DSProt_Callback failure_callback);`
+- `void DSProt_RegisterCallbacks(DSProt_Callback pass_callback, DSProt_Callback fail_callback);`
 - `void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2);`
 - `void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2);`
 - `void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2);`

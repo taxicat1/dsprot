@@ -48,7 +48,7 @@ Another function is provided as an inline in the header file:
 
 Additionally, a standard wrapper for each of the four detection functions is provided as an inline in the header file.
 
-Prior to calling any of the detection functions, it is required to call the initalization function (`DSProt_DecodeFunctions`). Otherwise, calling any detection function will immediately cause a crash. Next, it is required to register two callback functions (`DSProt_RegisterCallbacks`): a "success" callback, when no emulator or flashcart is detected, and a "failure" callback, when an emulator or flashcart *is* detected. These callback functions must be of the type `void* callback(void*, void*)`.
+Prior to calling any of the detection functions, it is required to call the initalization function (`DSProt_DecodeFunctions`). Otherwise, calling any detection function will immediately cause a crash. Next, it is required to register two callback functions (`DSProt_RegisterCallbacks`): a "pass" callback, when no emulator or flashcart is detected, and a "fail" callback, when an emulator or flashcart *is* detected. These callback functions must be of the type `void* callback(void*, void*)`.
 
 The detection functions take two parameters as arguments, each of type `void*`, which are passed along to the callback. The appropriate callback will be run based on the results of the detection. The return value of the detection function is the return value of the callback.
 

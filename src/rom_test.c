@@ -1,7 +1,7 @@
 #include "rom_test.h"
 
 #include "dsprot_types.h"
-#include "failure_codes.h"
+#include "error_codes.h"
 #include "nitro_card.h"
 #include "nitro_io_reg.h"
 #include "nitro_os.h"
@@ -148,9 +148,9 @@ static inline u32 testROM(
 	DSProt_Ctx*  ctx,
 	u32          pass_ret,
 	u32          fail_ret,
-	u32          failure_code_secure_region,
-	u32          failure_code_fake_secure_region,
-	u32          failure_code_sdk_mismatch
+	u32          error_code_secure_region,
+	u32          error_code_fake_secure_region,
+	u32          error_code_sdk_mismatch
 ) {
 	u32    crcs[12];
 	u8     rom_buf[ROM_BLOCK_SIZE];
@@ -227,21 +227,21 @@ static inline u32 testROM(
 	
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[6]) {
-			ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-			ctx->failure_code = failure_code_secure_region;
+			ctx->fail_callback_ret = ctx->fail_callback(ctx->callback_param1, ctx->callback_param2);
+			ctx->error_code = error_code_secure_region;
 			return fail_ret;
 		}
 	}
 	
 	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
-		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-		ctx->failure_code = failure_code_fake_secure_region;
+		ctx->fail_callback_ret = ctx->fail_callback(ctx->callback_param1, ctx->callback_param2);
+		ctx->error_code = error_code_fake_secure_region;
 		return fail_ret;
 	}
 	
 	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
-		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
-		ctx->failure_code = failure_code_sdk_mismatch;
+		ctx->fail_callback_ret = ctx->fail_callback(ctx->callback_param1, ctx->callback_param2);
+		ctx->error_code = error_code_sdk_mismatch;
 		return fail_ret;
 	}
 	
@@ -253,9 +253,9 @@ u32 ROMTest_IsBad(DSProt_Ctx* ctx) {
 	return testROM(ctx,
 	               PRIME_FALSE * PRIME_ROM_TEST_1,
 	               PRIME_TRUE * PRIME_ROM_TEST_1,
-	               FAILURE_CODE_ROM_TEST_1,
-	               FAILURE_CODE_ROM_TEST_2,
-	               FAILURE_CODE_ROM_TEST_3);
+	               ERROR_CODE_ROM_TEST_1,
+	               ERROR_CODE_ROM_TEST_2,
+	               ERROR_CODE_ROM_TEST_3);
 }
 
 
@@ -263,7 +263,7 @@ u32 ROMTest_IsGood(DSProt_Ctx* ctx) {
 	return testROM(ctx,
 	               PRIME_TRUE * PRIME_ROM_TEST_2,
 	               PRIME_FALSE * PRIME_ROM_TEST_2,
-	               FAILURE_CODE_ROM_TEST_4,
-	               FAILURE_CODE_ROM_TEST_3,
-	               FAILURE_CODE_ROM_TEST_2);
+	               ERROR_CODE_ROM_TEST_4,
+	               ERROR_CODE_ROM_TEST_3,
+	               ERROR_CODE_ROM_TEST_2);
 }
