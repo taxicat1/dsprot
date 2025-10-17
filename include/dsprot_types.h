@@ -6,12 +6,12 @@
 typedef void* (*DSProt_Callback)(void*, void*);
 
 typedef struct {
-	DSProt_Callback  success_callback;
-	DSProt_Callback  failure_callback;
-	void*            callback_param_1;
-	void*            callback_param_2;
-	void*            failure_callback_return;
-	u32              failure_code;
+	DSProt_Callback  pass_callback;
+	DSProt_Callback  fail_callback;
+	void*            callback_param1;
+	void*            callback_param2;
+	void*            fail_callback_ret;
+	u32              error_code;
 } DSProt_Ctx;
 
 #endif

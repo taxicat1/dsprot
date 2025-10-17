@@ -102,17 +102,17 @@ extern u32 DSProt_CallbackIndex;
 
 
 /* 
- * void DSProt_RegisterCallbacks(DSProt_Callback success_callback, DSProt_Callback failure_callback)
+ * void DSProt_RegisterCallbacks(DSProt_Callback pass_callback, DSProt_Callback fail_callback)
  * 
  * Register callbacks to be run according to the results of environment tests. Cannot specify NULL.
  * 
- * @param success_callback:    Callback to run if a test DOES NOT detect piracy or tampering
- * @param failure_callback:    Callback to run if a test DOES detect piracy or tampering
+ * @param pass_callback:    Callback to run if a test DOES NOT detect piracy or tampering
+ * @param fail_callback:    Callback to run if a test DOES detect piracy or tampering
  */
-static inline void DSProt_RegisterCallbacks(DSProt_Callback success_callback, DSProt_Callback failure_callback) {
+static inline void DSProt_RegisterCallbacks(DSProt_Callback pass_callback, DSProt_Callback fail_callback) {
 	DSProt_CallbackIndex = OS_GetVBlankCount() & 1;
-	DSProt_CallbackTable[DSProt_CallbackIndex    ] = success_callback;
-	DSProt_CallbackTable[DSProt_CallbackIndex ^ 1] = failure_callback;
+	DSProt_CallbackTable[DSProt_CallbackIndex    ] = pass_callback;
+	DSProt_CallbackTable[DSProt_CallbackIndex ^ 1] = fail_callback;
 }
 
 

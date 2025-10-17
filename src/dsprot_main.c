@@ -3,7 +3,7 @@
 #include "callback.h"
 #include "dsprot_types.h"
 #include "encoding_constants.h"
-#include "failure_codes.h"
+#include "error_codes.h"
 #include "integrity.h"
 #include "mac_owner.h"
 #include "nitro_types.h"
@@ -89,15 +89,15 @@ static inline void initCtx(DSProt_Ctx* ctx, void* param1, void* param2) {
 	
 	idx = *callback_idx_ptr;
 	
-	ctx->success_callback = callback_tbl_ptr[idx];
-	ctx->failure_callback = callback_tbl_ptr[idx ^ 1];
+	ctx->pass_callback = callback_tbl_ptr[idx];
+	ctx->fail_callback = callback_tbl_ptr[idx ^ 1];
 	
-	ctx->callback_param_1 = param1;
-	ctx->callback_param_2 = param2;
+	ctx->callback_param1 = param1;
+	ctx->callback_param2 = param2;
 	
-	ctx->failure_callback_return = NULL;
+	ctx->fail_callback_ret = NULL;
 	
-	ctx->failure_code = FAILURE_CODE_NONE;
+	ctx->error_code = ERROR_CODE_NONE;
 }
 
 
@@ -129,10 +129,10 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		} while (--i);
 		
 		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
-			if (work.failure_callback_return != NULL) {
-				return work.failure_callback_return;
+			if (work.fail_callback_ret != NULL) {
+				return work.fail_callback_ret;
 			} else {
-				return work.failure_callback(param1, param2);
+				return work.fail_callback(param1, param2);
 			}
 		}
 		
@@ -141,11 +141,11 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		
 		// `func_ret` should always be a prime-encoded Boolean
 		// 0 would indicate tampering
-		if (func_ret == 0 && work.failure_code == FAILURE_CODE_NONE) {
-			if (work.failure_callback_return != NULL) {
-				return work.failure_callback_return;
+		if (func_ret == 0 && work.error_code == ERROR_CODE_NONE) {
+			if (work.fail_callback_ret != NULL) {
+				return work.fail_callback_ret;
 			} else {
-				return work.failure_callback(param1, param2);
+				return work.fail_callback(param1, param2);
 			}
 		}
 		
@@ -161,12 +161,12 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 	}
 	
 	if (!(func_ret_total % prime_bool)) {
-		return work.success_callback(param1, param2);
+		return work.pass_callback(param1, param2);
 	} else {
-		if (work.failure_code != FAILURE_CODE_NONE) {
-			return work.failure_callback_return;
+		if (work.error_code != ERROR_CODE_NONE) {
+			return work.fail_callback_ret;
 		} else {
-			return work.failure_callback(param1, param2);
+			return work.fail_callback(param1, param2);
 		}
 	}
 }

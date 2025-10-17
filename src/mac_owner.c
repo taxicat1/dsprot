@@ -1,7 +1,7 @@
 #include "mac_owner.h"
 
 #include "encoding_constants.h"
-#include "failure_codes.h"
+#include "error_codes.h"
 #include "nitro_os.h"
 #include "primes.h"
 
@@ -27,8 +27,8 @@ static inline u32 testMACOwner(
 	DSProt_Ctx*  ctx,
 	u32          pass_ret,
 	u32          fail_ret,
-	u32          failure_code_nocashgba,
-	u32          failure_code_zero_mac
+	u32          error_code_nocashgba,
+	u32          error_code_zero_mac
 ) {
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
@@ -49,9 +49,9 @@ static inline u32 testMACOwner(
 		owner_info.birthday.day   == 1 && 
 		owner_info.nickNameLength == 0
 	) {
-		ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
+		ctx->fail_callback_ret = ctx->fail_callback(ctx->callback_param1, ctx->callback_param2);
 		ret = fail_ret;
-		ctx->failure_code = failure_code_nocashgba;
+		ctx->error_code = error_code_nocashgba;
 		goto EXIT;
 	}
 	
@@ -62,9 +62,9 @@ static inline u32 testMACOwner(
 		}
 	}
 	
-	ctx->failure_callback_return = ctx->failure_callback(ctx->callback_param_1, ctx->callback_param_2);
+	ctx->fail_callback_ret = ctx->fail_callback(ctx->callback_param1, ctx->callback_param2);
 	ret = fail_ret;
-	ctx->failure_code = failure_code_zero_mac;
+	ctx->error_code = error_code_zero_mac;
 	
 EXIT:
 	return ret;
@@ -75,8 +75,8 @@ u32 MACOwner_IsBad(DSProt_Ctx* ctx) {
 	return testMACOwner(ctx,
 	                    PRIME_FALSE,
 	                    PRIME_TRUE,
-	                    FAILURE_CODE_MAC_OWNER_1,
-	                    FAILURE_CODE_MAC_OWNER_1) * PRIME_MAC_OWNER_1;
+	                    ERROR_CODE_MAC_OWNER_1,
+	                    ERROR_CODE_MAC_OWNER_1) * PRIME_MAC_OWNER_1;
 }
 
 
@@ -84,6 +84,6 @@ u32 MACOwner_IsGood(DSProt_Ctx* ctx) {
 	return testMACOwner(ctx,
 	                    PRIME_TRUE,
 	                    PRIME_FALSE,
-	                    FAILURE_CODE_MAC_OWNER_2,
-	                    FAILURE_CODE_MAC_OWNER_3) * PRIME_MAC_OWNER_2;
+	                    ERROR_CODE_MAC_OWNER_2,
+	                    ERROR_CODE_MAC_OWNER_3) * PRIME_MAC_OWNER_2;
 }
