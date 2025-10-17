@@ -30,14 +30,14 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 	
 	u8          buffer[8];
 	REGType8v*  vnull;
+	u32         register_base_1;
 	REGType8v*  register_base_2;
 	u32         card_ctrl_13;
 	u32         addr_mask;
-	u32         reading_addr;
-	u16         ext_mem_register_val_original;
-	s32         addr_offset;
 	s32         card_ctrl_cmd;
-	u32         register_base_1;
+	s32         addr_offset;
+	u16         ext_mem_register_val_original;
+	u32         reading_addr;
 	u32         output;
 	int         i;
 	
@@ -142,16 +142,14 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 }
 
 
-u32 ROMTest_IsBad(void* __unused) {
-	#pragma unused(__unused)
-	
+static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 	u32    crcs[12];
 	u8     rom_buf[ROM_BLOCK_SIZE];
+	void*  buf_ptr;
+	int    i;
 	u32    rom_addr;
 	u32    rom_addr_offset;
 	u16    lock_id;
-	int    i;
-	void*  buf_ptr;
 	
 	rom_addr_offset = 0x7000;
 	rom_addr = 0x1000;
@@ -221,19 +219,26 @@ u32 ROMTest_IsBad(void* __unused) {
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[6]) {
 			DSProt_Crash(NULL, NULL);
-			return PRIME_TRUE * PRIME_ROM_TEST;
+			return fail_ret;
 		}
 	}
 	
 	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 
 	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 	
-	return PRIME_FALSE * PRIME_ROM_TEST;
+	return pass_ret;
+}
+
+
+u32 ROMTest_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
+	return testROM(PRIME_FALSE * PRIME_ROM_TEST, PRIME_TRUE * PRIME_ROM_TEST);
 }
