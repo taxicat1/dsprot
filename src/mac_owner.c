@@ -22,13 +22,11 @@ static const u8 bad_mac_addr[MAC_ADDR_SIZE] = {
 };
 
 
-u32 MACOwner_IsBad(void* __unused) {
-	#pragma unused(__unused)
-	
-	int          i;
+static inline u32 testMACOwner(u32 pass_ret, u32 fail_ret) {
 	u8           mac_addr[MAC_ADDR_SIZE];
 	OSOwnerInfo  owner_info;
-	u32          mul;
+	int          i;
+	u32          ret;
 	
 	OS_GetMacAddress(&mac_addr[0]);
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
@@ -45,20 +43,27 @@ u32 MACOwner_IsBad(void* __unused) {
 		owner_info.nickNameLength == 0
 	) {
 		DSProt_Crash(NULL, NULL);
-		mul = PRIME_TRUE;
+		ret = fail_ret;
 		goto EXIT;
 	}
 	
 	for (i = 0; i < MAC_ADDR_SIZE; i++) {
 		if (mac_addr[i] != 0x00) {
-			mul = PRIME_FALSE;
+			ret = pass_ret;
 			goto EXIT;
 		}
 	}
 	
 	DSProt_Crash(NULL, NULL);
-	mul = PRIME_TRUE;
+	ret = fail_ret;
 	
 EXIT:
-	return mul * PRIME_MAC_OWNER;
+	return ret;
+}
+
+
+u32 MACOwner_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
+	return testMACOwner(PRIME_FALSE, PRIME_TRUE) * PRIME_MAC_OWNER;
 }

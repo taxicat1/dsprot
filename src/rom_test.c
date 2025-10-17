@@ -36,7 +36,7 @@ static inline u32 getROMSize(void) {
 }
 
 
-static inline void localReadROM(void* dest, u32 addr, s32 num_bytes, u8 card_cmd_extra_byte, u8* buffer) {
+static inline void localReadROM(void* dest, u32 addr, s32 num_bytes, u8 card_cmd_byte) {
 	// This function is executing an obfuscated manual cartridge ROM read.
 	// Nitro SDK usually does this for you with CARD_ReadRom* and friends.
 	// 
@@ -45,16 +45,16 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes, u8 card_cmd
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
-	//u8          buffer[8]; // TODO
+	u8          buffer[8];
 	REGType8v*  vnull;
+	u32         register_base_1;
 	REGType8v*  register_base_2;
 	u32         card_ctrl_13;
 	u32         addr_mask;
-	u32         reading_addr;
-	u16         ext_mem_register_val_original;
-	s32         addr_offset;
 	s32         card_ctrl_cmd;
-	u32         register_base_1;
+	s32         addr_offset;
+	u16         ext_mem_register_val_original;
+	u32         reading_addr;
 	u32         output;
 	int         i;
 	
@@ -124,7 +124,7 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes, u8 card_cmd
 		register_base_2[REG_CARD_CMD_OFFSET + 2] = reading_addr >> 16;
 		register_base_2[REG_CARD_CMD_OFFSET + 3] = reading_addr >> 8;
 		register_base_2[REG_CARD_CMD_OFFSET + 4] = reading_addr;
-		register_base_2[REG_CARD_CMD_OFFSET + 5] = card_cmd_extra_byte;
+		register_base_2[REG_CARD_CMD_OFFSET + 5] = card_cmd_byte;
 		register_base_2[REG_CARD_CMD_OFFSET + 6] = 0x00;
 		register_base_2[REG_CARD_CMD_OFFSET + 7] = 0x00;
 		
@@ -160,23 +160,15 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes, u8 card_cmd
 }
 
 
-u32 ROMTest_IsBad(void* __unused) {
-	#pragma unused(__unused)
-	
-	u8     rom_buf[ROM_BLOCK_SIZE];
+static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 	u32    crcs[20];
-	u16    lock_id;
+	u8     rom_buf[ROM_BLOCK_SIZE];
+	void*  buf_ptr;
+	int    i;
 	u32    rom_addr;
 	u32    rom_addr_offset;
-	int    i;
-	void*  buf_ptr;
+	u16    lock_id;
 	u32    rom_size;
-	
-	// These must be declared in reverse order outside of their blocks to match
-	// TODO: this should not be necessary
-	u8  tmp_buf_3[8];
-	u8  tmp_buf_2[8];
-	u8  tmp_buf_1[8];
 	
 	rom_addr_offset = 0x7000;
 	rom_addr = 0x1000;
@@ -191,7 +183,7 @@ u32 ROMTest_IsBad(void* __unused) {
 		
 		// Offset the address by the size of the ROM, reading past its end
 		// The ROM should mirror when this happens
-		localReadROM(buf_ptr, rom_addr + rom_size, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL, &tmp_buf_1[0]);
+		localReadROM(buf_ptr, rom_addr + rom_size, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL);
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
@@ -234,7 +226,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	rom_addr += 0x1E000;
 	
 	for (; i < 8; i++) {
-		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL, &tmp_buf_2[0]);
+		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL);
 		crcs[i + 6] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
@@ -260,7 +252,7 @@ u32 ROMTest_IsBad(void* __unused) {
 	for (; i < 10; i++) {
 		// Set the byte following the address to 0x11
 		// This is technically a malformed read command, but this is ignored in normal operation
-		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_MALFORMED, &tmp_buf_3[0]);
+		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE, CARD_CMD_BYTE_MALFORMED);
 		crcs[i + 8] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)rom_addr, &rom_buf[0], ROM_BLOCK_SIZE);
@@ -303,29 +295,36 @@ u32 ROMTest_IsBad(void* __unused) {
 	for (i = 0; i < 3; i++) {
 		if (crcs[i] != crcs[6]) {
 			DSProt_Crash(NULL, NULL);
-			return PRIME_TRUE * PRIME_ROM_TEST;
+			return fail_ret;
 		}
 	}
 	
 	if (crcs[6] == crcs[7] && crcs[6] == crcs[8]) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 	
 	if (!(crcs[4] == crcs[10] && crcs[5] == crcs[11])) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 	
 	if (!(crcs[12] == crcs[14] && crcs[13] == crcs[15])) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 	
 	if (!(crcs[16] == crcs[18] && crcs[17] == crcs[19])) {
 		DSProt_Crash(NULL, NULL);
-		return PRIME_TRUE * PRIME_ROM_TEST;
+		return fail_ret;
 	}
 	
-	return PRIME_FALSE * PRIME_ROM_TEST;
+	return pass_ret;
+}
+
+
+u32 ROMTest_IsBad(void* __unused) {
+	#pragma unused(__unused)
+	
+	return testROM(PRIME_FALSE * PRIME_ROM_TEST, PRIME_TRUE * PRIME_ROM_TEST);
 }
