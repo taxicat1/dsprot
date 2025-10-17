@@ -24,13 +24,13 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Most/all convoluted syntax here must be that way to match.
 	// Some of the comment documentation may be inaccurate here.
 	
-	REGType8v*  vnull;
-	u32         register_base_1;
-	s32         addr_offset;
-	u32         card_ctrl_13;
-	REGType8v*  register_base_2;
 	u8          buffer[8];
 	u8*         buf_ptr;
+	REGType8v*  vnull;
+	u32         register_base_1;
+	REGType8v*  register_base_2;
+	u32         card_ctrl_13;
+	s32         addr_offset;
 	u16         lock_id;
 	u16         ext_mem_register_val_original;
 	u32         output;
