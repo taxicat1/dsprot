@@ -34,7 +34,7 @@ u32 ROMTest_IsBad(void* __unused);
 #define ROM_TEST_EXPECTED_CHECKSUM  (0x9FBB82E0)
 
 
-static inline BOOL checkDecryptionWrapper(void* addr) {
+static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 	u32   i;
 	u32*  func_data_ptr;
 	u32   checksum;
@@ -198,7 +198,7 @@ static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE);
 		
 		// First CRC integrity check
-		if (!checkDecryptionWrapper(crc_func_addr)) {
+		if (!decryptionWrapperChecksumMatches(crc_func_addr)) {
 			DSProt_Crash(NULL, NULL);
 			return fail_ret;
 		}
@@ -210,7 +210,7 @@ static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 		CARD_ReadRom(MI_DMA_NOT_USE, (void*)(rom_addr + 0x7000), &rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// Second CRC integrity check
-		if (!checkDecryptionWrapper(crc_func_addr)) {
+		if (!decryptionWrapperChecksumMatches(crc_func_addr)) {
 			DSProt_Crash(NULL, NULL);
 			return fail_ret;
 		}
