@@ -42,12 +42,13 @@ enum {
 };
 
 
-static inline void populateCallbacks(DSProt_Ctx* ctx) {
+static inline void initCtx(DSProt_Ctx* ctx, void* param1, void* param2) {
 	DSProt_Callback*  callback_tbl_ptr;
 	u32*              callback_idx_ptr;
 	u32               addr;
 	u32               idx;
 	
+	// Obfuscated loading of callback table and index data
 	addr = ADDR_PLUS_ADDEND(DSProt_CallbackIndex, ENC_VAL_1);
 	addr -= (ENC_VAL_1 - DSP_OBFS_OFFSET);
 	callback_idx_ptr = (u32*)(addr - DSP_OBFS_OFFSET);
@@ -60,6 +61,13 @@ static inline void populateCallbacks(DSProt_Ctx* ctx) {
 	
 	ctx->success_callback = callback_tbl_ptr[idx];
 	ctx->failure_callback = callback_tbl_ptr[idx ^ 1];
+	
+	ctx->callback_param_1 = param1;
+	ctx->callback_param_2 = param2;
+	
+	ctx->failure_callback_return = NULL;
+	
+	ctx->failure_code = FAILURE_CODE_NONE;
 }
 
 
@@ -73,12 +81,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 	u32          i;
 	u32          prime_bool;
 	
-	populateCallbacks(&work);
-	
-	work.callback_param_1        = param1;
-	work.callback_param_2        = param2;
-	work.failure_callback_return = NULL;
-	work.failure_code            = FAILURE_CODE_NONE;
+	initCtx(&work, param1, param2);
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
