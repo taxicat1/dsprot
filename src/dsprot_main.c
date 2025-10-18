@@ -50,42 +50,37 @@ typedef u32 (*TaskFunc)(void*);
 typedef void* (*CallbackFunc)(void*, void*);
 
 
-void* DetectAll(void* callback, void* param1, void* param2) {
-	u32       func_queue[5];
-	void*     ret;
-	u32       i;
-	u32*      func_queue_ptr;
-	u32*      func_data_ptr;
-	u32       func_data_checksum;
-	u32       func_ret;
-	TaskFunc  queued_func;
-	u32       func_ret_total;
+static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
+	u32   i;
+	u32*  func_data_ptr;
+	u32   checksum;
 	
-	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1);
-	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
-	func_queue[2] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
-	func_queue[3] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
-	func_queue[4] = FUNC_QUEUE_END;
+	func_data_ptr = (u32*)addr;
+	i = DSP_CHECKSUM_INS;
+	checksum = 0;
+	
+	do {
+		checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_ptr++;
+	} while (--i);
+	
+	return (checksum == DSP_EXPECTED_CHECKSUM);
+}
+
+
+static inline void* dsprotMain(u32* func_queue_ptr, void* callback, void* param1, void* param2) {
+	u32       func_ret_total;
+	TaskFunc  queued_func;
+	u32       func_ret;
 	
 	func_ret_total = PRIME_DSPROT_MAIN * PRIME_FALSE * PRIME_TRUE;
 	
-	func_queue_ptr = &func_queue[0];
 	do {
 		queued_func = (TaskFunc)(*func_queue_ptr - ENC_VAL_1);
 		
 		// Preliminary integrity check
-		func_data_ptr = (u32*)queued_func;
-		i = DSP_CHECKSUM_INS;
-		func_data_checksum = 0;
-		do {
-			func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
-			func_data_ptr++;
-		} while (--i);
-		
-		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
-			// The goto is useless, but required to match
-			ret = DSProt_Crash(NULL, NULL); // No return
-			goto EXIT;
+		if (!decryptionWrapperChecksumMatches(queued_func)) {
+			return DSProt_Crash(NULL, NULL);
 		}
 		
 		func_ret = queued_func(NULL);
@@ -93,9 +88,7 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 		// `func_ret` should always be a prime-encoded Boolean
 		// 0 would indicate tampering
 		if (func_ret == 0) {
-			// The goto is useless, but required to match
-			ret = DSProt_Crash(NULL, NULL); // No return
-			goto EXIT;
+			return DSProt_Crash(NULL, NULL);
 		}
 		
 		func_ret_total += func_ret;
@@ -104,14 +97,24 @@ void* DetectAll(void* callback, void* param1, void* param2) {
 	
 	if (!(func_ret_total % PRIME_FALSE)) {
 		if (callback != NULL) {
-			ret = ((CallbackFunc)callback)(param1, param2);
+			return ((CallbackFunc)callback)(param1, param2);
 		} else {
-			ret = NULL;
+			return NULL;
 		}
 	} else {
-		ret = DSProt_Crash(NULL, NULL);
+		return DSProt_Crash(NULL, NULL);
 	}
+}
+
+
+void* DetectAll(void* callback, void* param1, void* param2) {
+	u32 func_queue[5];
 	
-EXIT:
-	return ret;
+	func_queue[0] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_MACOwner_IsBad, ENC_VAL_1);
+	func_queue[1] = ADDR_PLUS_ADDEND(RunEncrypted_MACOwner_IsBad, ENC_VAL_1);
+	func_queue[2] = ADDR_PLUS_ADDEND(RunEncrypted_ROMTest_IsBad, ENC_VAL_1);
+	func_queue[3] = ADDR_PLUS_ADDEND(RunEncrypted_Integrity_ROMTest_IsBad, ENC_VAL_1);
+	func_queue[4] = FUNC_QUEUE_END;
+	
+	return dsprotMain(&func_queue[0], callback, param1, param2);
 }
