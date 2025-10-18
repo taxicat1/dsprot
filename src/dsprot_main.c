@@ -71,14 +71,29 @@ static inline void initCtx(DSProt_Ctx* ctx, void* param1, void* param2) {
 }
 
 
+static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
+	u32   i;
+	u32*  func_data_ptr;
+	u32   checksum;
+	
+	func_data_ptr = (u32*)addr;
+	i = DSP_CHECKSUM_INS;
+	checksum = 0;
+	
+	do {
+		checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
+		func_data_ptr++;
+	} while (--i);
+	
+	return (checksum == DSP_EXPECTED_CHECKSUM);
+}
+
+
 static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* param1, void* param2) {
 	DSProt_Ctx   work;
 	u32          func_ret_total;
 	DSProt_Task  task_func;
-	u32          func_data_checksum;
-	u32*         func_data_ptr;
 	u32          func_ret;
-	u32          i;
 	u32          prime_bool;
 	
 	initCtx(&work, param1, param2);
@@ -89,15 +104,7 @@ static inline void* dsprotMain(u32* func_queue_ptr, int expected_result, void* p
 		task_func = (DSProt_Task)(*func_queue_ptr - ENC_VAL_1);
 		
 		// Preliminary integrity check
-		func_data_ptr = (u32*)task_func;
-		i = DSP_CHECKSUM_INS;
-		func_data_checksum = 0;
-		do {
-			func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
-			func_data_ptr++;
-		} while (--i);
-		
-		if (func_data_checksum != DSP_EXPECTED_CHECKSUM) {
+		if (!decryptionWrapperChecksumMatches(task_func)) {
 			if (work.fail_callback_ret != NULL) {
 				return work.fail_callback_ret;
 			} else {
