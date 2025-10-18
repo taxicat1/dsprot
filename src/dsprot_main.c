@@ -100,7 +100,6 @@ static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 	checksum = 0;
 	
 	do {
-		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
 		checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 		func_data_ptr++;
 	} while (--i);
