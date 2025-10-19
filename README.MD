@@ -57,6 +57,7 @@ For documentation of its inner workings, see [FUNCTIONALITY.MD](./doc/FUNCTIONAL
 | CY9P | Club Penguin - EPF - Herbert's Revenge | Europe | Overlay 11 |
 | UXBP | Jam with the Band | Europe | Overlay 0 |
 | VAAJ | Egokoro Kyoushitsu DS | Japan | Overlay 0 |
+| VAAE | Art Academy | USA | Overlay 0 |
 | VAAK | Art Academy | Korea | Overlay 0 |
 | VAAV | Art Academy | Europe | Overlay 0 |
 | VCME | Camp Rock - The Final Jam | USA | Overlay 42 |
