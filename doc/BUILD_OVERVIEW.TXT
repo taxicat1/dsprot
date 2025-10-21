@@ -7,7 +7,7 @@ Module 1 (main):
 		DetectDummy
 		DetectNotDummy
 	
-	Encrypt and create decryption wrappers (key=0x175F2, prefix=DSProt_):
+	Encrypt and create decryption wrappers (key=0x175F2, prefix=__DSProt_):
 		DetectFlashcart
 		DetectNotFlashcart
 		DetectEmulator
@@ -16,12 +16,12 @@ Module 1 (main):
 		DetectNotDummy
 	
 	Encode and create decoder function:
-		DSProt_DetectFlashcart
-		DSProt_DetectNotFlashcart
-		DSProt_DetectEmulator
-		DSProt_DetectNotEmulator
-		DSProt_DetectDummy
-		DSProt_DetectNotDummy
+		__DSProt_DetectFlashcart
+		__DSProt_DetectNotFlashcart
+		__DSProt_DetectEmulator
+		__DSProt_DetectNotEmulator
+		__DSProt_DetectDummy
+		__DSProt_DetectNotDummy
 
 
 Module 1.5 (BSS + garbage):
