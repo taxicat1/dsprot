@@ -1,12 +1,14 @@
 #ifndef DSPROT_H
 #define DSPROT_H
 
-/* 
+//=================================================================================================
+/**
  * dsprot.h
  * 
  * Header file for the DS Protect library
  * Version 2.01
  */
+//=================================================================================================
 
 #ifndef SDK_ASM
 
@@ -24,91 +26,34 @@ extern "C" {
 typedef void* (*DSProt_Callback)(void*, void*);
 
 
-/* 
- * void DSProt_DecodeFunctions(void)
- * 
+//=================================================================================================
+/**
  * Decode other DS Protect functions from their encoded state.
- * This is required to be called before calling any other DS Protect functions.
+ * This is required before calling any other DS Protect functions.
  */
+//=================================================================================================
 extern void DSProt_DecodeFunctions(void);
 
 
-/* 
- * void* DSProt_DetectFlashcartA(void* param1, void* param2)
- * 
- * Detect if the current environment is a flashcart, using method A. Then, call
- * a registered callback function depending upon the result (see DSProt_RegisterCallbacks).
- * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
- */
+// DS Protect functions to be called by inlines
 extern void* DSProt_DetectFlashcartA(void* param1, void* param2);
-
-
-/* 
- * void* DSProt_DetectFlashcartB(void* param1, void* param2)
- * 
- * Detect if the current environment is a flashcart, using method B. Then, call
- * a registered callback function depending upon the result (see DSProt_RegisterCallbacks).
- * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
- */
 extern void* DSProt_DetectFlashcartB(void* param1, void* param2);
-
-
-/* 
- * void* DSProt_DetectEmulatorA(void* param1, void* param2)
- * 
- * Detect if the current environment is an emulator, using method A. Then, call
- * a registered callback function depending upon the result (see DSProt_RegisterCallbacks).
- * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
- */
 extern void* DSProt_DetectEmulatorA(void* param1, void* param2);
-
-
-/* 
- * void* DSProt_DetectEmulatorA(void* param1, void* param2)
- * 
- * Detect if the current environment is an emulator, using method B. Then, call
- * a registered callback function depending upon the result (see DSProt_RegisterCallbacks).
- * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
- */
 extern void* DSProt_DetectEmulatorB(void* param1, void* param2);
 
-
-/* 
- * Global table where registered callbacks are stored.
- */
-extern DSProt_Callback DSProt_CallbackTable[2];
+// Globals used to store registered callbacks
+extern DSProt_Callback  DSProt_CallbackTable[2];
+extern u32              DSProt_CallbackIndex;
 
 
-/* 
- * Global index tracking the order of the callback table, which is randomized.
- */
-extern u32 DSProt_CallbackIndex;
-
-
-/* 
- * void DSProt_RegisterCallbacks(DSProt_Callback pass_callback, DSProt_Callback fail_callback)
- * 
+//=================================================================================================
+/**
  * Register callbacks to be run according to the results of environment tests. Cannot specify NULL.
  * 
- * @param pass_callback:    Callback to run if a test DOES NOT detect piracy or tampering
- * @param fail_callback:    Callback to run if a test DOES detect piracy or tampering
+ * @param pass_callback Callback to run if a test DOES NOT detect piracy or tampering
+ * @param fail_callback Callback to run if a test DOES detect piracy or tampering
  */
+//=================================================================================================
 static inline void DSProt_RegisterCallbacks(DSProt_Callback pass_callback, DSProt_Callback fail_callback) {
 	DSProt_CallbackIndex = OS_GetVBlankCount() & 1;
 	DSProt_CallbackTable[DSProt_CallbackIndex    ] = pass_callback;
@@ -116,18 +61,18 @@ static inline void DSProt_RegisterCallbacks(DSProt_Callback pass_callback, DSPro
 }
 
 
-/* 
- * void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2)
+//=================================================================================================
+/**
+ * Run a tamper-detection checksum, then detect if the current environment
+ * is a flashcart using method A. Call a registered callback function
+ * depending upon the result (see DSProt_RegisterCallbacks).
  * 
- * Run a tamper-detection checksum, and then detect if the current
- * environment is a flashcart, using method A. Then, call a registered 
- * callback function depending upon the result (see DSProt_RegisterCallbacks).
+ * @param param1 First parameter passed to the callback
+ * @param param2 Second parameter passed to the callback
  * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
+ * @return Return value of the callback
  */
+//=================================================================================================
 static inline void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2) {
 	u32*  func_data_ptr;
 	u32   func_data_checksum;
@@ -149,18 +94,18 @@ static inline void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2) 
 }
 
 
-/* 
- * void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2)
+//=================================================================================================
+/**
+ * Run a tamper-detection checksum, then detect if the current environment
+ * is a flashcart using method B. Call a registered callback function
+ * depending upon the result (see DSProt_RegisterCallbacks).
  * 
- * Run a tamper-detection checksum, and then detect if the current
- * environment is a flashcart, using method B. Then, call a registered 
- * callback function depending upon the result (see DSProt_RegisterCallbacks).
+ * @param param1 First parameter passed to the callback
+ * @param param2 Second parameter passed to the callback
  * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
+ * @return Return value of the callback
  */
+//=================================================================================================
 static inline void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2) {
 	u32*  func_data_ptr;
 	u32   func_data_checksum;
@@ -182,18 +127,18 @@ static inline void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2) 
 }
 
 
-/* 
- * void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2)
+//=================================================================================================
+/**
+ * Run a tamper-detection checksum, then detect if the current environment
+ * is an emulator using method A. Call a registered callback function
+ * depending upon the result (see DSProt_RegisterCallbacks).
  * 
- * Run a tamper-detection checksum, and then detect if the current
- * environment is a emulator, using method A. Then, call a registered 
- * callback function depending upon the result (see DSProt_RegisterCallbacks).
+ * @param param1 First parameter passed to the callback
+ * @param param2 Second parameter passed to the callback
  * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
+ * @return Return value of the callback
  */
+//=================================================================================================
 static inline void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2) {
 	u32*  func_data_ptr;
 	u32   func_data_checksum;
@@ -215,18 +160,18 @@ static inline void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2) {
 }
 
 
-/* 
- * void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2)
+//=================================================================================================
+/**
+ * Run a tamper-detection checksum, then detect if the current environment
+ * is an emulator using method B. Call a registered callback function
+ * depending upon the result (see DSProt_RegisterCallbacks).
  * 
- * Run a tamper-detection checksum, and then detect if the current
- * environment is a emulator, using method B. Then, call a registered 
- * callback function depending upon the result (see DSProt_RegisterCallbacks).
+ * @param param1 First parameter passed to the callback
+ * @param param2 Second parameter passed to the callback
  * 
- * @param param1:    First parameter passed to the callback
- * @param param2:    Second parameter passed to the callback
- * 
- * @returns:    Return value of the callback
+ * @return Return value of the callback
  */
+//=================================================================================================
 static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 	u32*  func_data_ptr;
 	u32   func_data_checksum;
