@@ -236,6 +236,7 @@ static inline u32 DSProt_DetectDummy_Old(void* callback) {
  * 
  * @return 1 if the environment is determined to NOT be a flashcart, 0 otherwise
  */
+//=================================================================================================
 static inline u32 DSProt_DetectNotFlashcart_Old(void* callback) {
 	return DSProt_DetectNotFlashcart(__DSProt_DetectNotFlashcart_compatibilityWrapper, callback, 0) == DSP_DETECTNOTFLASHCART_OK;
 }
