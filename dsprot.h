@@ -27,7 +27,7 @@ extern u32 __DSProt_DetectNotEmulator(void* callback, void* param, u32 __unused)
 extern u32 __DSProt_DetectNotDummy(void* callback, void* param, u32 __unused);
 
 // Internal wrapper functions for exporting the DS Protect API
-// Define DSP_EXT_HEADER_FUNC if other non-decompiled functions exist after then
+// Define DSP_EXT_HEADER_FUNC if other non-decompiled functions exist after them
 #ifndef DSP_EXT_HEADER_FUNC
 
 static u32 __DSProt_DetectFlashcart_wrapper(void* callback);
