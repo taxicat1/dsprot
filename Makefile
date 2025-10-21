@@ -129,17 +129,17 @@ $(BUILD_DIR)/dsprot_main_decrypter_encoded.o \
 $(BUILD_DIR)/dsprot_main_decrypter_decoder.s: $(BUILD_DIR)/dsprot_main_decrypter.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main_decrypter.o $(BUILD_DIR)/dsprot_main_decrypter_encoded.o
 	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_decrypter_encoded.o -o $(BUILD_DIR)/dsprot_main_decrypter_decoder.s -g Garbage -f \
-		DSProt_DetectFlashcart     \
-		DSProt_DetectNotFlashcart  \
-		DSProt_DetectEmulator      \
-		DSProt_DetectNotEmulator   \
-		DSProt_DetectDummy         \
-		DSProt_DetectNotDummy
+		__DSProt_DetectFlashcart     \
+		__DSProt_DetectNotFlashcart  \
+		__DSProt_DetectEmulator      \
+		__DSProt_DetectNotEmulator   \
+		__DSProt_DetectDummy         \
+		__DSProt_DetectNotDummy
 
 $(BUILD_DIR)/dsprot_main_encrypted.o \
 $(BUILD_DIR)/dsprot_main_decrypter.s: $(BUILD_DIR)/dsprot_main.o $(ELFCODER)
 	cp $(BUILD_DIR)/dsprot_main.o $(BUILD_DIR)/dsprot_main_encrypted.o
-	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k $(KEY_DSPROT_MAIN) -p DSProt_ -f \
+	$(ELFCODER) -e -i $(BUILD_DIR)/dsprot_main_encrypted.o -o $(BUILD_DIR)/dsprot_main_decrypter.s -k $(KEY_DSPROT_MAIN) -p __DSProt_ -f \
 		DetectFlashcart     \
 		DetectNotFlashcart  \
 		DetectEmulator      \
