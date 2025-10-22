@@ -31,7 +31,7 @@ Each of the three methods exists as two copies, which are identical except for r
 - Detect dummy (always fails)
 - Detect not dummy (always succeeds)
 
-Each of these functions takes as argument an optional callback function and a parameter for that callback of type `void*`. The callback function will be run if the target detection succeeds. Meaning, `DetectFlashcart(callback, param)` will run the callback function only if a flashcart is detected. `DetectNotFlashcart(callback, param)` will inversely run the callback function only if a flashcart is *not* detected. They will also return `1` if the target detection succeeded, and `0` if it did not, regardless of whether a callback function was supplied.
+Each of these functions takes as argument an optional callback function, which will be run if the target detection succeeds. Meaning, `DetectFlashcart(callback)` will run the callback function only if a flashcart is detected. `DetectNotFlashcart(callback)` will inversely run the callback function only if a flashcart is *not* detected. They will also return `1` if the target detection succeeded, and `0` if it did not, regardless of whether a callback function was supplied.
 
 ## Obfuscation
 
