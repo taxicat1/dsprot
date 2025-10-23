@@ -119,7 +119,7 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 		
 		fprintf(output,
 			"\t.section .sinit, 4\n"
-			"\t.word NitroStaticInit\n"
+			"\tsinit NitroStaticInit\n"
 			"\n"
 		);
 	}

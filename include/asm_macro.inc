@@ -19,6 +19,14 @@
 	.endm
 
 
+	.macro sinit sinit_func
+	.type  NitroStaticInit_\@, @object
+NitroStaticInit_\@:
+	.word  \sinit_func
+	.size  NitroStaticInit_\@, .-NitroStaticInit_\@
+	.endm
+
+
 	.public BSS
 	.public Encryptor_DecryptFunction
 	.public Encryptor_EncryptFunction
