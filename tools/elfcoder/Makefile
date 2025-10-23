@@ -12,7 +12,7 @@ H_FILES := $(wildcard $(INC_DIR)/*.h)
 .PHONY: clean
 
 $(BUILD_DIR)/elfcoder: $(C_FILES) $(H_FILES)
-	$(CC) $(CFLAGS) $(C_FILES) -o $(BUILD_DIR)/elfcoder
+	$(CC) $(CFLAGS) $(C_FILES) -o $@
 
 clean:
-	$(RM) $(BUILD_DIR)/elfcoder
+	$(RM) -r $(BUILD_DIR)
