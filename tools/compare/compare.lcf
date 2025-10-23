@@ -1,0 +1,73 @@
+MEMORY {
+	ENV    : ORIGIN = 0x02000000
+	DSPROT : ORIGIN = 0x02100000 > dsprot.sbin
+}
+
+KEEP_SECTION {
+	.sinit
+}
+
+SECTIONS {
+	.env : {
+		ALIGNALL(4);
+		. = ALIGN(32);
+		
+		ENV_TEXT_START = .;
+		
+		env.o(.text)
+		. = ALIGN(4);
+		
+		ENV_TEXT_END = .;
+	} > ENV
+	
+	.dsprot : {
+		ALIGNALL(4);
+		. = ALIGN(32);
+		
+		DSPROT_TEXT_START = .;
+		
+		dsprot.a(.text)
+		. = ALIGN(4);
+		dsprot.a(.rodata)
+		. = ALIGN(4);
+		dsprot.a(.init)
+		. = ALIGN(4);
+		
+		DSPROT_SINIT_START = .;
+		
+		dsprot.a(.ctor)
+		dsprot.a(.sinit)
+		WRITEW 0;
+		
+		DSPROT_SINIT_END = .;
+		
+		. = ALIGN(32);
+		
+		DSPROT_TEXT_END = .;
+		
+		DSPROT_DATA_START = .;
+		
+		dsprot.a(.sdata)
+		. = ALIGN(4);
+		dsprot.a(.data)
+		. = ALIGN(4);
+		. = ALIGN(32);
+		
+		DSPROT_DATA_END = .;
+	} > DSPROT
+	
+	.dsprot.bss : {
+		ALIGNALL(4);
+		. = ALIGN(32);
+		
+		DSPROT_BSS_START = .;
+		
+		dsprot.a(.bss)
+		. = ALIGN(4);
+		dsprot.a(.sbss)
+		. = ALIGN(4);
+		. = ALIGN(32);
+		
+		DSPROT_BSS_END = .;
+	} >> DSPROT
+}
