@@ -22,6 +22,7 @@ $(shell mkdir -p $(BUILD_DIR))
 
 ELFCODER_DIR  :=  $(TOOL_DIR)/elfcoder
 FIXDEP_DIR    :=  $(TOOL_DIR)/fixdep
+COMPARE_DIR   :=  $(TOOL_DIR)/compare
 MWCCARM_DIR   ?=  $(TOOL_DIR)/mwccarm
 
 MW_VER := dsi/1.2p2
@@ -80,7 +81,7 @@ KEY_ROM_UTIL    := DD18
 KEY_ROM_TEST    := DD48
 
 
-.PHONY: all clean tools dsprot install
+.PHONY: all compare clean tools dsprot install
 .DELETE_ON_ERROR: 
 .NOTPARALLEL: 
 
@@ -88,9 +89,13 @@ all:
 	$(MAKE) tools
 	$(MAKE) dsprot
 
+compare:
+	$(MAKE) all COMPARE=1
+
 clean:
 	$(MAKE) -C $(ELFCODER_DIR) clean
 	$(MAKE) -C $(FIXDEP_DIR) clean
+	$(MAKE) -C $(COMPARE_DIR) clean
 	$(RM) -r $(BUILD_DIR)
 
 tools:
@@ -99,12 +104,14 @@ tools:
 
 dsprot:
 	$(MAKE) $(LIBRARY)
+ifneq ($(COMPARE),)
+	$(MAKE) -C $(COMPARE_DIR) MWCCARM_DIR=$(abspath $(MWCCARM_DIR)) MW_VER=$(MW_VER) LIBRARY=$(abspath $(LIBRARY))
+endif
 
-ifeq ($(INSTALL_DIR),)
 install:
+ifeq ($(INSTALL_DIR),)
 	$(error Nowhere to install. Specify INSTALL_DIR)
 else
-install:
 	$(MAKE) all
 	$(shell mkdir -p $(INSTALL_DIR)/lib/)
 	cp $(LIBRARY) $(INSTALL_DIR)/lib/
