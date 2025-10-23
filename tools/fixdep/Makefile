@@ -12,7 +12,7 @@ H_FILES := $(wildcard $(INC_DIR)/*.h)
 .PHONY: clean
 
 $(BUILD_DIR)/fixdep: $(C_FILES) $(H_FILES)
-	$(CC) $(CFLAGS) $(C_FILES) -o $(BUILD_DIR)/fixdep
+	$(CC) $(CFLAGS) $(C_FILES) -o $@
 
 clean:
-	$(RM) $(BUILD_DIR)/fixdep
+	$(RM) -r $(BUILD_DIR)
