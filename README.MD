@@ -1,6 +1,6 @@
 # dsprot
 
-This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is possibly version **1.05** (unconfirmed). See below for a list of games that use this version, and see other branches for alternate versions.
+This is a decompilation of DS Protect, an antipiracy library for the Nintendo DS. This is version **1.05**. See below for a list of games that use this version, and see other branches for alternate versions.
 
 See [dsdetect](https://github.com/taxicat1/dsdetect) to analyze a ROM file for DS Protect, as the lists here are not comprehensive.
 
