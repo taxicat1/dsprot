@@ -1,6 +1,3 @@
-#ifndef DSPROT_INSTANT_H
-#define DSPROT_INSTANT_H
-
 //=================================================================================================
 /**
  * dsprot_instant.h
@@ -10,21 +7,50 @@
  */
 //=================================================================================================
 
+#ifndef DSPROT_INSTANT_H
+#define DSPROT_INSTANT_H
+
 #ifndef SDK_ASM
 
-#include <nitro/types.h>  // For u32
+#ifndef DSP_NO_NITRO
+
+#include <nitro/types.h>  // For u32, NULL
+
+#else /* DSP_NO_NITRO */
+
+// Assumption for convenience-- make sure this is matching if you use it!
+typedef unsigned long  __dsp_u32;
+#define u32  __dsp_u32
+
+#ifndef NULL
+
+#define DSP_DEF_NULL
 
 #ifdef __cplusplus
-extern "C" {
-#endif
+#define NULL  (0)
+#else /* __cplusplus */
+#define NULL  ((void*)0)
+#endif /* __cplusplus */
+
+#endif /* NULL */
+
+#endif /* DSP_NO_NITRO */
 
 // See src/dsprot_main.c for information about this checksum procedure
 #define DSP_CHECKSUM_INS       (9)
 #define DSP_EXPECTED_CHECKSUM  (0x2FBB82E1)
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 // DS Protect functions to be called by inline
 extern void* DSProt_Crash(void* __unused1, void* __unused2);
 extern void* DSProt_DetectAll(void* callback, void* param1, void* param2);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 
 //=================================================================================================
@@ -65,9 +91,18 @@ static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void*
 #undef DSP_EXPECTED_CHECKSUM
 #undef DSP_CHECKSUM_INS
 
-#ifdef __cplusplus
-}
-#endif
+#ifdef DSP_NO_NITRO
+
+#ifdef DSP_DEF_NULL
+
+#undef NULL
+#undef DSP_DEF_NULL
+
+#endif /* DSP_DEF_NULL */
+
+#undef u32
+
+#endif /* DSP_NO_NITRO */
 
 #else /* SDK_ASM */
 
