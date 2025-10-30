@@ -1,6 +1,3 @@
-#ifndef DSPROT_H
-#define DSPROT_H
-
 //=================================================================================================
 /**
  * dsprot.h
@@ -10,20 +7,43 @@
  */
 //=================================================================================================
 
+#ifndef DSPROT_H
+#define DSPROT_H
+
 #ifndef SDK_ASM
+
+#ifndef DSP_NO_NITRO
 
 #include <nitro/types.h>  // For u32
 #include <nitro/os.h>     // For OS_GetVBlankCount (inline function)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#else /* DSP_NO_NITRO */
+
+// Assumptions for convenience-- make sure this is matching if you use it!
+typedef unsigned long  __dsp_u32;
+#define u32  __dsp_u32
+
+#define HW_VBLANK_COUNT_BUF  (0x02FFFC3C)
+
+
+static inline volatile u32 __DSProt_OS_GetVBlankCount(void) {
+	return *(volatile u32*)HW_VBLANK_COUNT_BUF;
+}
+
+
+#define OS_GetVBlankCount  __DSProt_OS_GetVBlankCount
+
+#endif /* DSP_NO_NITRO */
 
 // See src/dsprot_main.c for information about this checksum procedure
 #define DSP_CHECKSUM_INS       (37)
 #define DSP_EXPECTED_CHECKSUM  (0x9F75A8D6)
 
 typedef void* (*DSProt_Callback)(void*, void*);
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 
 //=================================================================================================
@@ -44,6 +64,10 @@ extern void* DSProt_DetectEmulatorB(void* param1, void* param2);
 // Globals used to store registered callbacks
 extern DSProt_Callback  DSProt_CallbackTable[2];
 extern u32              DSProt_CallbackIndex;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 
 //=================================================================================================
@@ -200,9 +224,13 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 #undef DSP_EXPECTED_CHECKSUM
 #undef DSP_CHECKSUM_INS
 
-#ifdef __cplusplus
-}
-#endif
+#ifdef DSP_NO_NITRO
+
+#undef OS_GetVBlankCount
+#undef HW_VBLANK_COUNT_BUF
+#undef u32
+
+#endif /* DSP_NO_NITRO */
 
 #else /* SDK_ASM */
 
