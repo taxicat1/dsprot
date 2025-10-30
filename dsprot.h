@@ -1,6 +1,3 @@
-#ifndef DSPROT_H
-#define DSPROT_H
-
 //=================================================================================================
 /**
  * dsprot.h
@@ -10,13 +7,26 @@
  */
 //=================================================================================================
 
+#ifndef DSPROT_H
+#define DSPROT_H
+
 #ifndef SDK_ASM
+
+#ifndef DSP_NO_NITRO
 
 #include <nitro/types.h>  // For u32
 
+#else /* DSP_NO_NITRO */
+
+// Assumption for convenience-- make sure this is matching if you use it!
+typedef unsigned long  __dsp_u32;
+#define u32  __dsp_u32
+
+#endif /* DSP_NO_NITRO */
+
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 // Internal DS Protect functions to be called by inlines
 extern u32 __DSProt_DetectFlashcart(void* callback, void* param, u32 __unused);
@@ -104,6 +114,10 @@ extern u32 __DSProt_DetectNotEmulator_wrapper(void* callback);
 extern u32 __DSProt_DetectNotDummy_wrapper(void* callback);
 
 #endif /* DSP_EXT_HEADER_FUNC */
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 
 //=================================================================================================
@@ -201,9 +215,11 @@ static inline u32 DSProt_DetectNotDummy(void* callback) {
 #undef DSP_DETECTDUMMY_OK
 #undef DSP_DETECTNOTDUMMY_OK
 
-#ifdef __cplusplus
-}
-#endif
+#ifdef DSP_NO_NITRO
+
+#undef u32
+
+#endif /* DSP_NO_NITRO */
 
 #else /* SDK_ASM */
 
