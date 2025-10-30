@@ -18,7 +18,7 @@
 
 #else /* DSP_NO_NITRO */
 
-// Assumption for convenience-- make sure this is matching if you use it!
+// Assumptions for convenience-- make sure this is matching if you use it!
 typedef unsigned long  __dsp_u32;
 #define u32  __dsp_u32
 
