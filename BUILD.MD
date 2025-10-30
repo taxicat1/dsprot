@@ -37,7 +37,7 @@ See [FUNCTIONALITY.MD](./doc/FUNCTIONALITY.MD) for more details on using these f
 
 ### Dependence on TWL SDK
 
-These TWL SDK functions are required for linking. If your decomp does not include TWL SDK, they will need to be found and correctly named. This can be done by cross-referencing DS Protect as dumped from the game ROM with a disassembly of the compiled `dsprot.a`.
+These TWL SDK functions are required for linking. If your decomp does not include TWL SDK, they will need to be found and correctly named. This can be done by cross-referencing DS Protect as dumped from the game ROM with a disassembly of the compiled `dsprot_instant.a`.
 
 - `CARD_GetRomHeader`
 - `CARD_LockRom`
