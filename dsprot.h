@@ -1,6 +1,3 @@
-#ifndef DSPROT_H
-#define DSPROT_H
-
 //=================================================================================================
 /**
  * dsprot.h
@@ -10,19 +7,36 @@
  */
 //=================================================================================================
 
+#ifndef DSPROT_H
+#define DSPROT_H
+
 #ifndef SDK_ASM
+
+#ifndef DSP_NO_NITRO
 
 #include <nitro/types.h>  // For u32
 
+#else /* DSP_NO_NITRO */
+
+// Assumption for convenience-- make sure this is matching if you use it!
+typedef unsigned long  __dsp_u32;
+#define u32  __dsp_u32
+
+#endif /* DSP_NO_NITRO */
+
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 // Internal DS Protect functions to be called by macros
 extern u32 __DSProt_DetectFlashcart(u32 callback_addr);
 extern u32 __DSProt_DetectNotFlashcart(u32 callback_addr);
 extern u32 __DSProt_DetectDummy(u32 callback_addr);
 extern u32 __DSProt_DetectNotDummy(u32 callback_addr);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 // Internal macros for function pointer preparation as the internal functions expect
 #define __DSP_OBFS_OFFSET  (0x190)
@@ -87,9 +101,11 @@ extern u32 __DSProt_DetectNotDummy(u32 callback_addr);
 #define DSProt_DetectNotDummy(callback)  (__DSProt_DetectNotDummy(__DSP_OBFS_PTR(callback)))
 
 
-#ifdef __cplusplus
-}
-#endif
+#ifdef DSP_NO_NITRO
+
+#undef u32
+
+#endif /* DSP_NO_NITRO */
 
 #else /* SDK_ASM */
 
