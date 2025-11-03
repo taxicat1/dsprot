@@ -23,11 +23,9 @@
 typedef unsigned long  __dsp_u32;
 #define u32  __dsp_u32
 
-#define HW_VBLANK_COUNT_BUF  (0x02FFFC3C)
-
 
 static inline volatile u32 __DSProt_GetVBlankCount(void) {
-	return *(volatile u32*)HW_VBLANK_COUNT_BUF;
+	return *(volatile u32*)(0x02FFFC3C); // HW_VBLANK_COUNT_BUF
 }
 
 
@@ -223,7 +221,6 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 #ifdef DSP_NO_NITRO
 
 #undef OS_GetVBlankCount
-#undef HW_VBLANK_COUNT_BUF
 #undef u32
 
 #endif /* DSP_NO_NITRO */
