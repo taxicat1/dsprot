@@ -10,6 +10,9 @@
 #ifndef DSPROT_INSTANT_H
 #define DSPROT_INSTANT_H
 
+#define DSP_VERSION      (200)
+#define DSP_VERSION_STR  "2.00s"
+
 #ifndef SDK_ASM
 
 #ifndef DSP_NO_NITRO
