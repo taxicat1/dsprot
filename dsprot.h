@@ -10,6 +10,9 @@
 #ifndef DSPROT_H
 #define DSPROT_H
 
+#define DSP_VERSION      (108)
+#define DSP_VERSION_STR  "1.08"
+
 #ifndef SDK_ASM
 
 #ifndef DSP_NO_NITRO
