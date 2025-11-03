@@ -10,6 +10,9 @@
 #ifndef DSPROT_H
 #define DSPROT_H
 
+#define DSP_VERSION      (102)  // Just to pick one
+#define DSP_VERSION_STR  "1.00/2"
+
 #ifndef SDK_ASM
 
 #ifndef DSP_NO_NITRO
