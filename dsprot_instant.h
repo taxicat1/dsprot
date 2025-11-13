@@ -10,8 +10,8 @@
 #ifndef DSPROT_INSTANT_H
 #define DSPROT_INSTANT_H
 
-#define DSP_VERSION      (203)
-#define DSP_VERSION_STR  "2.03s"
+#define DSPi_VERSION      (203)
+#define DSPi_VERSION_STR  "2.03s"
 
 #ifndef SDK_ASM
 
@@ -22,8 +22,8 @@
 #else /* DSP_NO_NITRO */
 
 // Assumptions for convenience-- make sure this is matching if you use it!
-typedef unsigned long  __dsp_u32;
-#define u32  __dsp_u32
+typedef unsigned long  __dspi_u32;
+#define u32  __dspi_u32
 
 #ifndef NULL
 
