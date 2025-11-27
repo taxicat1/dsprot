@@ -8,8 +8,6 @@
 // Exported functions
 u32 __DSProt_DetectFlashcart(u32 callback_addr);
 u32 __DSProt_DetectNotFlashcart(u32 callback_addr);
-u32 __DSProt_DetectEmulator(u32 callback_addr);
-u32 __DSProt_DetectNotEmulator(u32 callback_addr);
 u32 __DSProt_DetectDummy(u32 callback_addr);
 u32 __DSProt_DetectNotDummy(u32 callback_addr);
 
