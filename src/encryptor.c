@@ -60,7 +60,7 @@ void Encryptor_DecodeFunctionTable(FuncInfo* functions) {
 	u32   xorval;
 	u32*  prevmem;
 	
-	// Zero memory in the function callee
+	// Zero memory in the caller function (assembly decoder)
 	prevmem = (u32*)functions - 3;
 	prevmem[0] = prevmem[1] = prevmem[2] = 0;
 	
@@ -150,7 +150,7 @@ asm u32 Encryptor_DecryptionWrapperFragment(void) {
 	   onto the stack, however this is not an option as the stack pointer must be preserved for the inner
 	   function to accept arguments from it.
 	   
-	   Instead, storage space within the instructional memory of the callee is allocated to be a temporary
+	   Instead, storage space within the instructional memory of the caller is allocated to be a temporary
 	   location for register values. The stack may still be used to prepare arguments for the encryption and
 	   decryption functions, and at any point after the inner function returns.
 	   
