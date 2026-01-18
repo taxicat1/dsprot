@@ -177,7 +177,6 @@ static inline u32 testROM(
 	u32    rom_addr;
 	u32    rom_addr_offset;
 	u16    lock_id;
-	u32    rom_size;
 	
 	rom_addr_offset = 0x7000;
 	rom_addr = 0x1000;
@@ -188,11 +187,9 @@ static inline u32 testROM(
 	buf_ptr = &rom_buf[0];
 	
 	for (i = 0; i < 6; i++) {
-		rom_size = getROMSize();
-		
 		// Offset the address by the size of the ROM, reading past its end
 		// The ROM should mirror when this happens
-		localReadROM(buf_ptr, rom_addr + rom_size, ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL);
+		localReadROM(buf_ptr, rom_addr + getROMSize(), ROM_BLOCK_SIZE, CARD_CMD_BYTE_NORMAL);
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
