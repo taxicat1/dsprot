@@ -24,12 +24,10 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Some of the comment documentation may be inaccurate here.
 	
 	u8          buffer[8];
-	u8*         buf_ptr;
 	REGType8v*  vnull;
 	u32         register_base_1;
 	REGType8v*  register_base_2;
 	u32         card_ctrl_13;
-	u32         addr_mask;
 	s32         card_ctrl_cmd;
 	s32         addr_offset;
 	u16         ext_mem_register_val_original;
@@ -55,13 +53,8 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	
 	// Obfuscated, create address 0x027FFE60
 	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
-	card_ctrl_13 = 5;
-	
-	// Obfuscated 0x1FF to mask address later
-	addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-	
-	// Creating address 0x027FFE60 cont.
 	// If the system is in DSi mode, the address is changed to 0x02FFFE60
+	card_ctrl_13 = 5;
 	card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
@@ -75,7 +68,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// E.G. if we want to read starting from 0x1208, we actually need to
 	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 	// This would set `addr_offset` to -8.
-	addr_offset = 0 - (addr & addr_mask);
+	addr_offset = 0 - (addr & (CARD_ROM_PAGE_SIZE - 1));
 	
 	// Wait for card to not be busy
 	while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
@@ -86,9 +79,8 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	*(REGType8v*)(register_base_1 + REG_CARD_MASTER_CNT_OFFSET) = CARDMST_ENABLE;
 	
 	// Read 8-byte command out from gamecard bus, write this back later
-	buf_ptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		*buf_ptr++ = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
+		buffer[i] = *(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i);
 	}
 	
 	addr += addr_offset;
@@ -115,7 +107,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 			if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
 				output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
-					*(u32*)(dest + addr_offset) = output;
+					*(u32*)((u32)dest + addr_offset) = output;
 				}
 				
 				addr_offset += 4;
@@ -129,9 +121,8 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 	// Done reading, restore everything how it was before
 	
 	// Write original command back to gamecard bus
-	buf_ptr = &buffer[0];
 	for (i = 0; i < 8; i++) {
-		*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = *buf_ptr++;
+		*(vnull + HW_REG_BASE + REG_CARD_CMD_OFFSET + i) = buffer[i];
 	}
 	
 	// Write original value back to to external memory control register
