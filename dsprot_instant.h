@@ -81,7 +81,7 @@ static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void*
 	do {
 		func_data_checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
 		func_data_ptr++;
-	} while (--i);
+	} while (--i != 0);
 	
 	if (func_data_checksum == DSP_EXPECTED_CHECKSUM) {
 		return DSProt_DetectAll(callback, param1, param2);
