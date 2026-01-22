@@ -82,7 +82,7 @@ static inline void* DSProt_CheckAndDetectAll(void* callback, void* param1, void*
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
 		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 		func_data_ptr++;
-	} while (--i);
+	} while (--i != 0);
 	
 	if (func_data_checksum == DSP_EXPECTED_CHECKSUM) {
 		return DSProt_DetectAll(callback, param1, param2);

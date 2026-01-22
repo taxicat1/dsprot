@@ -74,7 +74,7 @@ static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
 		checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 		func_data_ptr++;
-	} while (--i);
+	} while (--i != 0);
 	
 	return (checksum == DSP_EXPECTED_CHECKSUM);
 }
