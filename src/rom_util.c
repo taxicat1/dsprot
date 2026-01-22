@@ -103,7 +103,7 @@ void ROMUtil_Read(void* dest, u32 addr, s32 num_bytes) {
 			if (*(REGType32v*)(register_base + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
 				output = *(REGType32v*)(register_base + REG_CARD_DATA_OFFSET);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
-					*(u32*)(dest + addr_offset) = output;
+					*(u32*)((u32)dest + addr_offset) = output;
 				}
 				
 				addr_offset += 4;
