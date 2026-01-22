@@ -35,7 +35,6 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 	u32         register_base_1;
 	REGType8v*  register_base_2;
 	u32         card_ctrl_13;
-	u32         addr_mask;
 	s32         card_ctrl_cmd;
 	s32         addr_offset;
 	u16         ext_mem_register_val_original;
@@ -62,13 +61,8 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 	
 	// Obfuscated, create address 0x027FFE60
 	// This is an address in the ROM header: port 0x040001A4 / setting for normal commands
-	card_ctrl_13 = 5;
-	
-	// Obfuscated 0x1FF to mask address later
-	addr_mask = (CARD_ROM_PAGE_SIZE + 4) - card_ctrl_13;
-	
-	// Creating address 0x027FFE60 cont.
 	// If the system is in DSi mode, the address is changed to 0x02FFFE60
+	card_ctrl_13 = 5;
 	card_ctrl_13 += *(REGType8v*)(register_base_1 + REG_A9ROM_OFFSET) & REG_SCFG_A9ROM_SEC_MASK;
 	card_ctrl_13 <<= 18;
 	card_ctrl_13 -= 13;
@@ -78,11 +72,11 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 	card_ctrl_cmd = (*(vs32*)card_ctrl_13 & ~CARD_COMMAND_MASK) | 
 	                (CARD_COMMAND_PAGE | CARD_READ_MODE | CARD_START | CARD_RESET_HI);
 	
-	// Setting offset to round back to nearest 0x200-byte block.
+	// Calculate offset to round back to nearest 0x200-byte block.
 	// E.G. if we want to read starting from 0x1208, we actually need to
 	// request the block at 0x1200 and then ignore the first 8 bytes of the result.
 	// This would set `addr_offset` to -8.
-	addr_offset = 0 - (addr & addr_mask);
+	addr_offset = 0 - (addr & (CARD_ROM_PAGE_SIZE - 1));
 	
 	// Wait for card to not be busy
 	while (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_START) {
@@ -121,7 +115,7 @@ static inline void localReadROM(void* dest, u32 addr, s32 num_bytes) {
 			if (*(REGType32v*)(register_base_1 + REG_CARDCNT_OFFSET) & CARD_DATA_READY) {
 				output = *(REGType32v*)(register_base_1 + REG_CARD_DATA_OFFSET);
 				if (addr_offset >= 0 && addr_offset < num_bytes) {
-					*(u32*)(dest + addr_offset) = output;
+					*(u32*)((u32)dest + addr_offset) = output;
 				}
 				
 				addr_offset += 4;
@@ -152,13 +146,12 @@ static inline u32 testROM(
 	u32          error_code_fake_secure_region,
 	u32          error_code_sdk_mismatch
 ) {
-	u32    crcs[12];
-	u8     rom_buf[ROM_BLOCK_SIZE];
-	void*  buf_ptr;
-	int    i;
-	u32    rom_addr;
-	u32    rom_addr_offset;
-	u16    lock_id;
+	u32  crcs[12];
+	u8   rom_buf[ROM_BLOCK_SIZE];
+	int  i;
+	u32  rom_addr;
+	u32  rom_addr_offset;
+	u16  lock_id;
 	
 	rom_addr_offset = 0x7000;
 	rom_addr = 0x1000;
@@ -166,11 +159,9 @@ static inline u32 testROM(
 	lock_id = OS_GetLockID();
 	CARD_LockRom(lock_id);
 	
-	buf_ptr = &rom_buf[0];
-	
 	for (i = 0; i < 6; i++) {
 		// For below 8000h reads, use manual read
-		localReadROM(buf_ptr, rom_addr, ROM_BLOCK_SIZE);
+		localReadROM(&rom_buf[0], rom_addr, ROM_BLOCK_SIZE);
 		crcs[i] = ROMUtil_CRC32(&rom_buf[0], ROM_BLOCK_SIZE);
 		
 		// For above 8000h reads, use the SDK `CARD_ReadRom`
@@ -214,7 +205,7 @@ static inline u32 testROM(
 	OS_ReleaseLockID(lock_id);
 	
 	// Erasing read buffer
-	for (i = 0; i < ROM_BLOCK_SIZE/4; i++) {
+	for (i = 0; i < ROM_BLOCK_SIZE / 4; i++) {
 		((u32*)&rom_buf[0])[i] = i;
 	}
 	
