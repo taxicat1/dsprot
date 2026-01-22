@@ -102,7 +102,7 @@ static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 	do {
 		checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
 		func_data_ptr++;
-	} while (--i);
+	} while (--i != 0);
 	
 	return (checksum == DSP_EXPECTED_CHECKSUM);
 }
