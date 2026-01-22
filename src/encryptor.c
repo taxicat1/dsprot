@@ -30,10 +30,10 @@ static inline void clearDataAndInstructionCache(void) {
 		mcr  p15, 0, r2, c7, c14, 2  /* DC flush */
 		
 		add  r0, r0, #HW_CACHE_LINE_SIZE
-		cmp  r0, #HW_DCACHE_SIZE/4
+		cmp  r0, #HW_DCACHE_SIZE / 4
 		blt  @2
 		
-		add  r1, r1, #1<<HW_C7_CACHE_SET_NO_SHIFT
+		add  r1, r1, #1 << HW_C7_CACHE_SET_NO_SHIFT
 		cmp  r1, #0
 		bne  @1
 		
