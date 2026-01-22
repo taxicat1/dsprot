@@ -48,7 +48,7 @@ static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 	do {
 		checksum ^= (*func_data_ptr >> 5) | (*func_data_ptr << 27);
 		func_data_ptr++;
-	} while (--i);
+	} while (--i != 0);
 	
 	return (checksum == ROM_TEST_EXPECTED_CHECKSUM);
 }
