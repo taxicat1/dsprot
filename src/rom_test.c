@@ -61,7 +61,7 @@ static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 	
 EXIT:
 	// Erasing read buffer
-	for (i = 0; i < ROM_BLOCK_SIZE/4; i++) {
+	for (i = 0; i < ROM_BLOCK_SIZE / 4; i++) {
 		((u32*)&rom_buf[0])[i] = i;
 	}
 	
