@@ -14,7 +14,6 @@ static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 	// Extra CRC entry is required to match
 	u32  crcs[7];
 	u8   rom_buf[ROM_BLOCK_SIZE];
-	u8*  buf_ptr;
 	int  i;
 	u32  rom_addr;
 	u32  ret;
@@ -53,9 +52,8 @@ static inline u32 testROM(u32 pass_ret, u32 fail_ret) {
 	
 EXIT:
 	// Erasing read buffer
-	buf_ptr = &rom_buf[0];
 	for (i = 0; i < ROM_BLOCK_SIZE; i++) {
-		*buf_ptr++ = 0;
+		rom_buf[i] = 0;
 	}
 	
 	return ret;
