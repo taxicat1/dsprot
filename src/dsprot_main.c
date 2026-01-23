@@ -100,7 +100,7 @@ static inline BOOL decryptionWrapperChecksumMatches(void* addr) {
 	checksum = 0;
 	
 	do {
-		checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	

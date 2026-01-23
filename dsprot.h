@@ -107,7 +107,7 @@ static inline void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2) 
 	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
@@ -140,7 +140,7 @@ static inline void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2) 
 	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
@@ -173,7 +173,7 @@ static inline void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2) {
 	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
@@ -206,7 +206,7 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 	i = DSP_CHECKSUM_INS;
 	func_data_checksum = 0;
 	do {
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
