@@ -108,7 +108,7 @@ static inline void* DSProt_CheckAndDetectFlashcartA(void* param1, void* param2) 
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
@@ -142,7 +142,7 @@ static inline void* DSProt_CheckAndDetectFlashcartB(void* param1, void* param2) 
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
@@ -176,7 +176,7 @@ static inline void* DSProt_CheckAndDetectEmulatorA(void* param1, void* param2) {
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
@@ -210,7 +210,7 @@ static inline void* DSProt_CheckAndDetectEmulatorB(void* param1, void* param2) {
 	func_data_checksum = 0;
 	do {
 		// BUG: the first 5 loops have invalid shifts, resulting in 0 instead of the rotated instruction
-		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32-i));
+		func_data_checksum ^= (*func_data_ptr >> i) | (*func_data_ptr << (32 - i));
 		func_data_ptr++;
 	} while (--i != 0);
 	
