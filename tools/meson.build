@@ -1,0 +1,2 @@
+subdir('elfcoder')
+subdir('fixdep')
