@@ -61,7 +61,8 @@ static void printUsage(const char* self_name) {
 		"  -k, --key [key]                            Optional encryption key.           \n"
 		"  -p, --prefix [prefix = RunEncrypted_]      Prefix for decryption wrappers.    \n"
 		"  -g  --garbage [symbol]                     Optional added garbage reference.  \n"
-		"  -v, --verbose                              Print encoding progress.           \n",
+		"  -v, --verbose                              Print encoding progress.           \n"
+		"  -c, --input-copy-suffix [suffix]           Copy input files before encoding.  \n",
 		self_name
 	);
 }
@@ -82,6 +83,7 @@ enum {
 int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 	// Defaults
 	task->inputs          = NULL;
+	task->copy_suffix     = NULL;
 	task->output_fname    = NULL;
 	task->encoding_type   = ENC_INVALID;
 	task->key_mode        = MODE_UNKEYED;
@@ -134,6 +136,15 @@ int ArgParse_CreateTask(EncodingTask* task, char** argv) {
 				}
 				
 				await_state = AWAIT_INPUT_FILE;
+			
+			} else if (argCompare(curr_arg, 'c', "--input-copy-suffix")) {
+				if (next_arg == NULL || next_arg[0] == '-') {
+					printf("Error: %s but no suffix provided\n", curr_arg);
+					return 1;
+				}
+				
+				task->copy_suffix = next_arg;
+				arg_idx++;
 			
 			} else if (argCompare(curr_arg, 'o', "--output")) {
 				if (next_arg == NULL || next_arg[0] == '-') {
