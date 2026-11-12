@@ -11,7 +11,7 @@ int KeyData_Write(KeyData* key, char* output_fname) {
 		printf("Derived key: %08x\n", key->key);
 		return 0;
 	} else {
-		FILE* output = fopen(output_fname, "w");
+		FILE* output = fopen(output_fname, "wb");
 		if (output == NULL) {
 			return 1;
 		}
