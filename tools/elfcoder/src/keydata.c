@@ -8,7 +8,7 @@ int KeyData_Read(KeyData* key, char* input_fname) {
 		return 1;
 	}
 	
-	FILE* input = fopen(input_fname, "r");
+	FILE* input = fopen(input_fname, "rb");
 	if (input == NULL) {
 		return 1;
 	}
