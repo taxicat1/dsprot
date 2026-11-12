@@ -232,12 +232,11 @@ rc4_dec_enc_args = [
 
 # These were originally generators, due to the creation of private build
 # directories, elfcoder would need to accept an output for the encoded/encrypted
-# files, so they are not utilised
+# files, so they are just the commands
 
 ############################################################
 ###                      .c -> .o                        ###
 ############################################################
-
 mwccarm_cmds = [
     mwccarm,
     c_args,
@@ -252,7 +251,6 @@ mwccarm_cmds = [
 ############################################################
 ###                      .s -> .o                        ###
 ############################################################
-
 mwasmarm_cmds = [
     mwasmarm,
     asm_args,
@@ -266,7 +264,6 @@ mwasmarm_cmds = [
 ############################################################
 ###                      ENCODE/ENCRYPT                  ###
 ############################################################
-
 elfcoder_cmds = [
     elfcoder_exe,
     '-e',
@@ -279,55 +276,128 @@ elfcoder_cmds = [
 ]
 
 ############################################################
-###                       DSPROT MAIN                    ###
+###                      SETUP COMPONENTS                ###
 ############################################################
-dsprot_main = custom_target(
-    'dsprot_main',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/dsprot_main.c',
-    command: mwccarm_cmds,
-)
+components = {
+    'dsprot_main': {
+        'dec_enc_args': dsprot_main_dec_enc_args,
+        'decrypter_dec_enc_args': dsprot_main_decrypter_dec_enc_args,
+    },
+    'integrity': {
+        'dec_enc_args': integrity_dec_enc_args,
+        'decrypter_dec_enc_args': integrity_decrypter_dec_enc_args,
+    },
+    'encryptor': {
+        'dec_enc_args': encryptor_dec_enc_args,
+    },
+    'mac_owner': {
+        'dec_enc_args': mac_owner_dec_enc_args,
+    },
+    'rom_util': {
+        'dec_enc_args': rom_util_dec_enc_args,
+    },
+    'rom_test': {
+        'dec_enc_args': rom_test_dec_enc_args,
+    },
+    'rc4': {
+        'dec_enc_args': rc4_dec_enc_args,
+    },
+}
 
-dsprot_main_dec_enc = custom_target(
-    'dsprot_main_dec_enc',
-    input: dsprot_main,
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    command: [
-        elfcoder_cmds,
-        dsprot_main_dec_enc_args,
-    ],
-)
+enc_objects = {}
+enc_decrypters = {}
+decrypter_decoders = {}
+decs = {}
 
-dsprot_main_decrypter_s = dsprot_main_dec_enc[0]
-dsprot_main_encrypted = dsprot_main_dec_enc[1]
+foreach name, component : components
 
-dsprot_main_decrypter = custom_target(
-    'dsprot_main_decrypter',
-    output: '@BASENAME@.o',
-    input: dsprot_main_decrypter_s,
-    command: mwasmarm_cmds,
-)
+    # Compile
+    comp = custom_target(
+        name + 'loop',
+        output: '@BASENAME@.o',
+        depfile: '@BASENAME@.d',
+        input: 'src/' + name + '.c',
+        command: mwccarm_cmds,
+    )
 
-dsprot_main_decrypter_dec_enc = custom_target(
-    'dsprot_main_decrypter_dec_enc',
-    input: dsprot_main_decrypter,
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    command: [
-        elfcoder_cmds,
-        dsprot_main_decrypter_dec_enc_args,
-    ],
-)
+    # Encrypt / Encode
+    dec_enc = custom_target(
+        name + 'dec_enc',
+        input: comp,
+        output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
+        command: [
+            elfcoder_cmds,
+            component['dec_enc_args'],
+        ],
+    )
 
-dsprot_main_decrypter_decoder_s = dsprot_main_decrypter_dec_enc[0]
-dsprot_main_decrypter_encoded = dsprot_main_decrypter_dec_enc[1]
+    decryptor_s = dec_enc[0]
+    encrypted = dec_enc[1]
 
-dsprot_main_decrypter_decoder = custom_target(
-    'dsprot_main_decrypter_decoder',
-    output: '@BASENAME@.o',
-    input: dsprot_main_decrypter_decoder_s,
-    command: mwasmarm_cmds,
-)
+    # Assemble Decrypter / Decoder
+    dec = custom_target(
+        name + 'dec',
+        output: '@BASENAME@.o',
+        input: decryptor_s,
+        command: mwasmarm_cmds,
+    )
+
+    enc_objects += {name: encrypted}
+    decs += {name: dec}
+
+    if (component.has_key('decrypter_dec_enc_args'))
+
+        # Encode Decrypter
+        decrypter_dec_enc = custom_target(
+            name + 'decrypter_dec_enc',
+            input: dec,
+            output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
+            command: [
+                elfcoder_cmds,
+                component['decrypter_dec_enc_args'],
+            ],
+        )
+
+        decrypter_decoder_s = decrypter_dec_enc[0]
+        decrypter_encoded = decrypter_dec_enc[1]
+
+        # Assemble Decrypter Decoder
+        decrypter_decoder = custom_target(
+            name + 'decrypter_dec',
+            output: '@BASENAME@.o',
+            input: decrypter_decoder_s,
+            command: mwasmarm_cmds,
+        )
+
+        enc_decrypters += {name: decrypter_encoded}
+        decrypter_decoders += {name: decrypter_decoder}
+
+    endif
+endforeach
+
+dsprot_main_encrypted = enc_objects['dsprot_main']
+dsprot_main_decrypter_encoded = enc_decrypters['dsprot_main']
+dsprot_main_decrypter_decoder = decrypter_decoders['dsprot_main']
+
+integrity_encrypted = enc_objects['integrity']
+integrity_decrypter_encoded = enc_decrypters['integrity']
+integrity_decrypter_decoder = decrypter_decoders['integrity']
+
+encryptor_encoded = enc_objects['encryptor']
+encryptor_decoder = decs['encryptor']
+
+mac_owner_encrypted = enc_objects['mac_owner']
+mac_owner_decrypter = decs['mac_owner']
+
+rom_util_encrypted = enc_objects['rom_util']
+rom_util_decrypter = decs['rom_util']
+
+rom_test_encrypted = enc_objects['rom_test']
+rom_test_decrypter = decs['rom_test']
+
+rc4_encoded = enc_objects['rc4']
+rc4_decoder = decs['rc4']
+
 
 ############################################################
 ###                       EXTRA                          ###
@@ -340,181 +410,6 @@ extra = custom_target(
     command: mwccarm_cmds,
 )
 
-############################################################
-###                       INTEGRITY                      ###
-############################################################
-integrity = custom_target(
-    'integrity',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/integrity.c',
-    command: mwccarm_cmds,
-)
-
-integrity_dec_enc = custom_target(
-    'integrity_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: integrity,
-    command: [
-        elfcoder_cmds,
-        integrity_dec_enc_args,
-    ],
-)
-
-integrity_decrypter_s = integrity_dec_enc[0]
-integrity_encrypted = integrity_dec_enc[1]
-
-
-integrity_decrypter = custom_target(
-    'integrity_decrypter',
-    output: '@BASENAME@.o',
-    input: integrity_decrypter_s,
-    command: mwasmarm_cmds,
-)
-
-integrity_decrypter_dec_enc = custom_target(
-    'integrity_decrypter_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: integrity_decrypter,
-    command: [
-        elfcoder_cmds,
-        integrity_decrypter_dec_enc_args,
-    ],
-)
-
-integrity_decrypter_decoder_s = integrity_decrypter_dec_enc[0]
-integrity_decrypter_encoded = integrity_decrypter_dec_enc[1]
-
-integrity_decrypter_decoder = custom_target(
-    'integrity_decrypter_decoder',
-    output: '@BASENAME@.o',
-    input: integrity_decrypter_decoder_s,
-    command: mwasmarm_cmds,
-)
-
-############################################################
-###                       ENCRYPTOR                      ###
-############################################################
-encryptor = custom_target(
-    'encryptor',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/encryptor.c',
-    command: mwccarm_cmds,
-)
-
-encryptor_dec_enc = custom_target(
-    'encryptor_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: encryptor,
-    command: [
-        elfcoder_cmds,
-        encryptor_dec_enc_args,
-    ],
-)
-
-encryptor_decoder_s = encryptor_dec_enc[0]
-encryptor_encoded = encryptor_dec_enc[1]
-
-encryptor_decoder = custom_target(
-    'encryptor_decoder',
-    output: '@BASENAME@.o',
-    input: encryptor_decoder_s,
-    command: mwasmarm_cmds,
-)
-
-############################################################
-###                       MAC OWNER                      ###
-############################################################
-mac_owner = custom_target(
-    'mac_owner',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/mac_owner.c',
-    command: mwccarm_cmds,
-)
-
-mac_owner_dec_enc = custom_target(
-    'mac_owner_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: mac_owner,
-    command: [
-        elfcoder_cmds,
-        mac_owner_dec_enc_args,
-    ],
-)
-
-mac_owner_decrypter_s = mac_owner_dec_enc[0]
-mac_owner_encrypted = mac_owner_dec_enc[1]
-
-mac_owner_decrypter = custom_target(
-    'mac_owner_decrypter',
-    output: '@BASENAME@.o',
-    input: mac_owner_decrypter_s,
-    command: mwasmarm_cmds,
-)
-
-############################################################
-###                       ROM UTIL                       ###
-############################################################
-rom_util = custom_target(
-    'rom_util',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/rom_util.c',
-    command: mwccarm_cmds,
-)
-
-rom_util_dec_enc = custom_target(
-    'rom_util_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: rom_util,
-    command: [
-        elfcoder_cmds,
-        rom_util_dec_enc_args,
-    ],
-)
-
-rom_util_decrypter_s = rom_util_dec_enc[0]
-rom_util_encrypted = rom_util_dec_enc[1]
-
-rom_util_decrypter = custom_target(
-    'rom_util_decrypter',
-    output: '@BASENAME@.o',
-    input: rom_util_decrypter_s,
-    command: mwasmarm_cmds,
-)
-
-############################################################
-###                       ROM TEST                       ###
-############################################################
-rom_test = custom_target(
-    'rom_test',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/rom_test.c',
-    command: mwccarm_cmds,
-)
-
-rom_test_dec_enc = custom_target(
-    'rom_test_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: rom_test,
-    command: [
-        elfcoder_cmds,
-        rom_test_dec_enc_args,
-    ],
-)
-
-rom_test_decrypter_s = rom_test_dec_enc[0]
-rom_test_encrypted = rom_test_dec_enc[1]
-
-rom_test_decrypter = custom_target(
-    'rom_test_decrypter',
-    output: '@BASENAME@.o',
-    input: rom_test_decrypter_s,
-    command: mwasmarm_cmds,
-)
 
 ############################################################
 ###                       CORETESTS                      ###
@@ -547,37 +442,6 @@ coretests_decoder = custom_target(
     'coretests_decoder',
     output: '@BASENAME@.o',
     input: coretests_decoder_s,
-    command: mwasmarm_cmds,
-)
-
-############################################################
-###                       RC4                            ###
-############################################################
-rc4 = custom_target(
-    'rc4',
-    output: '@BASENAME@.o',
-    depfile: '@BASENAME@.d',
-    input: 'src/rc4.c',
-    command: mwccarm_cmds,
-)
-
-rc4_dec_enc = custom_target(
-    'rc4_dec_enc',
-    output: ['@BASENAME@_dec.s', '@PLAINNAME@_enc.o'],
-    input: rc4,
-    command: [
-        elfcoder_cmds,
-        rc4_dec_enc_args,
-    ],
-)
-
-rc4_decoder_s = rc4_dec_enc[0]
-rc4_encoded = rc4_dec_enc[1]
-
-rc4_decoder = custom_target(
-    'rc4_decrypter',
-    output: '@BASENAME@.o',
-    input: rc4_decoder_s,
     command: mwasmarm_cmds,
 )
 
