@@ -477,7 +477,10 @@ dsprot = static_library(
 ############################################################
 ###                    FOR CONSUMERS                     ###
 ############################################################
-dsprot_dep = declare_dependency(link_with: dsprot)
+dsprot_dep = declare_dependency(
+    link_with: dsprot,
+    include_directories: include_directories('.'),
+)
 
 meson.override_dependency('dsprot', dsprot_dep)
 
