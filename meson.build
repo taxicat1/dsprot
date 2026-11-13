@@ -26,7 +26,6 @@ mwasmarm = meson.get_compiler('nasm', native: false).cmd_array()
 ############################################################
 include_dir = meson.project_source_root() / 'include'
 
-
 ############################################################
 ###                    COMPILER FLAGS                    ###
 ############################################################
@@ -308,9 +307,9 @@ components = {
 }
 
 enc_objects = {}
+decs = {}
 enc_decrypters = {}
 decrypter_decoders = {}
-decs = {}
 
 foreach name, component : components
 
@@ -334,18 +333,18 @@ foreach name, component : components
         ],
     )
 
-    decryptor_s = dec_enc[0]
-    encrypted = dec_enc[1]
+    dec_s = dec_enc[0]
+    enc = dec_enc[1]
 
     # Assemble Decrypter / Decoder
     dec = custom_target(
         name + 'dec',
         output: '@BASENAME@.o',
-        input: decryptor_s,
+        input: dec_s,
         command: mwasmarm_cmds,
     )
 
-    enc_objects += {name: encrypted}
+    enc_objects += {name: enc}
     decs += {name: dec}
 
     if (component.has_key('decrypter_dec_enc_args'))
@@ -412,7 +411,6 @@ extra = custom_target(
     input: 'src/extra.c',
     command: mwccarm_cmds,
 )
-
 
 ############################################################
 ###                       CORETESTS                      ###
