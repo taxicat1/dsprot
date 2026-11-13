@@ -5,7 +5,7 @@
 
 static inline uint32_t ror(uint32_t x, unsigned int amt) {
 	amt %= 32;
-	return ( x >> amt) | (x << (32 - amt));
+	return (x >> amt) | (x << (32 - amt));
 }
 
 
