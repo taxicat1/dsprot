@@ -92,12 +92,12 @@ int ArgParse_CreateTask(FuncHashTask* task, char** argv) {
 			
 			if (argCompare(curr_arg, 'i', "--input")) {
 				if (next_arg == NULL || next_arg[0] == '-') {
-					printf("Error: %s but no output filename provided\n", curr_arg);
+					printf("Error: %s but no input filename provided\n", curr_arg);
 					return 1;
 				}
 				
 				if (task->input_fname != NULL) {
-					printf("Error: multiple output files provided\n");
+					printf("Error: multiple input files provided\n");
 					return 1;
 				}
 				
@@ -125,7 +125,7 @@ int ArgParse_CreateTask(FuncHashTask* task, char** argv) {
 				}
 				
 				if (task->target_symbol != NULL) {
-					printf("Error: multiple output files provided\n");
+					printf("Error: multiple target functions provided\n");
 					return 1;
 				}
 				
