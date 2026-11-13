@@ -2,8 +2,11 @@ project(
     'dsprot',
     ['c', 'nasm'],
     version: '1.23',
-    meson_version: '>=1.12.0',
-    default_options: ['buildtype=plain', 'warning_level=0'],
+    meson_version: '>=1.5.0',
+    default_options: {
+        'buildtype': 'plain',
+        'warning_level': '0',
+    },
 )
 
 
