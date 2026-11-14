@@ -77,11 +77,44 @@ static int getRelocationHeaderByTarget(ElfFile* elf, int target_idx, Elf32_Shdr*
 }
 
 
-static int ElfFile_Init(ElfFile* elf, char* fname) {
+static FILE* fopen_by_copy(const char* path, const char* copy_suffix) {
+	char buffer[1024];
+	
+	FILE* src = fopen(path, "rb");
+	if (src == NULL) {
+		return NULL;
+	}
+	
+	snprintf(buffer, sizeof(buffer), "%s%s", path, copy_suffix);
+	FILE* dst = fopen(buffer, "wb+");
+	if (dst == NULL) {
+		fclose(src);
+		return NULL;
+	}
+	
+	while (!feof(src)) {
+		int len = fread(buffer, 1, sizeof(buffer), src);
+		if (len > 0) {
+			fwrite(buffer, 1, len, dst);
+		}
+	}
+	
+	fclose(src);
+	fseek(dst, 0, SEEK_SET);
+	return dst;
+}
+
+
+static int ElfFile_Init(ElfFile* elf, char* fname, char* copy_suffix) {
 	elf->fname = fname;
 	
-	// Open file
-	elf->fhandle = fopen(elf->fname, "rb+");
+	// Open file (creating copy if needed)
+	if (copy_suffix == NULL) {
+		elf->fhandle = fopen(elf->fname, "rb+");
+	} else {
+		elf->fhandle = fopen_by_copy(elf->fname, copy_suffix);
+	}
+	
 	if (elf->fhandle == NULL) {
 		printf("Error: could not open input file: %s\n", elf->fname);
 		return 1;
@@ -367,7 +400,7 @@ int Elf_EncodeSymbols(EncodingTask* task) {
 	
 	ElfFile* elfs = calloc(num_inputs + 1, sizeof(ElfFile));
 	for (int elf_idx = 0; elf_idx < num_inputs; elf_idx++) {
-		ret_code += ElfFile_Init(&elfs[elf_idx], task->inputs[elf_idx]);
+		ret_code += ElfFile_Init(&elfs[elf_idx], task->inputs[elf_idx], task->copy_suffix);
 		
 #if 0
 		// This just.. doesn't work. fstat() doesn't work.

@@ -21,6 +21,7 @@ enum {
 
 typedef struct {
 	char**    inputs;
+	char*     copy_suffix;
 	char*     output_fname;
 	int       encoding_type;
 	int       key_mode;

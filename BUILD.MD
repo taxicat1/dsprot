@@ -26,6 +26,8 @@ libdsprot:
 	$(MAKE) -C lib/dsprot install MWCCARM_DIR=$(TOOLS_DIR)/mwccarm INSTALL_DIR=$(BUILD_DIR)/$(buildname)
 ```
 
+Building the library as a Meson subproject using metroskrew is also supported.
+
 The exported functions are (these are actually inlines provided by the header file):
 - `u32 DSProt_DetectFlashcart(void* callback);`
 - `u32 DSProt_DetectNotFlashcart(void* callback);`
