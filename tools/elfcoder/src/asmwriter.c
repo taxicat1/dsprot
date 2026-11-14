@@ -96,7 +96,7 @@ static void writeAssembly(ASMWriter_Ctx* asmw, FILE* output) {
 			fprintf(output,
 				"\tfunc_table_entry %s, 0x%x\n",
 				asmw->symbols[symbol_idx],
-				asmw->symbol_metadata[symbol_idx]
+				asmw->symbol_metadata[symbol_idx].size
 			);
 		}
 		
