@@ -32,6 +32,7 @@ include_dir = meson.project_source_root() / 'include'
 c_args = []
 asm_args = []
 
+mwrap_sdk = get_option('mwrap_sdk')
 if mwrap_sdk != 'default'
     c_args += ['-wrap:sdk', mwrap_sdk]
     asm_args += ['-wrap:sdk', mwrap_sdk]
