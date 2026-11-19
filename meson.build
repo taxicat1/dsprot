@@ -9,6 +9,7 @@ project(
     },
 )
 
+fs = import('fs')
 
 ############################################################
 ###                         TOOLS                        ###
@@ -24,7 +25,10 @@ mwasmarm = meson.get_compiler('nasm', native: false).cmd_array()
 ############################################################
 ###                    INCLUDE PATHS                     ###
 ############################################################
-include_dir = meson.project_source_root() / 'include'
+include_dir = fs.relative_to(
+    meson.project_source_root() / 'include',
+    meson.global_build_root(),
+)
 
 ############################################################
 ###                    COMPILER FLAGS                    ###
